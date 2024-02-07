@@ -10,11 +10,14 @@
 - [ ] 슬랙 연결
 
 - 회원 탈퇴 테스트 코드 작성
-  - 회원 탈퇴 API 를 기존 GET 에서 PUT 으로 바꾸었다. REST 규칙에 이것이 맞는 것 같다.
+  - __회원 탈퇴 API 를 기존 GET 에서 PUT 으로 바꾸었다. REST 규칙에 이것이 맞는 것 같다.__
 
 - TODAY ISSUE
   - Apple 로그인을 위해, 나는 redirect url 변경이 필요한데, 한 번에 한 번만 등록이 되는 것 같아서 나중에 새벽에 테스트 해보아야 할 것 같다. 
-  
+    - JPQL 에서, DTO 객체로 SELECT 를 하는데, 내 ResponseDto 들을 전부 Inner Class 라서, 이를 불러오지 못하는 문제가 발생했다.
+    - `SELECT new OuterClass.InnerClass()` 를 , `SELECT new OuterClass$InnerClass()` 로 하면 정상적으로 컴파일된다.
+    - 그러나 인텔리제이 IDE 에서는 이를 오류로 인식하고 빨갛게 표시하고 있다. 무시하고 어플리케이션을 실행하면 잘 동작한다.
+
 
 ### 4. 2024/02/06
 
@@ -22,7 +25,7 @@
 - 사용자 정보 수정  - 유효성 검사 테스트 추가
 - 사용자 관심사 카테고리 수정 API
 - 사용자 프로필 사진 등록, 삭제 API
-- DB 에 사용자의 프로필 이미지 주소 동기화 API 의 HTTP METHOD 를 변경하였다 (v1 과 비교하여)
+- __DB 에 사용자의 프로필 이미지 주소 동기화 API 의 HTTP METHOD 를 변경하였다 (v1 과 비교하여)__
   - REST 규칙에 GET 보다는 PUT 이 맞다고 판단 하였음
   - `GET /member/info/profile-image/sync` -> `PUT /member/info/profile-image/sync`
 - dev 용 S3 버킷을 새로 만들었다. `버킷 명 : XXXXX-dev`

@@ -20,7 +20,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.db.DataClearExtension;
@@ -56,7 +55,7 @@ class MemberControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
-        Member member = memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        memberRepository.save(newMember("1111", "sinner@gmail.com"));
         em.clear();
     }
 

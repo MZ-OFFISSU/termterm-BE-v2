@@ -5,6 +5,7 @@ import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
 import site.termterm.api.domain.member.entity.SocialLoginType;
+import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class DummyObject {
         return Member.builder()
                 .id(id)
                 .socialId(socialId)
+
                 .name("sinner")
                 .email(email)
                 .profileImg("image.com")
@@ -50,5 +52,13 @@ public class DummyObject {
                 .nickname(UUID.randomUUID().toString())
                 .profileImg("image.com")
                 .build();
+    }
+
+    protected Term newTerm(String name, String description, List<CategoryEnum> categoryEnums){
+        return Term.builder().name(name).description(description).categories(categoryEnums).build();
+    }
+
+    protected Term newMockTerm(Long id, String name, String description, List<CategoryEnum> categoryEnums){
+        return Term.builder().id(id).name(name).description(description).categories(categoryEnums).build();
     }
 }
