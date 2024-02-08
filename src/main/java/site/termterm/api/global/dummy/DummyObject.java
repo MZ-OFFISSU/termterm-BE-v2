@@ -1,6 +1,7 @@
 package site.termterm.api.global.dummy;
 
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
@@ -60,5 +61,13 @@ public class DummyObject {
 
     protected Term newMockTerm(Long id, String name, String description, List<CategoryEnum> categoryEnums){
         return Term.builder().id(id).name(name).description(description).categories(categoryEnums).build();
+    }
+
+    protected Folder newFolder(String title, String description, Member member){
+        return Folder.builder().title(title).description(description).member(member).build();
+    }
+
+    protected Folder newMockFolder(Long id, String title, String description, Member member){
+        return Folder.builder().id(id).title(title).description(description).member(member).build();
     }
 }

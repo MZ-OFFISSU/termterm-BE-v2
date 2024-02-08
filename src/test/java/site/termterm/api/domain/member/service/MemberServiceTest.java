@@ -189,6 +189,8 @@ class MemberServiceTest extends DummyObject {
 
         // stub 2
         when(memberRepository.existsByNicknameIgnoreCase(any())).thenReturn(false);
+
+        //then
         assertDoesNotThrow(() -> memberService.checkNicknameDuplicated("something"));
 
     }

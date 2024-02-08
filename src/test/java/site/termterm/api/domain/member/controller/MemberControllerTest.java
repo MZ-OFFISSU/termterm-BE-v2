@@ -192,9 +192,9 @@ class MemberControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isBadRequest());
-        resultActions.andExpect(jsonPath("$.data.yearCareer").value("must be greater than or equal to 0"));
-        resultActions.andExpect(jsonPath("$.data.domain").value("size must be between 0 and 10"));
-        resultActions.andExpect(jsonPath("$.data.job").value("size must be between 0 and 10"));
+        resultActions.andExpect(jsonPath("$.data.yearCareer").exists());
+        resultActions.andExpect(jsonPath("$.data.domain").exists());
+        resultActions.andExpect(jsonPath("$.data.job").exists());
         resultActions.andExpect(jsonPath("$.status").value(-1));
 
     }

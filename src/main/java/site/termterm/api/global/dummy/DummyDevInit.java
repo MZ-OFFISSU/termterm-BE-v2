@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import static site.termterm.api.domain.category.CategoryEnum.*;
 
+import site.termterm.api.domain.folder.repository.FolderRepository;
+import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.repository.TermRepository;
 
@@ -15,9 +17,9 @@ import java.util.List;
 public class DummyDevInit extends DummyObject {
     @Profile("dev")
     @Bean
-    CommandLineRunner init(MemberRepository memberRepository, TermRepository termRepository){
+    CommandLineRunner init(MemberRepository memberRepository, TermRepository termRepository, FolderRepository folderRepository){
         return args -> {
-            memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+            Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
 
             termRepository.save(newTerm("Seamless :: 심리스", "IT 및 디자인 분야에서는 사용자 경험을 향상시키기 위해 요소들이 자연스럽게 조화롭게 어우러지는 상태를 묘사할 때 사용하고, 비즈니스에서는 프로세스나 서비스가 매끄럽고 효율적으로 진행되는 상태를 말해요.", List.of(IT, DEVELOPMENT)));
             termRepository.save(newTerm("PoC :: Proof of Concept", "@@Proof of Concept@@의 약자로 새로운 아이디어, 제품, 서비스 등이 실제로 구현 가능하며 성공할 수 있는지를 입증하는 것을 의미해요. IT에서는 신기술이나 도입 예정 제품을 요구사항에 맞는지 검증하는 절차를 말해요.", List.of(IT, DEVELOPMENT, MARKETING)));
@@ -27,6 +29,8 @@ public class DummyDevInit extends DummyObject {
             termRepository.save(newTerm("Terraform :: 테라폼", "@@테라폼@@은 인프라스트럭처를 코드로 관리하는 오픈 소스 도구예요. 클라우드 인프라스트럭처를 생성, 변경 및 버전 관리하는 데에 사용해요.", List.of(IT, DEVELOPMENT)));
             termRepository.save(newTerm("HEX :: 헥스", "@@헥스@@색상은 색상을 16진수 값으로 나타낸 용어예요. 16진수는 주로 프로그래밍 언어에서 색상 코드를 표현하는데 사용되며, CSS 코드에서 색상을 지정할 때 \"#RRGGBB\" 형식으로 사용해요. 색상의 강도를 나타내기 위해 00부터 FF까지의 범위로 표시할 수 있어요. 예를들어 #FF0000은 빨간색 성분이 최댓값 FF이고 녹색, 파란색은 최솟값 00인 가장 순수한 빨간색이에요.", List.of(PM, DESIGN)));
             termRepository.save(newTerm("Chatbot :: 챗봇", "@@챗봇@@ 인공지능 등을 활용하여 사용자와 대화를 나누는 컴퓨터 프로그램이에요. 실제 인간이 직접 응답하는 것처럼 자연스럽고 대화형으로 사용자와 상호작용할 수 있어요.", List.of(PM, DESIGN, IT)));
+
+            folderRepository.save(newFolder("새 폴더", "새 폴더 설명", member1));
 
         };
 
