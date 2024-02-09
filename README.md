@@ -2,11 +2,19 @@
 
 ### 7. 2024/02/09
 - 용어 아카이브 API
+- 폴더 삭제 API
+- 용어 아카이브 해제 API
 
 - `FolderService.archiveTerm` 에서, stream 을 통해 저장한 Folder 객체들은 Persistence 에 저장되지 않은 객체들이었다.
   - 일단 Folder 를 불러오면 무조건 그 용어를 추가하고, 예외 상황에 throw Exception 을 하면, 롤백이 되므로, map 함수 내부에서 term 을 추가해주어도 괜찮았다. 
   - 처음에 여러개의 폴더에 저장하려고 헀을 때, TermBookmark 의 folderCnt 가 무조건 1로 저장되는 버그 수정
     - 어떻게 이런 버그를 그동안 방치해 놓았을 수 있지? 이래서 혼자 하면 안돼... 페어 프로그래밍, 코드리뷰가 절실하다.
+- TermBookmark 테이블에서 STATUS 컬럼을 삭제했다. 
+  - __이제 bookmark status 가 무조건 NO 일 것이다. null 로 응답되는 경우는 없다. 프론트 개발자님들께 알려드리기.__
+
+
+- TODAY ISSUE
+
 
 
 ### 6. 2024/02/08

@@ -51,4 +51,14 @@ public class FolderRequestDto {
         private Long termId;
     }
 
+    @Getter
+    @Setter
+    public static class UnArchiveTermRequestDto {
+        @Positive
+        private Long folderId;
+
+        @Positive
+        private Long termId;
+    }
+
 }

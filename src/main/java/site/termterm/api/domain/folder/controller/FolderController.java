@@ -68,9 +68,24 @@ public class FolderController {
     public ResponseEntity<ResponseDto<?>> archiveTermIntoFolders(
             @RequestBody @Valid ArchiveTermRequestDto requestDto,
             BindingResult bindingResult,
-            @AuthenticationPrincipal LoginMember loginMember){
+            @AuthenticationPrincipal LoginMember loginMember
+    ){
         folderService.archiveTerm(requestDto, loginMember.getMember().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "용어 아카이브 요청 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 폴더에 용어를 삭제합니다. (아카이빙 해제)
+     */
+    @DeleteMapping("/s/folder/term")
+    public ResponseEntity<ResponseDto<?>> unArchiveTerm(
+            @RequestBody @Valid UnArchiveTermRequestDto requestDto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal LoginMember loginMember
+    ){
+        folderService.unArchiveTerm(requestDto, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "용어 아카이브 해제 요청 성공", null), HttpStatus.NO_CONTENT);
     }
 
 }

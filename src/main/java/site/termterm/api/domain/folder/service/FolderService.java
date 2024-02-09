@@ -54,34 +54,45 @@ public class FolderService {
      */
     @Transactional
     public Folder modifyFolderInfo(FolderModifyRequestDto requestDto, Long id) {
-        Folder folder = folderRepository.findById(requestDto.getFolderId())
+        Folder folderPS = folderRepository.findById(requestDto.getFolderId())
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
 
-        if (folder.getMember().getId().longValue() != id.longValue()){
+        if (folderPS.getMember().getId().longValue() != id.longValue()){
             throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
         }
 
-        return folder.modifyInfo(requestDto.getName(), requestDto.getDescription());
+        return folderPS.modifyInfo(requestDto.getName(), requestDto.getDescription());
     }
 
     /**
      * 폴더를 삭제합니다.
      */
+    @Transactional
     public void deleteFolder(Long folderId, Long memberId) {
-        Folder folder = folderRepository.findById(folderId)
+        Folder folderPS = folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
 
-        if (folder.getMember().getId().longValue() != memberId.longValue()){
+        if (folderPS.getMember().getId().longValue() != memberId.longValue()){
             throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
         }
 
-        /*
-        TODO
-           -> v1 에 있던 주석
-            폴더 안에 아카이빙된 모든 용어에 대하여, 연관된 TermBookmark 에 folder_cnt를 1 깎아야 하고, 이 값이 0 이되면 아무 폴더에도 남아있지 않다는 뜻이므로 db에서 컬럼을 삭제한다.
+        Member memberPS = memberRepository.getReferenceById(memberId);
 
-            - 무슨 말인진 모르겠지만...북마크 기능을 구현하면 이해할 것 같으니 북마크 먼저 구현하고 돌아오자.
-         */
+        for(Long termId: folderPS.getTermIds()){
+            Term termPS = termRepository.getReferenceById(termId);
+
+            TermBookmark termBookmarkPS = termBookmarkRepository.findByTermAndMember(termPS, memberPS)
+                    .orElseThrow(() -> new CustomApiException("북마크 기록이 존재하지 않습니다. 데이터 동기화가 잘못 되었습니다.", "Folder : " + folderPS.getId() + "\nTerm : " + termId + "\nMember : " + memberId));
+
+            if (termBookmarkPS.getFolderCnt() <= 1){        // 현재 이 용어는 하나의 폴더에만 속해 있으므로, 그대로 삭제하면 된다.
+                termBookmarkRepository.delete(termBookmarkPS);
+            }else{
+                termBookmarkPS.addFolderCnt(-1);
+            }
+        }
+
+        folderRepository.delete(folderPS);
+        memberPS.getFolders().remove(folderPS);
     }
 
     /**
@@ -120,7 +131,7 @@ public class FolderService {
         Member memberPS = memberRepository.getReferenceById(memberId);
 
         // 북마크 테이블을 업데이트 합니다.
-        Optional<TermBookmark> termBookmarkOptional = termBookmarkRepository.findByTermAndMember(termPS, memberPS);;
+        Optional<TermBookmark> termBookmarkOptional = termBookmarkRepository.findByTermAndMember(termPS, memberPS);
 
         if (termBookmarkOptional.isEmpty()){
             try {
@@ -133,5 +144,32 @@ public class FolderService {
             return termBookmarkOptional.get();
         }
 
+    }
+
+    /**
+     * 폴더에서 용어를 삭제합니다.
+     */
+    @Transactional
+    public Folder unArchiveTerm(UnArchiveTermRequestDto requestDto, Long memberId) {
+        // 폴더 소유자 확인
+        Folder folderPS = folderRepository.findById(requestDto.getFolderId())
+                .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        // TermBookmark 객체의 folderCnt -= 1,  folderCnt 가 0 이 되었을 경우 삭제
+        Term termPS = termRepository.getReferenceById(requestDto.getTermId());
+        Member memberPS = memberRepository.getReferenceById(memberId);
+
+        TermBookmark termBookmarkPS = termBookmarkRepository.findByTermAndMember(termPS, memberPS)
+                .orElseThrow(() -> new CustomApiException("북마크 이력이 존재하지 않습니다."));
+
+        termBookmarkPS.addFolderCnt(-1);
+        if (termBookmarkPS.getFolderCnt() == 0){
+            termBookmarkRepository.delete(termBookmarkPS);
+        }
+
+        // 폴더에서 용어 삭제
+        folderPS.getTermIds().remove(requestDto.getTermId());
+
+        return folderPS;
     }
 }

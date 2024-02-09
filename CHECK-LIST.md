@@ -33,7 +33,7 @@
 - [ ] GET /v1/folder/term/random-10
 
 ### Folder
-- [ ] DELETE /v1/folder/{folderId}
+- [x] DELETE /v1/folder/{folderId}
 - [ ] GET /v1/folder/{folderId}/including/{termId}
 - [ ] GET /v1/folder/detail/each/{folderId}
 - [ ] GET /v1/folder/detail/sum/{folderId}
@@ -42,7 +42,7 @@
 - [x] POST /v1/folder/new
 - [ ] GET /v1/folder/related-info
 - [x] POST /v1/folder/term
-- [ ] DELETE /v1/folder/term
+- [x] DELETE /v1/folder/term
 - [ ] GET /v1/folder/term/random-10
 
 ### Home - 상단 Title (우선순위 제일 아래...)

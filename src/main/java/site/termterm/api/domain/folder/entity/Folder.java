@@ -15,6 +15,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@ToString
 public class Folder {
     private static final int FOLDER_LIMIT = 50;
 

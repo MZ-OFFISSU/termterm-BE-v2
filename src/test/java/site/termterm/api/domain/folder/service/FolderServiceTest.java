@@ -276,5 +276,69 @@ class FolderServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("폴더 삭제 - 성공")
+    @Test
+    public void delete_folder_success_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner);
+        Term term = newMockTerm(1L, "용어", "용어 설명", List.of(CategoryEnum.IT));
+        folder.getTermIds().add(1L);
+        TermBookmark termBookmark = TermBookmark.of(term, sinner, 3);
+
+        //stub1
+        when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
+
+        //stub2
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+
+        //stub3
+        when(termRepository.getReferenceById(any())).thenReturn(term);
+
+        //stub4
+        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(termBookmark));
+
+        //when
+        folderService.deleteFolder(1L, 1L);
+
+        //then
+        assertThat(termBookmark.getFolderCnt()).isEqualTo(2);
+    }
+
+    @DisplayName("폴더에서 용어 삭제 - 성공")
+    @Test
+    public void unarchive_term_from_folder_success_test() throws Exception{
+        //given
+        // folder 에는 1, 2번 Term 이 들어있고,
+        // 1번 term 은 3군데의 폴더에, 2번 term 은 1군데의 폴더에 있다.
+        // folder 에 1번 term 을 삭제하려고 한다.
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner);
+        Term term1 = newMockTerm(1L, "용어", "용어 설명", List.of(CategoryEnum.IT));
+        Term term2 = newMockTerm(2L, "용어", "용어 설명", List.of(CategoryEnum.IT));
+        folder.getTermIds().add(1L);
+        folder.getTermIds().add(2L);
+        TermBookmark termBookmark1 = TermBookmark.of(term1, sinner, 3);
+        TermBookmark termBookmark2 = TermBookmark.of(term2, sinner, 1);
+
+        UnArchiveTermRequestDto requestDto = new UnArchiveTermRequestDto();
+        requestDto.setFolderId(1L);
+        requestDto.setTermId(1L);
+
+        //stub
+        when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
+        when(termRepository.getReferenceById(any())).thenReturn(term1);
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(termBookmark1));
+
+        //when
+        Folder updatedFolder = folderService.unArchiveTerm(requestDto, 1L);
+        System.out.println(updatedFolder);
+
+        //then
+        assertThat(updatedFolder.getTermIds().size()).isEqualTo(1);
+        assertThat(termBookmark1.getFolderCnt()).isEqualTo(2);
+
+    }
 
 }

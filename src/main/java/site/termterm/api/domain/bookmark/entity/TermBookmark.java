@@ -18,28 +18,16 @@ public class TermBookmark {
     @Column(name = "TERM_BOOKMARK_ID")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TERM_ID")
     private Term term;
 
     @Builder.Default
     private Integer folderCnt = 1;
-
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private BookmarkStatus status = BookmarkStatus.YES;
-
-    public void unBookmark(){
-        this.status = BookmarkStatus.NO;
-    }
-
-    public void bookmark(){
-        this.status = BookmarkStatus.YES;
-    }
 
     public void addFolderCnt(int plus){
         this.folderCnt += plus;
@@ -48,6 +36,5 @@ public class TermBookmark {
     public static TermBookmark of(Term term, Member member, int folderCnt){
         return TermBookmark.builder().term(term).member(member).folderCnt(folderCnt).build();
     }
-
 
 }
