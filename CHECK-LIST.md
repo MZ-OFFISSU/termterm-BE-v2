@@ -41,7 +41,7 @@
 - [ ] GET /v1/folder/list
 - [x] POST /v1/folder/new
 - [ ] GET /v1/folder/related-info
-- [ ] POST /v1/folder/term
+- [x] POST /v1/folder/term
 - [ ] DELETE /v1/folder/term
 - [ ] GET /v1/folder/term/random-10
 

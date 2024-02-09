@@ -15,7 +15,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(CustomApiException.class)     // CustomApiException 이 발생하면 이 메소드가 호출된다.
     public ResponseEntity<?> apiException(CustomApiException e){
         log.error(e.getMessage());
-        return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), null), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), e.getData()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(CustomValidationException.class)

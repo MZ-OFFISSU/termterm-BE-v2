@@ -15,11 +15,15 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,12 +50,18 @@ class FolderControllerTest extends DummyObject {
     private FolderRepository folderRepository;
 
     @Autowired
+    private TermRepository termRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
     public void setUp(){
         Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
-        folderRepository.save(newFolder("새 폴더", "새 폴더 설명", sinner));
+        folderRepository.save(newFolder("새 폴더1", "새 폴더 설명1", sinner));
+        folderRepository.save(newFolder("새 폴더2", "새 폴더 설명2", sinner));
+        termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
+        termRepository.save(newTerm("용어2", "용어2 설명", List.of(CategoryEnum.IT)));
         em.clear();
     }
 
@@ -159,8 +169,45 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.name").exists());
     }
 
+    @DisplayName("폴더 삭제 API 요청 - 성공")
+    @Test
+    public void delete_folder_success_test() throws Exception{
+        //given
 
 
+        //when
+
+
+        //then
+
+    }
+
+
+    @DisplayName("용어 아카이브 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archive_term_into_folders_success_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L));
+        requestDto.setTermId(1L);
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/folder/term")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+    }
 
 
 }

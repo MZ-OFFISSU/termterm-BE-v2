@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberRequestDto;
@@ -91,7 +92,8 @@ public class Member {
     @Builder.Default
     private List<Folder> folders = new ArrayList<>();
 
-
+    @OneToMany(mappedBy = "member")
+    private List<TermBookmark> termBookmarks;
 
     @Builder
     public Member(Long id, String socialId, String name, String email, String profileImg, String nickname,List<CategoryEnum> categories,  MemberEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {

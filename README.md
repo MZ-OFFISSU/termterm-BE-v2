@@ -1,8 +1,19 @@
 ## termterm v2 - auth server
 
+### 7. 2024/02/09
+- 용어 아카이브 API
+
+- `FolderService.archiveTerm` 에서, stream 을 통해 저장한 Folder 객체들은 Persistence 에 저장되지 않은 객체들이었다.
+  - 일단 Folder 를 불러오면 무조건 그 용어를 추가하고, 예외 상황에 throw Exception 을 하면, 롤백이 되므로, map 함수 내부에서 term 을 추가해주어도 괜찮았다. 
+  - 처음에 여러개의 폴더에 저장하려고 헀을 때, TermBookmark 의 folderCnt 가 무조건 1로 저장되는 버그 수정
+    - 어떻게 이런 버그를 그동안 방치해 놓았을 수 있지? 이래서 혼자 하면 안돼... 페어 프로그래밍, 코드리뷰가 절실하다.
+
+
 ### 6. 2024/02/08
 - 기존에는 Curation 과 Term 이 다대다 관계로 연결되어 데이터베이스를 많이 차지하고 있었는데,.. 큐레이션 단에 스트링으로 convert 해서 엮을까 생각중
 - 폴더 생성, 정보 수정 API
+- 용어에 큐레이션을 저장하는 로직에서, findById() 대신 getReferenceById() 를 이용하여 쿼리 발생을 2회 줄였다. 
+  - 자세한 내용은 블로그 글 참고
 
 
 ### 5. 2024/02/07

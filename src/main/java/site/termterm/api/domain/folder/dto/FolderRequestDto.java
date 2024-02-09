@@ -7,6 +7,8 @@ import lombok.Setter;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.entity.Member;
 
+import java.util.List;
+
 public class FolderRequestDto {
 
     @Getter
@@ -38,6 +40,15 @@ public class FolderRequestDto {
 
         @Size(max = 25)
         private String description;
+    }
+
+    @Getter
+    @Setter
+    public static class ArchiveTermRequestDto {
+        private List<@Positive Long> folderIds;
+
+        @Positive
+        private Long termId;
     }
 
 }

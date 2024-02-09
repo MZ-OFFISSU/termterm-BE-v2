@@ -1,15 +1,23 @@
 package site.termterm.api.domain.folder.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.termterm.api.domain.bookmark.entity.TermBookmark;
+import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.term.entity.Term;
+import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static site.termterm.api.domain.folder.dto.FolderRequestDto.*;
 import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
@@ -20,6 +28,8 @@ import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
 public class FolderService {
     private final FolderRepository folderRepository;
     private final MemberRepository memberRepository;
+    private final TermRepository termRepository;
+    private final TermBookmarkRepository termBookmarkRepository;
 
     /**
      * 새로운 폴더를 생성합니다.
@@ -52,5 +62,76 @@ public class FolderService {
         }
 
         return folder.modifyInfo(requestDto.getName(), requestDto.getDescription());
+    }
+
+    /**
+     * 폴더를 삭제합니다.
+     */
+    public void deleteFolder(Long folderId, Long memberId) {
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        if (folder.getMember().getId().longValue() != memberId.longValue()){
+            throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
+        }
+
+        /*
+        TODO
+           -> v1 에 있던 주석
+            폴더 안에 아카이빙된 모든 용어에 대하여, 연관된 TermBookmark 에 folder_cnt를 1 깎아야 하고, 이 값이 0 이되면 아무 폴더에도 남아있지 않다는 뜻이므로 db에서 컬럼을 삭제한다.
+
+            - 무슨 말인진 모르겠지만...북마크 기능을 구현하면 이해할 것 같으니 북마크 먼저 구현하고 돌아오자.
+         */
+    }
+
+    /**
+     * 폴더에 용어를 저장합니다. (아카이빙)
+     * 한 번에 여러 폴더에 저장할 수 있습니다.
+     * 그러나 폴더에 이미 해당 용어가 담겨 있을 경우, 이미 담은 폴더명들을 리스트로 반환합니다.
+     */
+    @Transactional
+    public TermBookmark archiveTerm(ArchiveTermRequestDto requestDto, Long memberId) {
+        List<String> alreadyArchivedFolderNames = new ArrayList<>();
+
+        for (Long folderId: requestDto.getFolderIds()){
+            Folder folderPS = folderRepository.findById(folderId).orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+            if (folderPS.getMember().getId().longValue() != memberId.longValue()) {
+                throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
+            }
+
+            if (folderPS.getTermIds().size() >= folderPS.getSaveLimit()){
+                throw new CustomApiException("폴더가 다 찼습니다.");
+            }
+
+            if (folderPS.getTermIds().contains(requestDto.getTermId())){
+                alreadyArchivedFolderNames.add(folderPS.getTitle());
+            }
+
+            folderPS.getTermIds().add(requestDto.getTermId());
+        }
+
+        // 선택한 폴더 중 하나의 폴더라도 해당 단어를 기저장하고 있을 경우, 해당 폴더 명과 함께 저장 로직 롤백
+        if (!alreadyArchivedFolderNames.isEmpty()){
+            throw new CustomApiException("아래 폴더들에 이미 저장된 용어입니다.", alreadyArchivedFolderNames);
+        }
+
+        Term termPS = termRepository.getReferenceById(requestDto.getTermId());
+        Member memberPS = memberRepository.getReferenceById(memberId);
+
+        // 북마크 테이블을 업데이트 합니다.
+        Optional<TermBookmark> termBookmarkOptional = termBookmarkRepository.findByTermAndMember(termPS, memberPS);;
+
+        if (termBookmarkOptional.isEmpty()){
+            try {
+                return termBookmarkRepository.save(TermBookmark.of(termPS, memberPS, requestDto.getFolderIds().size()));
+            }catch (DataIntegrityViolationException e){
+                throw new CustomApiException("용어/사용자 가 존재하지 않습니다.");
+            }
+        }else{
+            termBookmarkOptional.get().addFolderCnt(requestDto.getFolderIds().size());
+            return termBookmarkOptional.get();
+        }
+
     }
 }

@@ -7,13 +7,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import site.termterm.api.domain.bookmark.entity.TermBookmark;
+import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.term.entity.Term;
+import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.dummy.DummyObject;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +42,12 @@ class FolderServiceTest extends DummyObject {
 
     @Mock
     private FolderRepository folderRepository;
+
+    @Mock
+    private TermRepository termRepository;
+
+    @Mock
+    private TermBookmarkRepository termBookmarkRepository;
 
     @DisplayName("폴더 생성 성공")
     @Test
@@ -102,7 +114,167 @@ class FolderServiceTest extends DummyObject {
         assertThat(modifiedFolder.getDescription()).isEqualTo("수정된 폴더 설명");
     }
 
+    @DisplayName("폴더 정보 수정 실패 - 소유자 다름")
+    @Test
+    public void modify_folder_info_different_master_fail_test() throws Exception{
+        //given
+        FolderModifyRequestDto requestDto = new FolderModifyRequestDto();
+        requestDto.setFolderId(1L);
+        requestDto.setName("수정된 폴더");
+        requestDto.setDescription("수정된 폴더 설명");
 
+        // stub 1
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        when(folderRepository.findById(any())).thenReturn(Optional.of(newMockFolder(1L, "새 폴더", "새 폴더 설명", sinner)));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> folderService.modifyFolderInfo(requestDto, 9999L));
+
+    }
+
+    @DisplayName("폴더 용어 저장 - 성공 - 첫 북마크")
+    @Test
+    public void archive_term_first_into_folders_success_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L, 3L));
+        requestDto.setTermId(1L);
+
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+
+        // stub1
+        when(folderRepository.findById(1L)).thenReturn(Optional.of(newMockFolder(1L, "폴더1", "폴더 설명1", sinner)));
+        when(folderRepository.findById(2L)).thenReturn(Optional.of(newMockFolder(2L, "폴더2", "폴더 설명2", sinner)));
+        when(folderRepository.findById(3L)).thenReturn(Optional.of(newMockFolder(3L, "폴더3", "폴더 설명3", sinner)));
+
+        //stub2
+        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.empty());
+
+        //stub3
+        when(termRepository.getReferenceById(any())).thenReturn(term);
+
+        //stub4
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+
+        //stub5
+        when(termBookmarkRepository.save(any())).thenReturn(TermBookmark.of(term, sinner, requestDto.getFolderIds().size()));
+
+        //when
+        TermBookmark termBookmark = folderService.archiveTerm(requestDto, 1L);
+        System.out.println(termBookmark);
+
+        //then
+        assertThat(termBookmark.getTerm()).isEqualTo(term);
+        assertThat(termBookmark.getMember()).isEqualTo(sinner);
+        assertThat(termBookmark.getFolderCnt()).isEqualTo(3);
+    }
+
+    @DisplayName("폴더 용어 저장 - 성공 - 두번쨰 이상 북마크")
+    @Test
+    public void archive_term_not_first_into_folders_success_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L, 3L));
+        requestDto.setTermId(1L);
+
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+
+        // stub1
+        when(folderRepository.findById(1L)).thenReturn(Optional.of(newMockFolder(1L, "폴더1", "폴더 설명1", sinner)));
+        when(folderRepository.findById(2L)).thenReturn(Optional.of(newMockFolder(2L, "폴더2", "폴더 설명2", sinner)));
+        when(folderRepository.findById(3L)).thenReturn(Optional.of(newMockFolder(3L, "폴더3", "폴더 설명3", sinner)));
+
+        //stub2
+        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(TermBookmark.of(term, sinner, 2)));
+
+        //stub3
+        when(termRepository.getReferenceById(any())).thenReturn(term);
+
+        //stub4
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+
+        //when
+        TermBookmark termBookmark = folderService.archiveTerm(requestDto, 1L);
+        System.out.println(termBookmark);
+
+        //then
+        assertThat(termBookmark.getTerm()).isEqualTo(term);
+        assertThat(termBookmark.getMember()).isEqualTo(sinner);
+        assertThat(termBookmark.getFolderCnt()).isEqualTo(5);
+    }
+
+    @DisplayName("폴더 용어 저장 - 실패 - 폴더 꽉 참")
+    @Test
+    public void archive_term_into_folders_full_fail_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L));
+        requestDto.setTermId(1L);
+
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder1 = newMockFolder(1L, "폴더1", "폴더 설명1", sinner);
+
+        for (int i = 0; i < 50; i++){
+            folder1.getTermIds().add((long) (i + 100));
+        }
+        System.out.println(folder1.getTermIds().size());
+
+        // stub1
+        when(folderRepository.findById(1L)).thenReturn(Optional.of(folder1));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> folderService.archiveTerm(requestDto, 1L));
+
+    }
+
+    @DisplayName("폴더 용어 저장 - 실패 - 기저장된 용어")
+    @Test
+    public void archive_term_into_folders_already_archived_fail_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L));
+        requestDto.setTermId(1L);
+
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder = newMockFolder(1L, "폴더1", "폴더 설명1", sinner);
+        folder.getTermIds().add(1L);
+
+        // stub1
+        when(folderRepository.findById(1L)).thenReturn(Optional.of(folder));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> folderService.archiveTerm(requestDto, 1L));
+
+    }
+
+    @DisplayName("폴더 용어 저장 - 실패 - 소유자 다름")
+    @Test
+    public void archive_term_into_folders_not_master_fail_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(1L, 2L));
+        requestDto.setTermId(1L);
+
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder = newMockFolder(1L, "폴더1", "폴더 설명1", sinner);
+
+        // stub1
+        when(folderRepository.findById(1L)).thenReturn(Optional.of(folder));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> folderService.archiveTerm(requestDto, 2L));
+
+    }
 
 
 }

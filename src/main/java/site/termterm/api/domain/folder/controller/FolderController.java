@@ -49,4 +49,28 @@ public class FolderController {
         return new ResponseEntity<>(new ResponseDto<>(1, "폴더 정보 수정 성공", null), HttpStatus.OK);
     }
 
+    /**
+     * 폴더를 삭제합니다.
+     */
+    @DeleteMapping("/s/folder/{folderId}")
+    public ResponseEntity<ResponseDto<?>> deleteFolder(@PathVariable(name = "folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
+        folderService.deleteFolder(folderId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 삭제 성공", null), HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * 폴더에 용어를 저장합니다. (아카이빙)
+     * 한 번에 여러 폴더에 저장할 수 있습니다.
+     * 그러나 폴더에 이미 해당 용어가 담겨 있을 경우, 이미 담은 폴더명들을 리스트로 반환합니다.
+     */
+    @PostMapping("/s/folder/term")
+    public ResponseEntity<ResponseDto<?>> archiveTermIntoFolders(
+            @RequestBody @Valid ArchiveTermRequestDto requestDto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal LoginMember loginMember){
+        folderService.archiveTerm(requestDto, loginMember.getMember().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "용어 아카이브 요청 성공", null), HttpStatus.OK);
+    }
+
 }
