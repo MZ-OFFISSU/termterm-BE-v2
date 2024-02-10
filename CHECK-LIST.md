@@ -36,7 +36,7 @@
 - [x] DELETE /v1/folder/{folderId}
 - [ ] GET /v1/folder/{folderId}/including/{termId}
 - [ ] GET /v1/folder/detail/each/{folderId}
-- [ ] GET /v1/folder/detail/sum/{folderId}
+- [x] GET /v1/folder/detail/sum/{folderId}
 - [x] PUT /v1/folder/info
 - [ ] GET /v1/folder/list
 - [x] POST /v1/folder/new

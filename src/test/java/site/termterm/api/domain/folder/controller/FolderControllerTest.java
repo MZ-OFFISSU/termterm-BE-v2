@@ -25,7 +25,6 @@ import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
-import site.termterm.api.global.handler.exceptions.CustomApiException;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,10 +71,14 @@ class FolderControllerTest extends DummyObject {
         Term term1 = termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
         Term term2 = termRepository.save(newTerm("용어2", "용어2 설명", List.of(CategoryEnum.IT)));
         Term term3 = termRepository.save(newTerm("용어3", "용어3 설명", List.of(CategoryEnum.IT)));
+        Term term4 = termRepository.save(newTerm("용어4", "용어4 설명", List.of(CategoryEnum.IT)));
+        Term term5 = termRepository.save(newTerm("용어5", "용어5 설명", List.of(CategoryEnum.IT)));
 
         folder1.getTermIds().add(term1.getId());
         folder1.getTermIds().add(term2.getId());
         folder2.getTermIds().add(term1.getId());
+        folder2.getTermIds().add(term5.getId());
+        folder2.getTermIds().add(term3.getId());
         folderRepository.save(folder1);
         folderRepository.save(folder2);
 
@@ -229,7 +232,7 @@ class FolderControllerTest extends DummyObject {
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
-        resultActions.andExpect(status().isNoContent());
+        resultActions.andExpect(status().isOk());
         Optional<Folder> folder2 = folderRepository.findById(2L);
         assertThat(folderRepository.findById(1L)).isEqualTo(Optional.empty());
         assertThat(folder2).isNotEqualTo(Optional.empty());
@@ -241,7 +244,7 @@ class FolderControllerTest extends DummyObject {
                 delete("/v2/s/folder/{folderId}", "2"));
 
         //then
-        resultActions2.andExpect(status().isNoContent());
+        resultActions2.andExpect(status().isOk());
         assertThat(folderRepository.findById(2L)).isEqualTo(Optional.empty());
 
     }
@@ -285,7 +288,7 @@ class FolderControllerTest extends DummyObject {
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
-        resultActions.andExpect(status().isNoContent());
+        resultActions.andExpect(status().isOk());
         assertThat(folderRepository.findById(1L).get().getTermIds().size()).isEqualTo(1);
 
     }
@@ -315,9 +318,31 @@ class FolderControllerTest extends DummyObject {
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
-        resultActions.andExpect(status().isNoContent());
+        resultActions.andExpect(status().isOk());
         assertThat(termBookmarkRepository.findByTermAndMember(newMockTerm(2L, "", "", null), newMockMember(1L, "", "")))
                 .isEqualTo(Optional.empty());
 
     }
+
+    @DisplayName("폴더 상세 정보 보기 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void folder_details_success_test() throws Exception{
+        //given
+        // folder2 에는 [1, 5, 3] 이 있음
+        Long folderId = 2L;
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/folder/detail/sum/{folderId}", folderId));   //
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+    }
+
 }

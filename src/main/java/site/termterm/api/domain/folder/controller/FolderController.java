@@ -56,7 +56,7 @@ public class FolderController {
     public ResponseEntity<ResponseDto<?>> deleteFolder(@PathVariable(name = "folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
         folderService.deleteFolder(folderId, loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 삭제 성공", null), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 삭제 성공", null), HttpStatus.OK);
     }
 
     /**
@@ -85,7 +85,18 @@ public class FolderController {
     ){
         folderService.unArchiveTerm(requestDto, loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "용어 아카이브 해제 요청 성공", null), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ResponseDto<>(1, "용어 아카이브 해제 요청 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 폴더 내에 담긴 용어들을 리턴합니다.
+     * "폴더 상세 페이지 _ 모아서 보기"
+     */
+    @GetMapping("/s/folder/detail/sum/{folderId}")
+    public ResponseEntity<ResponseDto<?>> getFolderDetailSum(@PathVariable("folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
+        FolderDetailResponseDto responseDto = folderService.getFolderDetailSum(folderId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 상세 조회 성공", responseDto), HttpStatus.OK);
     }
 
 }

@@ -15,4 +15,12 @@ public class TermResponseDto {
 //        private BookmarkStatus bookmarked;    TODO
 
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class TermIdAndNameResponseDto {
+        private Long termId;
+        private String name;
+    }
 }

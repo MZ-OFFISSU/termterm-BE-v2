@@ -1,6 +1,8 @@
 package site.termterm.api.domain.folder.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,11 +16,10 @@ import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static site.termterm.api.domain.term.dto.TermResponseDto.*;
 import static site.termterm.api.domain.folder.dto.FolderRequestDto.*;
 import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
 
@@ -26,6 +27,7 @@ import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FolderService {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final FolderRepository folderRepository;
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
@@ -53,11 +55,11 @@ public class FolderService {
      * 폴더 정보를 수정합니다.
      */
     @Transactional
-    public Folder modifyFolderInfo(FolderModifyRequestDto requestDto, Long id) {
+    public Folder modifyFolderInfo(FolderModifyRequestDto requestDto, Long memberId) {
         Folder folderPS = folderRepository.findById(requestDto.getFolderId())
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
 
-        if (folderPS.getMember().getId().longValue() != id.longValue()){
+        if (folderPS.getMember().getId().longValue() != memberId.longValue()){
             throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
         }
 
@@ -151,9 +153,12 @@ public class FolderService {
      */
     @Transactional
     public Folder unArchiveTerm(UnArchiveTermRequestDto requestDto, Long memberId) {
-        // 폴더 소유자 확인
         Folder folderPS = folderRepository.findById(requestDto.getFolderId())
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        if (folderPS.getMember().getId().longValue() != memberId.longValue()){
+            throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
+        }
 
         // TermBookmark 객체의 folderCnt -= 1,  folderCnt 가 0 이 되었을 경우 삭제
         Term termPS = termRepository.getReferenceById(requestDto.getTermId());
@@ -171,5 +176,36 @@ public class FolderService {
         folderPS.getTermIds().remove(requestDto.getTermId());
 
         return folderPS;
+    }
+
+    /**
+     * 폴더 내에 담긴 용어들을 폴더 정보와 함께 리턴합니다.
+     */
+    public FolderDetailResponseDto getFolderDetailSum(Long folderId, Long memberId) {
+        Folder folderPS = folderRepository.findById(folderId)
+                .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        if (folderPS.getMember().getId().longValue() != memberId.longValue()){
+            throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
+        }
+
+        FolderDetailResponseDto responseDto = FolderDetailResponseDto.of(folderPS);
+        List<FolderDetailResponseDto.TermIdAndNameDto> termIdAndNameDtoList = folderPS.getTermIds().stream().map(termId -> {
+            Optional<TermIdAndNameResponseDto> termIdAndNameResponseDtoOptional = termRepository.findIdAndNameById(termId);
+
+            if (termIdAndNameResponseDtoOptional.isEmpty()) {
+                log.error("{}에서 불러온 {}가 DB 에 존재하지 않습니다.", folderId, termId);
+                return null;
+            }
+
+            return new FolderDetailResponseDto.TermIdAndNameDto(termId, termIdAndNameResponseDtoOptional.get().getName());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        Collections.reverse(termIdAndNameDtoList);
+        responseDto.setTerms(termIdAndNameDtoList);
+
+        return responseDto;
+
+
     }
 }
