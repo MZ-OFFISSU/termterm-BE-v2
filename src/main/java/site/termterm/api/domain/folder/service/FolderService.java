@@ -221,4 +221,14 @@ public class FolderService {
 
         return responseDtoList;
     }
+
+    /**
+     * 폴더 관련 정보 모달  - 현재 폴더 개수, 나의 폴더 생성 한도, 생성 가능 폴더 개수
+     */
+    public FolderRelatedInfoResponseDto getFolderRelatedInfo(Long memberId) {
+        Member memberPS = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+
+        return FolderRelatedInfoResponseDto.of(memberPS);
+    }
 }

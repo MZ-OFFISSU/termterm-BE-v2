@@ -393,5 +393,30 @@ class FolderServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("폴더 관련 정보(모달) 조회")
+    @Test
+    public void folder_related_info_success_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder1 = newMockFolder(1L, "폴더1", "폴더설명1", sinner);
+        Folder folder2 = newMockFolder(2L, "폴더2", "폴더설명2", sinner);
+        sinner.getFolders().add(folder1);
+        sinner.getFolders().add(folder2);
+
+        // stub
+        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
+
+        //when
+        FolderRelatedInfoResponseDto folderRelatedInfo = folderService.getFolderRelatedInfo(1L);
+        System.out.println(folderRelatedInfo);
+
+        //then
+        assertThat(folderRelatedInfo.getCurrentFolderCount()).isEqualTo(2);
+        assertThat(folderRelatedInfo.getMyFolderCreationLimit()).isEqualTo(3);
+        assertThat(folderRelatedInfo.getSystemFolderCreationLimit()).isEqualTo(9);
+
+    }
+
+
 
 }

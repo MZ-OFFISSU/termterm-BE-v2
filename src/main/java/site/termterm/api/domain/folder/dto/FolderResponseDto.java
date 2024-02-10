@@ -2,6 +2,7 @@ package site.termterm.api.domain.folder.dto;
 
 import lombok.*;
 import site.termterm.api.domain.folder.entity.Folder;
+import site.termterm.api.domain.member.entity.Member;
 
 import java.util.List;
 
@@ -62,4 +63,18 @@ public class FolderResponseDto {
             return new FolderMinimumInfoDto(folder.getId(), folder.getTitle(), folder.getDescription());
         }
     }
+
+    @Getter
+    @AllArgsConstructor
+    @ToString
+    public static class FolderRelatedInfoResponseDto {
+        private Integer currentFolderCount;
+        private Integer myFolderCreationLimit;
+        private Integer systemFolderCreationLimit;
+
+        public static FolderRelatedInfoResponseDto of(Member member) {
+            return new FolderRelatedInfoResponseDto(member.getFolders().size(), member.getFolderLimit(), 9);
+        }
+    }
+
 }

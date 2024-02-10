@@ -353,18 +353,34 @@ class FolderControllerTest extends DummyObject {
     @Test
     public void my_folder_list_success_test() throws Exception{
         //given
-                
+
         //when
         System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
         ResultActions resultActions = mvc.perform(get("/v2/s/folder/list"));
         System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
+        //then
+        resultActions.andExpect(status().isOk());
+
+    }
+
+    @DisplayName("폴더 관련 정보 (모달) API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void folder_related_info_success_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/related-info"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
         resultActions.andExpect(status().isOk());
-        
+        resultActions.andExpect(jsonPath("$.data.currentFolderCount").value(2));
     }
-    
+
 
 }

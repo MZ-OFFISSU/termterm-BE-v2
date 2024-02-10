@@ -40,7 +40,7 @@
 - [x] PUT /v1/folder/info
 - [x] GET /v1/folder/list
 - [x] POST /v1/folder/new
-- [ ] GET /v1/folder/related-info
+- [x] GET /v1/folder/related-info
 - [x] POST /v1/folder/term
 - [x] DELETE /v1/folder/term
 - [ ] GET /v1/folder/term/random-10

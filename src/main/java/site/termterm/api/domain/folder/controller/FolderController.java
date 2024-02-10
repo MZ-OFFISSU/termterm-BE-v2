@@ -111,4 +111,13 @@ public class FolderController {
         return new ResponseEntity<>(new ResponseDto<>(1, "내 폴더 리스트 조회 성공", responseDtoList), HttpStatus.OK);
     }
 
+    /**
+     * 폴더 관련 정보 모달  - 현재 폴더 개수, 나의 폴더 생성 한도, 생성 가능 폴더 개수
+     */
+    @GetMapping("/s/folder/related-info")
+    public ResponseEntity<ResponseDto<FolderRelatedInfoResponseDto>> getFolderRelatedInfo(@AuthenticationPrincipal LoginMember loginMember){
+        FolderRelatedInfoResponseDto responseDto = folderService.getFolderRelatedInfo(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 관련 정보 조회 성공", responseDto), HttpStatus.OK);
+    }
 }
