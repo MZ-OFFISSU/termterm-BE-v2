@@ -89,6 +89,31 @@ class FolderControllerTest extends DummyObject {
         termBookmarkRepository.save(newTermBookmark(term3, sinner, 1));
         termBookmarkRepository.save(newTermBookmark(term5, sinner, 1));
 
+        /*  *******************************************************************
+        * folder3 : {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}                 */
+
+
+        Folder folder3 = newFolder("새 폴더3", "새 폴더 설명3", sinner);
+
+        Term term6 = termRepository.save(newTerm("용어6", "용어6 설명", List.of(CategoryEnum.IT)));
+        Term term7 = termRepository.save(newTerm("용어7", "용어7 설명", List.of(CategoryEnum.IT)));
+        Term term8 = termRepository.save(newTerm("용어8", "용어8 설명", List.of(CategoryEnum.IT)));
+        Term term9 = termRepository.save(newTerm("용어9", "용어9 설명", List.of(CategoryEnum.IT)));
+        Term term10 = termRepository.save(newTerm("용어10", "용어10 설명", List.of(CategoryEnum.IT)));
+        Term term11 = termRepository.save(newTerm("용어11", "용어11 설명", List.of(CategoryEnum.IT)));
+        Term term12 = termRepository.save(newTerm("용어12", "용어12 설명", List.of(CategoryEnum.IT)));
+        Term term13 = termRepository.save(newTerm("용어13", "용어13 설명", List.of(CategoryEnum.IT)));
+        Term term14 = termRepository.save(newTerm("용어14", "용어14 설명", List.of(CategoryEnum.IT)));
+        Term term15 = termRepository.save(newTerm("용어15", "용어15 설명", List.of(CategoryEnum.IT)));
+        Term term16 = termRepository.save(newTerm("용어16", "용어16 설명", List.of(CategoryEnum.IT)));
+
+        List<Term> terms = List.of(term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16);
+        for (int i=0; i<terms.size(); i++){
+            folder3.getTermIds().add((long) i);
+            termBookmarkRepository.save(newTermBookmark(terms.get(i), sinner, 1));
+        }
+        folderRepository.save(folder3);
+
         em.clear();
     }
 
@@ -380,6 +405,23 @@ class FolderControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.currentFolderCount").value(2));
+    }
+
+    @DisplayName("아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 줄 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void random_10_archived_terms_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/term/random-10"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(10));
     }
 
 

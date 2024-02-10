@@ -231,4 +231,16 @@ public class FolderService {
 
         return FolderRelatedInfoResponseDto.of(memberPS);
     }
+
+    /**
+     * 홈 화면 - 아카이빙한 용어를 확인해 보세요!
+     * 아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 리턴
+     */
+    public List<TermIdAndNameAndDescriptionDto> getArchivedTermsRandom10(Long memberId) {
+        List<TermIdAndNameAndDescriptionDtoInterface> random10TermsDtoInterfaceList = termBookmarkRepository.findTermIdAndNameAndDescriptionByMemberId(memberId);
+
+        return random10TermsDtoInterfaceList.stream()
+                .map(TermIdAndNameAndDescriptionDto::of)
+                .collect(Collectors.toList());
+    }
 }

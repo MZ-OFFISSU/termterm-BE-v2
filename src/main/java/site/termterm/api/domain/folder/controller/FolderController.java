@@ -120,4 +120,15 @@ public class FolderController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "폴더 관련 정보 조회 성공", responseDto), HttpStatus.OK);
     }
+
+    /**
+     * 홈 화면 - 아카이빙한 용어를 확인해 보세요!
+     * 아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 리턴
+     */
+    @GetMapping("/s/folder/term/random-10")
+    public ResponseEntity<ResponseDto<?>> getArchivedTermsRandom10(@AuthenticationPrincipal LoginMember loginMember){
+        List<TermIdAndNameAndDescriptionDto> responseDtoList = folderService.getArchivedTermsRandom10(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "아카이빙한 용어 최대 10개 리턴 성공", responseDtoList), HttpStatus.OK);
+    }
 }

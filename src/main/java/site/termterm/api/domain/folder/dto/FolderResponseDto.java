@@ -4,6 +4,7 @@ import lombok.*;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.entity.Member;
 
+import java.sql.Clob;
 import java.util.List;
 
 public class FolderResponseDto {
@@ -75,6 +76,26 @@ public class FolderResponseDto {
         public static FolderRelatedInfoResponseDto of(Member member) {
             return new FolderRelatedInfoResponseDto(member.getFolders().size(), member.getFolderLimit(), 9);
         }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @ToString
+    public static class TermIdAndNameAndDescriptionDto {
+        private String termId;
+        private String name;
+        private String description;
+
+        public static TermIdAndNameAndDescriptionDto of(TermIdAndNameAndDescriptionDtoInterface resultInterface){
+            return new TermIdAndNameAndDescriptionDto(resultInterface.getTermId(), resultInterface.getName(), resultInterface.getDescription().toString());
+        }
+    }
+
+
+    public interface TermIdAndNameAndDescriptionDtoInterface {
+        String getTermId();
+        String getName();
+        Clob getDescription();
     }
 
 }

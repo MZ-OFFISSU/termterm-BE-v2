@@ -43,7 +43,7 @@
 - [x] GET /v1/folder/related-info
 - [x] POST /v1/folder/term
 - [x] DELETE /v1/folder/term
-- [ ] GET /v1/folder/term/random-10
+- [x] GET /v1/folder/term/random-10
 
 ### Home - 상단 Title (우선순위 제일 아래...)
 - [ ] GET /v1/home/subtitle
