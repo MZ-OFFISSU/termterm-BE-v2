@@ -15,6 +15,8 @@ import site.termterm.api.domain.folder.service.FolderService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v2")
@@ -93,10 +95,20 @@ public class FolderController {
      * "폴더 상세 페이지 _ 모아서 보기"
      */
     @GetMapping("/s/folder/detail/sum/{folderId}")
-    public ResponseEntity<ResponseDto<?>> getFolderDetailSum(@PathVariable("folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
+    public ResponseEntity<ResponseDto<FolderDetailResponseDto>> getFolderDetailSum(@PathVariable("folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
         FolderDetailResponseDto responseDto = folderService.getFolderDetailSum(folderId, loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "폴더 상세 조회 성공", responseDto), HttpStatus.OK);
+    }
+
+    /**
+     * 내 폴더 리스트
+     */
+    @GetMapping("/s/folder/list")
+    public ResponseEntity<ResponseDto<List<FolderMinimumInfoDto>>> getMyFolderList(@AuthenticationPrincipal LoginMember loginMember){
+        List<FolderMinimumInfoDto> responseDtoList = folderService.getMyFolderList(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "내 폴더 리스트 조회 성공", responseDtoList), HttpStatus.OK);
     }
 
 }

@@ -38,7 +38,7 @@
 - [ ] GET /v1/folder/detail/each/{folderId}
 - [x] GET /v1/folder/detail/sum/{folderId}
 - [x] PUT /v1/folder/info
-- [ ] GET /v1/folder/list
+- [x] GET /v1/folder/list
 - [x] POST /v1/folder/new
 - [ ] GET /v1/folder/related-info
 - [x] POST /v1/folder/term

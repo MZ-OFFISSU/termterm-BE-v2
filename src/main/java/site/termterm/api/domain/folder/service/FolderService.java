@@ -208,4 +208,17 @@ public class FolderService {
 
 
     }
+
+    /**
+     * 내 폴더 리스트 리턴
+     */
+    public List<FolderMinimumInfoDto> getMyFolderList(Long memberId) {
+        Member memberPS = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+
+        List<Folder> folders = memberPS.getFolders();
+        List<FolderMinimumInfoDto> responseDtoList = folders.stream().map(FolderMinimumInfoDto::of).toList();
+
+        return responseDtoList;
+    }
 }

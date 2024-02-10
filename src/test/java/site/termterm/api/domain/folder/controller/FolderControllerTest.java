@@ -65,6 +65,8 @@ class FolderControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
+        // folder1 : {1, 2} , folder2 : {1, 5, 3}
+
         Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
         Folder folder1 = newFolder("새 폴더1", "새 폴더 설명1", sinner);
         Folder folder2 = newFolder("새 폴더2", "새 폴더 설명2", sinner);
@@ -84,6 +86,8 @@ class FolderControllerTest extends DummyObject {
 
         termBookmarkRepository.save(newTermBookmark(term1, sinner, 2));
         termBookmarkRepository.save(newTermBookmark(term2, sinner, 1));
+        termBookmarkRepository.save(newTermBookmark(term3, sinner, 1));
+        termBookmarkRepository.save(newTermBookmark(term5, sinner, 1));
 
         em.clear();
     }
@@ -199,7 +203,7 @@ class FolderControllerTest extends DummyObject {
         //given
         ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
         requestDto.setFolderIds(List.of(1L, 2L));
-        requestDto.setTermId(3L);
+        requestDto.setTermId(4L);
 
         String requestBody = om.writeValueAsString(requestDto);
         System.out.println(requestBody);
@@ -224,26 +228,25 @@ class FolderControllerTest extends DummyObject {
     public void delete_folder_success_test() throws Exception{
         //given
 
-        //when
+        //when 1
         System.out.println(">>>>>>>요청 쿼리 시작");
         ResultActions resultActions = mvc.perform(
                 delete("/v2/s/folder/{folderId}", "1"));
         System.out.println("<<<<<<<요청 쿼리 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
-        //then
+        //then 1
         resultActions.andExpect(status().isOk());
         Optional<Folder> folder2 = folderRepository.findById(2L);
         assertThat(folderRepository.findById(1L)).isEqualTo(Optional.empty());
         assertThat(folder2).isNotEqualTo(Optional.empty());
-        assertThat(folder2.get().getTermIds().size()).isEqualTo(1);
+        assertThat(folder2.get().getTermIds().size()).isEqualTo(3);
 
-
-        //when
+        //when 2
         ResultActions resultActions2 = mvc.perform(
                 delete("/v2/s/folder/{folderId}", "2"));
 
-        //then
+        //then 2
         resultActions2.andExpect(status().isOk());
         assertThat(folderRepository.findById(2L)).isEqualTo(Optional.empty());
 
@@ -344,5 +347,24 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(status().isOk());
 
     }
+
+    @DisplayName("내 폴더 리스트 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void my_folder_list_success_test() throws Exception{
+        //given
+                
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/list"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+        
+    }
+    
 
 }

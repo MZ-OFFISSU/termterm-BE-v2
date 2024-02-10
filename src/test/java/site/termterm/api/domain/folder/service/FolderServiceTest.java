@@ -366,6 +366,30 @@ class FolderServiceTest extends DummyObject {
         //then
         assertThat(responseDto.getTerms().get(0).getTermId()).isEqualTo(1);
 
+    }
+
+    @DisplayName("내 폴더 리스트 조회")
+    @Test
+    public void my_folder_list_success_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder1 = newMockFolder(1L, "폴더1", "폴더설명1", sinner);
+        Folder folder2 = newMockFolder(2L, "폴더2", "폴더설명2", sinner);
+        sinner.getFolders().add(folder1);
+        sinner.getFolders().add(folder2);
+
+
+        //stub
+        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
+
+        //when
+        List<FolderMinimumInfoDto> myFolderList = folderService.getMyFolderList(1L);
+        System.out.println(myFolderList);
+
+        //then
+        assertThat(myFolderList.size()).isEqualTo(2);
+        assertThat(myFolderList.get(0).getFolderId()).isEqualTo(1);
+        assertThat(myFolderList.get(1).getFolderId()).isEqualTo(2);
 
     }
 

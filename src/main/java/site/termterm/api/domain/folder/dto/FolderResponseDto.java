@@ -48,4 +48,18 @@ public class FolderResponseDto {
                     .build();
         }
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @ToString
+    public static class FolderMinimumInfoDto {
+        private Long folderId;
+        private String title;
+        private String description;
+
+        public static FolderMinimumInfoDto of(Folder folder){
+            return new FolderMinimumInfoDto(folder.getId(), folder.getTitle(), folder.getDescription());
+        }
+    }
 }
