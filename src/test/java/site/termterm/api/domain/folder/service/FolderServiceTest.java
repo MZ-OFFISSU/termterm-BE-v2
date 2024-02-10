@@ -316,11 +316,9 @@ class FolderServiceTest extends DummyObject {
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
         Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner);
         Term term1 = newMockTerm(1L, "용어", "용어 설명", List.of(CategoryEnum.IT));
-        Term term2 = newMockTerm(2L, "용어", "용어 설명", List.of(CategoryEnum.IT));
         folder.getTermIds().add(1L);
         folder.getTermIds().add(2L);
         TermBookmark termBookmark1 = TermBookmark.of(term1, sinner, 3);
-        TermBookmark termBookmark2 = TermBookmark.of(term2, sinner, 1);
 
         UnArchiveTermRequestDto requestDto = new UnArchiveTermRequestDto();
         requestDto.setFolderId(1L);
@@ -342,7 +340,7 @@ class FolderServiceTest extends DummyObject {
 
     }
 
-    @DisplayName("폴더 상세 정보 보기 성겅")
+    @DisplayName("폴더 상세 정보 보기 성공")
     @Test
     public void folder_detail_success_test() throws Exception{
         //given
@@ -368,7 +366,7 @@ class FolderServiceTest extends DummyObject {
 
     }
 
-    @DisplayName("내 폴더 리스트 조회")
+    @DisplayName("내 폴더 리스트 조회 - 성공")
     @Test
     public void my_folder_list_success_test() throws Exception{
         //given
@@ -393,7 +391,7 @@ class FolderServiceTest extends DummyObject {
 
     }
 
-    @DisplayName("폴더 관련 정보(모달) 조회")
+    @DisplayName("폴더 관련 정보(모달) 조회 - 성공")
     @Test
     public void folder_related_info_success_test() throws Exception{
         //given
@@ -414,6 +412,30 @@ class FolderServiceTest extends DummyObject {
         assertThat(folderRelatedInfo.getCurrentFolderCount()).isEqualTo(2);
         assertThat(folderRelatedInfo.getMyFolderCreationLimit()).isEqualTo(3);
         assertThat(folderRelatedInfo.getSystemFolderCreationLimit()).isEqualTo(9);
+
+    }
+
+    @DisplayName("폴더에 용어 포함 여부 조회 - 성공")
+    @Test
+    public void folder_is_including_term_success_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Folder folder = newMockFolder(1L, "폴더1", "폴더설명1", sinner);
+        folder.getTermIds().add(1L);
+        folder.getTermIds().add(3L);
+
+        //stub
+        when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
+
+        //when
+        FolderIsIncludingTermResponseDto includingTerm1 = folderService.isIncludingTerm(1L, 1L);
+        FolderIsIncludingTermResponseDto includingTerm2 = folderService.isIncludingTerm(1L, 2L);
+        FolderIsIncludingTermResponseDto includingTerm3 = folderService.isIncludingTerm(1L, 3L);
+
+        //then
+        assertThat(includingTerm1.getIsExist()).isEqualTo(true);
+        assertThat(includingTerm2.getIsExist()).isEqualTo(false);
+        assertThat(includingTerm3.getIsExist()).isEqualTo(true);
 
     }
 

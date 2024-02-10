@@ -67,7 +67,10 @@ class FolderControllerTest extends DummyObject {
     public void setUp(){
         // folder1 : {1, 2} , folder2 : {1, 5, 3}
 
-        Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        Member sinner = newMember("1111", "sinner@gmail.com");
+        sinner.addFolderLimit();       // 폴더 생성 가능 횟수 : 4
+        memberRepository.save(sinner);
+
         Folder folder1 = newFolder("새 폴더1", "새 폴더 설명1", sinner);
         Folder folder2 = newFolder("새 폴더2", "새 폴더 설명2", sinner);
         Term term1 = termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
@@ -109,7 +112,7 @@ class FolderControllerTest extends DummyObject {
 
         List<Term> terms = List.of(term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16);
         for (int i=0; i<terms.size(); i++){
-            folder3.getTermIds().add((long) i);
+            folder3.getTermIds().add((long) i+1);
             termBookmarkRepository.save(newTermBookmark(terms.get(i), sinner, 1));
         }
         folderRepository.save(folder3);
@@ -404,7 +407,9 @@ class FolderControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isOk());
-        resultActions.andExpect(jsonPath("$.data.currentFolderCount").value(2));
+        resultActions.andExpect(jsonPath("$.data.currentFolderCount").value(3));
+        resultActions.andExpect(jsonPath("$.data.myFolderCreationLimit").value(4));
+        resultActions.andExpect(jsonPath("$.data.systemFolderCreationLimit").value(9));
     }
 
     @DisplayName("아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 줄 API 요청 - 성공")
@@ -424,5 +429,40 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.length()").value(10));
     }
 
+    @DisplayName("폴더에 특정 단어 포함 여부 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void folder_is_including_term_success_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/{folderId}/including/{termId}", "1", "1"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.isExist").value("true"));
+
+    }
+
+    @DisplayName("폴더에 특정 단어 포함 여부 API 요청 - 실패")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void folder_is_including_term_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/{folderId}/including/{termId}", "1", "3"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.isExist").value("false"));
+
+    }
 
 }

@@ -243,4 +243,16 @@ public class FolderService {
                 .map(TermIdAndNameAndDescriptionDto::of)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 특정 폴더에 특정 단어가 포함되어 있는 지 여부를 응답합니다.
+     */
+    public FolderIsIncludingTermResponseDto isIncludingTerm(Long folderId, Long termId) {
+        Folder folderPS = folderRepository.findById(folderId)
+                .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        boolean isExist = folderPS.getTermIds().contains(termId);
+
+        return new FolderIsIncludingTermResponseDto(isExist);
+    }
 }

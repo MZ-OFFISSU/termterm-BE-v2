@@ -98,4 +98,11 @@ public class FolderResponseDto {
         Clob getDescription();
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class FolderIsIncludingTermResponseDto {
+        private Boolean isExist;
+    }
+
 }

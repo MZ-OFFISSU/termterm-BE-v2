@@ -129,6 +129,20 @@ public class FolderController {
     public ResponseEntity<ResponseDto<?>> getArchivedTermsRandom10(@AuthenticationPrincipal LoginMember loginMember){
         List<TermIdAndNameAndDescriptionDto> responseDtoList = folderService.getArchivedTermsRandom10(loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "아카이빙한 용어 최대 10개 리턴 성공", responseDtoList), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "아카이빙한 용어 최대 10개 조회 성공", responseDtoList), HttpStatus.OK);
     }
+
+    /**
+     * 특정 폴더에 특정 단어가 포함되어 있는 지 여부를 응답합니다.
+     */
+    @GetMapping("/s/folder/{folderId}/including/{termId}")
+    public ResponseEntity<ResponseDto<FolderIsIncludingTermResponseDto>> getIsIncludingTerm(
+            @PathVariable(name = "folderId") Long folderId,
+            @PathVariable(name = "termId") Long termId,
+            @AuthenticationPrincipal LoginMember loginMember
+    ){
+        FolderIsIncludingTermResponseDto responseDto = folderService.isIncludingTerm(folderId, termId);
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더에 용어 포함 여부 조회 성공", responseDto), HttpStatus.OK);
+    }
+
 }
