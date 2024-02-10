@@ -68,7 +68,7 @@
 - [x] DELETE /v1/member/info/profile-image
 - [x] GET /v1/member/info/profile-image/presigned-url
 - [x] GET /v1/member/info/profile-image/sync  __-------------> PUT__
-- [ ] GET /v1/member/nickname/check
+- [x] GET /v1/member/nickname/check
 - [x] GET /v1/member/withdraw  __-------------> PUT__
 
 
