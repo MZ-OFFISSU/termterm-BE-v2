@@ -1,5 +1,6 @@
 package site.termterm.api.global.dummy;
 
+import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
@@ -69,5 +70,9 @@ public class DummyObject {
 
     protected Folder newMockFolder(Long id, String title, String description, Member member){
         return Folder.builder().id(id).title(title).description(description).member(member).build();
+    }
+
+    protected TermBookmark newTermBookmark(Term term, Member member, int folderCnt){
+        return TermBookmark.of(term, member, folderCnt);
     }
 }

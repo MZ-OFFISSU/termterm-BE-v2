@@ -19,12 +19,14 @@ public class Term {
     @Column(name = "TERM_ID")
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String description;
 
     @Convert(converter = CategoryListConverter.class)
     private List<CategoryEnum> categories;
+
 
 }
