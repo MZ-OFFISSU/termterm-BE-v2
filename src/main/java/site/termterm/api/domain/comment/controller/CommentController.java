@@ -44,4 +44,14 @@ public class CommentController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 좋아요 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 나만의 용어 설명 좋아요 취소
+     */
+    @PutMapping("/s/comment/dislike/{id}")
+    public ResponseEntity<ResponseDto<?>> dislikeComment(@PathVariable(name = "id") Long commentId, @AuthenticationPrincipal LoginMember loginMember){
+        commentService.dislike(commentId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 좋아요 취소 성공", null), HttpStatus.OK);
+    }
 }

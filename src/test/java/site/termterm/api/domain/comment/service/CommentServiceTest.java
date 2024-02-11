@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.member.entity.Member;
@@ -17,6 +18,7 @@ import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.dummy.DummyObject;
+import site.termterm.api.global.handler.exceptions.CustomApiException;
 
 import java.util.List;
 import java.util.Optional;
@@ -81,17 +83,19 @@ class CommentServiceTest extends DummyObject {
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
         Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
         Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
+        CommentLike commentLike = newMockCommentLike(comment, sinner, CommentLikeStatus.NO);
 
         //stub
         when(memberRepository.getReferenceById(any())).thenReturn(sinner);
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
-        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(newMockCommentLike(comment, sinner, CommentLikeStatus.NO)));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(commentLike));
 
         //when
         Comment updatedComment = commentService.like(1L, 1L);
 
         //then
         assertThat(updatedComment.getLikeCnt()).isEqualTo(1);
+        assertThat(commentLike.getStatus()).isEqualTo(CommentLikeStatus.YES);
 
     }
 
@@ -122,19 +126,63 @@ class CommentServiceTest extends DummyObject {
         //given
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
         Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
-        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
-        comment.addLike();
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner).addLike();
+        CommentLike commentLike = newMockCommentLike(comment, sinner, CommentLikeStatus.YES);
 
         //stub
         when(memberRepository.getReferenceById(any())).thenReturn(sinner);
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
-        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(newMockCommentLike(comment, sinner, CommentLikeStatus.YES)));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(commentLike));
 
         //when
-        Comment updatedComment = commentService.like(1L, 1L);
 
         //then
-        assertThat(updatedComment.getLikeCnt()).isEqualTo(1);
+        assertThrows(CustomApiException.class, () -> commentService.like(1L, 1L));
+
+    }
+
+    @DisplayName("나만의 용어 설명 좋아요 취소")
+    @Test
+    public void cancel_like_comment_success_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner).addLike();
+        CommentLike commentLike = newMockCommentLike(comment, sinner, CommentLikeStatus.YES);
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(commentLike));
+
+        //when
+        Comment updatedComment = commentService.dislike(1L, 1L);
+
+        //then
+        assertThat(updatedComment.getLikeCnt()).isEqualTo(0);
+        assertThat(commentLike.getStatus()).isEqualTo(CommentLikeStatus.NO);
+
+    }
+
+    @DisplayName("나만의 용어 설명 좋아요 취소 실패")
+    @Test
+    public void cancel_like_comment_fail_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
+        CommentLike commentLike = newMockCommentLike(comment, sinner, CommentLikeStatus.NO);
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(commentLike));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> commentService.dislike(1L, 1L));
+        assertThat(commentLike.getStatus()).isEqualTo(CommentLikeStatus.NO);
 
     }
 

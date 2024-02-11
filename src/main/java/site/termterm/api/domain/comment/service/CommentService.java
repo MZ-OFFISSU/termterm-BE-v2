@@ -71,7 +71,32 @@ public class CommentService {
             if (commentLikePS.getStatus() == CommentLikeStatus.NO){
                 commentLikePS.setStatus(CommentLikeStatus.YES);
                 commentPS.addLike();
+            }else{
+                throw new CustomApiException(String.format("Member(%s)는 Comment(%s)에 이미 좋아요를 남겼습니다.", memberId+"", commentId+""));
             }
+        }
+
+        return commentPS;
+    }
+
+    /**
+     * 나만의 용어 설명에 좋아요를 취소합니다.
+     */
+    @Transactional
+    public Comment dislike(Long commentId, Long memberId) {
+        Member memberPS = memberRepository.getReferenceById(memberId);
+
+        Comment commentPS = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomApiException(String.format("commentId(%s) 와 일치하는 Comment 가 존재하지 않습니다.", commentId+"")));
+
+        CommentLike commentLikePS = commentLikeRepository.findByCommentAndMember(commentPS, memberPS)
+                .orElseThrow(() -> new CustomApiException(String.format("Member(%s)는 Comment(%s)에 좋아요를 남긴 이력이 없습니다.", memberId+"", commentId+"")));
+
+        if (commentLikePS.getStatus() == CommentLikeStatus.YES){
+            commentLikePS.setStatus(CommentLikeStatus.NO);
+            commentPS.subLike();
+        }else{
+            throw new CustomApiException(String.format("Member(%s)는 Comment(%s)에 이미 좋아요를 취소했습니다.", memberId+"", commentId+""));
         }
 
         return commentPS;

@@ -6,10 +6,10 @@
 
 
 ### Comment
-- [ ] POST /v1/comment
+- [x] POST /v1/comment
 - [ ] PUT /v1/comment/accept/{id}
-- [ ] PUT /v1/comment/dislike/{id}
-- [ ] PUT /v1/comment/like/{id}
+- [x] PUT /v1/comment/dislike/{id}
+- [x] PUT /v1/comment/like/{id}
 - [ ] GET /v1/comment/list
 - [ ] PUT /v1/comment/reject/{id}
 - [ ] POST /v1/comment/report

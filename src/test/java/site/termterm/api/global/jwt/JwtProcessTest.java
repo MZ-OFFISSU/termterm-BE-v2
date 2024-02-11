@@ -22,14 +22,24 @@ class JwtProcessTest {
     @Test
     public void 토큰_생성_성공_test() throws Exception{
         //given
-        Member member = Member.builder().id(1L).role(MemberEnum.CUSTOMER).build();
+        Member member1 = Member.builder().id(1L).role(MemberEnum.CUSTOMER).build();
+        Member member2 = Member.builder().id(2L).role(MemberEnum.CUSTOMER).build();
+        Member member3 = Member.builder().id(3L).role(MemberEnum.ADMIN).build();
 
         //when
-        String jwtToken = jwtProcess.create(member);
-        System.out.println("생성된 토큰 : " + jwtToken);
+        String jwtToken1 = jwtProcess.create(member1);
+        System.out.println("1L 의 토큰 : " + jwtToken1);
+
+        String jwtToken2 = jwtProcess.create(member1);
+        System.out.println("2L 의 토큰 : " + jwtToken2);
+
+        String jwtToken3 = jwtProcess.create(member1);
+        System.out.println("3L 의 토큰 (ADMIN): " + jwtToken3);
 
         //then
-        assertFalse(jwtToken.isEmpty());
+        assertFalse(jwtToken1.isEmpty());
+        assertFalse(jwtToken2.isEmpty());
+        assertFalse(jwtToken3.isEmpty());
     }
 
     @Test

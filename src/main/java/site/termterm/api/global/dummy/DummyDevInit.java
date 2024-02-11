@@ -34,6 +34,7 @@ public class DummyDevInit extends DummyObject {
         return args -> {
             Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
             Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+            Member member3 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
 
             Term term1 = termRepository.save(newTerm("Seamless :: 심리스", "IT 및 디자인 분야에서는 사용자 경험을 향상시키기 위해 요소들이 자연스럽게 조화롭게 어우러지는 상태를 묘사할 때 사용하고, 비즈니스에서는 프로세스나 서비스가 매끄럽고 효율적으로 진행되는 상태를 말해요.", List.of(IT, DEVELOPMENT)));
             Term term2 = termRepository.save(newTerm("PoC :: Proof of Concept", "@@Proof of Concept@@의 약자로 새로운 아이디어, 제품, 서비스 등이 실제로 구현 가능하며 성공할 수 있는지를 입증하는 것을 의미해요. IT에서는 신기술이나 도입 예정 제품을 요구사항에 맞는지 검증하는 절차를 말해요.", List.of(IT, DEVELOPMENT, MARKETING)));
