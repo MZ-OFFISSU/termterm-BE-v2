@@ -1,5 +1,10 @@
 ## termterm v2 - auth server
 
+### 9. 2024/02/11
+- Comment 도메인 생성
+- Report 도메인 생성
+- 나만의 용어 설명 등록 API
+
 
 ### 8. 2024/02/10
 - 폴더 상세 정보 보기 API

@@ -2,6 +2,7 @@ package site.termterm.api.global.dummy;
 
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -74,5 +75,28 @@ public class DummyObject {
 
     protected TermBookmark newTermBookmark(Term term, Member member, int folderCnt){
         return TermBookmark.of(term, member, folderCnt);
+    }
+
+    protected Comment newComment(String content, String source, Member member, Term term){
+        return Comment.builder()
+                .content(content)
+                .source(source)
+                .member(member)
+                .term(term)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
+    }
+
+    protected Comment newMockComment(Long id, String content, String source, Member member, Term term){
+        return Comment.builder()
+                .id(id)
+                .content(content)
+                .source(source)
+                .member(member)
+                .term(term)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
     }
 }
