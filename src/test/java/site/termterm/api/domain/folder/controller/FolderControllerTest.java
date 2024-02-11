@@ -66,10 +66,7 @@ class FolderControllerTest extends DummyObject {
     @BeforeEach
     public void setUp(){
         // folder1 : {1, 2} , folder2 : {1, 5, 3}
-
-        Member sinner = newMember("1111", "sinner@gmail.com");
-        sinner.addFolderLimit();       // 폴더 생성 가능 횟수 : 4
-        memberRepository.save(sinner);
+        Member sinner =memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
 
         Folder folder1 = newFolder("새 폴더1", "새 폴더 설명1", sinner);
         Folder folder2 = newFolder("새 폴더2", "새 폴더 설명2", sinner);

@@ -3,6 +3,8 @@ package site.termterm.api.global.dummy;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment_like.entity.CommentLike;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -88,7 +90,7 @@ public class DummyObject {
                 .build();
     }
 
-    protected Comment newMockComment(Long id, String content, String source, Member member, Term term){
+    protected Comment newMockComment(Long id, String content, String source, Term term, Member member){
         return Comment.builder()
                 .id(id)
                 .content(content)
@@ -98,5 +100,9 @@ public class DummyObject {
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();
+    }
+
+    protected CommentLike newMockCommentLike(Comment comment, Member member, CommentLikeStatus status){
+        return CommentLike.builder().comment(comment).member(member).status(status).build();
     }
 }

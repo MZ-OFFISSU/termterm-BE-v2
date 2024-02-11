@@ -6,10 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
@@ -36,5 +33,15 @@ public class CommentController {
         commentService.registerComment(requestDto, loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 등록 완료", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 좋아요
+     */
+    @PutMapping("/s/comment/like/{id}")
+    public ResponseEntity<ResponseDto<?>> likeComment(@PathVariable(name = "id") Long commentId, @AuthenticationPrincipal LoginMember loginMember){
+        commentService.like(commentId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 좋아요 성공", null), HttpStatus.OK);
     }
 }

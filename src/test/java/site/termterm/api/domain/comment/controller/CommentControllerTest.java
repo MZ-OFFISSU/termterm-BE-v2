@@ -18,6 +18,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLike;
+import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.entity.Term;
@@ -58,6 +61,9 @@ class CommentControllerTest extends DummyObject {
     private TermRepository termRepository;
 
     @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
@@ -69,9 +75,12 @@ class CommentControllerTest extends DummyObject {
         Term term1 = termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
         Term term2 = termRepository.save(newTerm("용어2", "용어2 설명", List.of(CategoryEnum.IT)));
 
-        Comment comment1 = commentRepository.save(newComment("용어 설명 1", "내 머리1", sinner, term1));
+        Comment comment1 = commentRepository.save(newComment("용어 설명 1", "내 머리1", sinner, term1).addLike());
         Comment comment2 = commentRepository.save(newComment("용어 설명 2", "내 머리2", djokovic, term1));
         Comment comment3 = commentRepository.save(newComment("용어 설명 3", "내 머리3", federer, term1));
+
+        CommentLike commentLike1 = commentLikeRepository.save(newMockCommentLike(comment1, sinner, CommentLikeStatus.YES));
+        CommentLike commentLike2 = commentLikeRepository.save(newMockCommentLike(comment2, sinner, CommentLikeStatus.NO));
 
         em.clear();
     }
@@ -101,6 +110,102 @@ class CommentControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isOk());
 
+    }
+
+    @DisplayName("Comment 좋아요 - 새로운 Comment 에")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void like_comment_success1_test() throws Exception{
+        //given
+        // sinner 는 Comment1 에 이미 좋아요를 누른 상태이고, Comment 2 에는 좋아요 취소를 한 이력이 있다.
+        Long requestCommentId = 3L;
+        Integer beforeLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Integer afterLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+        assertThat(afterLikeCount).isEqualTo(beforeLikeCount + 1);
+
+    }
+
+    @DisplayName("Comment 좋아요 - 좋아요를 취소했던 Comment 에")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void like_comment_success2_test() throws Exception{
+        //given
+        // sinner 는 Comment1 에 이미 좋아요를 누른 상태이고, Comment 2 에는 좋아요 취소를 한 이력이 있다.
+        Long requestCommentId = 2L;
+        Integer beforeLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Integer afterLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+        assertThat(afterLikeCount).isEqualTo(beforeLikeCount + 1);
+
+    }
+
+    @DisplayName("이미 좋아요한 Comment 에 계속 좋아요 API 요청을 해도 좋아요 수는 변함 없음")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void like_comment_already_liked_fail1_test() throws Exception{
+        //given
+        Long requestCommentId = 1L;
+        Integer beforeLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+
+        //when
+        ResultActions resultActions1 = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println(resultActions1.andReturn().getResponse().getContentAsString());
+
+        ResultActions resultActions2 = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println(resultActions2.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions1.andExpect(status().isOk());
+        Integer afterLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+        assertThat(afterLikeCount).isEqualTo(beforeLikeCount);
+    }
+
+    @DisplayName("Comment 좋아요 API 요청을 여러번 해도 좋아요 수는 한 번만 증가")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void like_comment_already_liked_fail2_test() throws Exception{
+        //given
+        Long requestCommentId = 3L;
+        Integer beforeLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+
+        //when
+        ResultActions resultActions1 = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println(resultActions1.andReturn().getResponse().getContentAsString());
+
+        ResultActions resultActions2 = mvc.perform(
+                put("/v2/s/comment/like/{id}", requestCommentId+""));
+        System.out.println(resultActions2.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions1.andExpect(status().isOk());
+        Integer afterLikeCount = commentRepository.findById(requestCommentId).get().getLikeCnt();
+        assertThat(afterLikeCount).isEqualTo(beforeLikeCount + 1);
     }
 
 }

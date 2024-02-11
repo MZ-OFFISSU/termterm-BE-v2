@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Profile;
 import static site.termterm.api.domain.category.CategoryEnum.*;
 
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -20,7 +23,14 @@ import java.util.List;
 public class DummyDevInit extends DummyObject {
     @Profile("dev")
     @Bean
-    CommandLineRunner init(MemberRepository memberRepository, TermRepository termRepository, FolderRepository folderRepository, TermBookmarkRepository termBookmarkRepository){
+    CommandLineRunner init(
+            MemberRepository memberRepository,
+            TermRepository termRepository,
+            FolderRepository folderRepository,
+            TermBookmarkRepository termBookmarkRepository,
+            CommentRepository commentRepository,
+            CommentLikeRepository commentLikeRepository
+    ){
         return args -> {
             Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
             Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
@@ -50,6 +60,8 @@ public class DummyDevInit extends DummyObject {
             Folder folder2 = folderRepository.save(newFolder("새 폴더2", "새 폴더 설명2", member1));
             Folder folder3 = folderRepository.save(newFolder("새 폴더3", "새 폴더 설명3", member2));
 
+            Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term1));
+            Comment comment2 = commentRepository.save(newComment("용어 설명1", "내 머리", member2, term1));
         };
 
     }

@@ -10,6 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.entity.Term;
@@ -44,6 +46,9 @@ class CommentServiceTest extends DummyObject {
     @Mock
     private CommentRepository commentRepository;
 
+    @Mock
+    private CommentLikeRepository commentLikeRepository;
+
     @DisplayName("나만의 용어 설명 등록 성공")
     @Test
     public void register_comment_success_test() throws Exception{
@@ -68,5 +73,70 @@ class CommentServiceTest extends DummyObject {
         assertThat(comment.getMember().getId()).isEqualTo(1L);
 
     }
+
+    @DisplayName("나만의 용어 설명 좋아요 성공 - 1")
+    @Test
+    public void like_comment_success1_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(newMockCommentLike(comment, sinner, CommentLikeStatus.NO)));
+
+        //when
+        Comment updatedComment = commentService.like(1L, 1L);
+
+        //then
+        assertThat(updatedComment.getLikeCnt()).isEqualTo(1);
+
+    }
+
+    @DisplayName("나만의 용어 설명 좋아요 성공 - 2")
+    @Test
+    public void like_comment_success2_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.empty());
+
+        //when
+        Comment updatedComment = commentService.like(1L, 1L);
+
+        //then
+        assertThat(updatedComment.getLikeCnt()).isEqualTo(1);
+
+    }
+
+    @DisplayName("나만의 용어 설명 좋아요 실패")
+    @Test
+    public void like_comment_fail_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, sinner);
+        comment.addLike();
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+        when(commentLikeRepository.findByCommentAndMember(comment, sinner)).thenReturn(Optional.of(newMockCommentLike(comment, sinner, CommentLikeStatus.YES)));
+
+        //when
+        Comment updatedComment = commentService.like(1L, 1L);
+
+        //then
+        assertThat(updatedComment.getLikeCnt()).isEqualTo(1);
+
+    }
+
 
 }

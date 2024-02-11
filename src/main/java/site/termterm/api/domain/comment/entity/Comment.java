@@ -61,8 +61,10 @@ public class Comment {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    public void addLike(){
+    public Comment addLike(){
         this.likeCnt++;
+
+        return this;
     }
 
     public void subLike(){
