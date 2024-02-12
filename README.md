@@ -1,5 +1,13 @@
 ## termterm v2 - auth server
 
+### 10. 2024/02/12
+
+-- TODAY ISSUE
+  - JWT 토큰 자체가 서명된 증명된 토큰이기 때문에, API 마다 다시 DB 를 통해 증명할 필요가 없다.
+    - 따라서 Service 클래스 내 메소드에서 member 를 검증하는 로직을 제외하였다. 
+  - 폴더 생성 Service 로직에서, Member 엔티티에서 폴더를 Convert 해서 저장하고 있기 때문에 JPQL 의 DTO Select 가 제대로 동작하지 않았다.
+    - Member Entity 에서 Folder 의 개수를 찾는 것이 아닌, Folder 테이블에서 memberId 를 COUNT 하는 방식으로 SQL 쿼리를 굉장히 단순화 하였다.  
+
 ### 9. 2024/02/11
 - Comment 도메인 생성
 - Report 도메인 생성

@@ -9,7 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
-import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
+import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 
 import site.termterm.api.domain.comment.service.CommentService;
 import site.termterm.api.global.config.auth.LoginMember;
@@ -54,4 +54,19 @@ public class CommentController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 좋아요 취소 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 나만의 용어 설명 신고하기
+     */
+    @PostMapping("/s/comment/report")
+    public ResponseEntity<ResponseDto<?>> reportComment(
+            @RequestBody @Valid ReportSubmitRequestDto requestDto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.receiveReport(requestDto, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "신고 처리 완료", null), HttpStatus.OK);
+    }
+
 }

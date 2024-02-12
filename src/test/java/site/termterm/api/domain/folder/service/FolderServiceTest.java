@@ -58,12 +58,12 @@ class FolderServiceTest extends DummyObject {
         requestDto.setTitle("새 폴더");
         requestDto.setDescription("설명입니다~!");
 
-        // stub 1
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
-        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
-
-        // stub 2
         Folder newFolder = requestDto.toEntity(sinner);
+
+        // stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(memberRepository.findFolderLimitById(any())).thenReturn(3);
         when(folderRepository.save(any())).thenReturn(newFolder);
 
         //when
@@ -83,12 +83,15 @@ class FolderServiceTest extends DummyObject {
         requestDto.setTitle("새 폴더");
         requestDto.setDescription("설명입니다~!");
 
-        // stub 1
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
         sinner.getFolders().add(newFolder("1", "1", sinner));
         sinner.getFolders().add(newFolder("1", "1", sinner));
         sinner.getFolders().add(newFolder("1", "1", sinner));
-        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
+
+        // stub
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(memberRepository.findFolderLimitById(any())).thenReturn(sinner.getFolderLimit());
+        when(folderRepository.countByMemberId(any())).thenReturn(sinner.getFolders().size());
 
         //then
         assertThrows(CustomApiException.class, () -> folderService.createNewFolder(requestDto, 1L));
@@ -378,7 +381,7 @@ class FolderServiceTest extends DummyObject {
 
 
         //stub
-        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
+        when(memberRepository.findFoldersById(any())).thenReturn(sinner.getFolders());
 
         //when
         List<FolderMinimumInfoDto> myFolderList = folderService.getMyFolderList(1L);

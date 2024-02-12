@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
@@ -38,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
+import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 
 @ExtendWith(DataClearExtension.class)
 @ActiveProfiles("test")
@@ -62,6 +64,9 @@ class CommentControllerTest extends DummyObject {
 
     @Autowired
     private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
+    private ReportRepository reportRepository;
 
     @Autowired
     private EntityManager em;
@@ -283,4 +288,70 @@ class CommentControllerTest extends DummyObject {
         assertThat(afterLikeCount).isEqualTo(beforeLikeCount);
 
     }
+
+    @DisplayName("나만의 용어 설명 신고 접수 API 요청 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void report_comment_success_test() throws Exception{
+        //given
+        ReportSubmitRequestDto requestDto = new ReportSubmitRequestDto();
+        requestDto.setCommentId(1L);
+        requestDto.setType("SPAM");
+        requestDto.setContent("이거 아닌데요");
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        Integer beforeReportCount = reportRepository.findAll().size();
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/comment/report")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(reportRepository.findAll().size()).isEqualTo(beforeReportCount + 1);
+
+    }
+
+    @DisplayName("나만의 용어 설명 신고 접수 API 요청 실패 - 유효성 검사")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void report_comment_validation_fail_test() throws Exception{
+        //given
+        ReportSubmitRequestDto requestDto = new ReportSubmitRequestDto();
+        requestDto.setCommentId(1L);
+        requestDto.setType("SPAM");
+        requestDto.setContent("이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘기기 위한 의미없는 문장입니다. 이것은 300자를 넘");
+
+
+        //when
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        Integer beforeReportCount = reportRepository.findAll().size();
+
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/comment/report")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(reportRepository.findAll().size()).isEqualTo(beforeReportCount);
+
+
+    }
+
+
 }

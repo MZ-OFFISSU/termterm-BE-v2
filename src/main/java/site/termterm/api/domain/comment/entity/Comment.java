@@ -5,10 +5,9 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import site.termterm.api.domain.comment.dto.CommentRequestDto;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.member.entity.Member;
-import site.termterm.api.domain.report.entity.Report;
+import site.termterm.api.domain.comment.domain.report.entity.Report;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
@@ -28,12 +27,16 @@ public class Comment {
     @Column(name = "COMMENT_ID")
     private Long id;
 
+    @Column(length = 250)
     private String content;
 
     private String source;
 
     @Builder.Default
     private Integer likeCnt = 0;
+
+    @Builder.Default
+    private Integer reportCnt = 0;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -85,12 +88,16 @@ public class Comment {
 
     public void setReported(){this.status = CommentStatus.REPORTED;}
 
-    public static Comment of(CommentRequestDto.CommentRegisterRequestDto registerRequestDto, Member member, Term term){
-        return Comment.builder()
-                .term(term)
-                .member(member)
-                .content(registerRequestDto.getContent())
-                .source(registerRequestDto.getSource())
-                .build();
+    public Comment addReportCnt(){
+        this.reportCnt++;
+
+        return this;
     }
+
+    public Comment subReportCnt(){
+        this.reportCnt--;
+
+        return this;
+    }
+
 }

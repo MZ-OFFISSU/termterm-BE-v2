@@ -146,7 +146,7 @@ public class Member {
     }
 
     public Member addFolderLimit() {
-        this.folderLimit += 1;
+        this.folderLimit++;
 
         return this;
     }

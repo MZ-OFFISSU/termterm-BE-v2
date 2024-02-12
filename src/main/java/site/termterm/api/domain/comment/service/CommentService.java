@@ -3,6 +3,8 @@ package site.termterm.api.domain.comment.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.termterm.api.domain.comment.domain.report.entity.Report;
+import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
@@ -16,8 +18,8 @@ import site.termterm.api.global.handler.exceptions.CustomApiException;
 
 import java.util.Optional;
 
+import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
-import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
 
 @RequiredArgsConstructor
 @Service
@@ -27,18 +29,18 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final ReportRepository reportRepository;
 
     /**
      * 나만의 용어 설명을 등록합니다.
      */
     @Transactional
     public Comment registerComment(CommentRegisterRequestDto requestDto, Long memberId) {
-        Member memberPS = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+        Member memberPS = memberRepository.getReferenceById(memberId);
 
         Term termPS = termRepository.getReferenceById(requestDto.getTermId());
 
-        Comment newComment = Comment.of(requestDto, memberPS, termPS);
+        Comment newComment = requestDto.toEntity(termPS, memberPS);
         commentRepository.save(newComment);
 
         return newComment;
@@ -100,5 +102,20 @@ public class CommentService {
         }
 
         return commentPS;
+    }
+
+    /**
+     *  나만의 용어 설명 신고 접수
+     */
+    @Transactional
+    public Report receiveReport(ReportSubmitRequestDto requestDto, Long memberId) {
+        Member memberPS = memberRepository.getReferenceById(memberId);
+        Comment commentPS = commentRepository.getReferenceById(requestDto.getCommentId());
+
+        Report reportPS = reportRepository.save(requestDto.toEntity(commentPS, memberPS));
+        commentPS.addReportCnt();
+
+        return reportPS;
+
     }
 }

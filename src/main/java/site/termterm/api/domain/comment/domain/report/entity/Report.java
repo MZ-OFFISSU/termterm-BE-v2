@@ -1,9 +1,7 @@
-package site.termterm.api.domain.report.entity;
+package site.termterm.api.domain.comment.domain.report.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +17,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Getter
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)  // 이게 있어야만 createdAt, modifiedAt 작동
+@ToString
+@Builder
 public class Report {
     @Id @GeneratedValue(strategy = IDENTITY)
     @Column(name = "REPORT_ID")
@@ -27,6 +27,7 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
+    @Column(length = 300)
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -48,8 +49,10 @@ public class Report {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    public void completeReport(){
+    public Report completeReport(){
         this.status = ReportStatus.COMPLETED;
+
+        return this;
     }
 
 }

@@ -1,4 +1,4 @@
-package site.termterm.api.domain.report.entity;
+package site.termterm.api.domain.comment.domain.report.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

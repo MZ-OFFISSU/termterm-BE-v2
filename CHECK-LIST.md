@@ -12,7 +12,7 @@
 - [x] PUT /v1/comment/like/{id}
 - [ ] GET /v1/comment/list
 - [ ] PUT /v1/comment/reject/{id}
-- [ ] POST /v1/comment/report
+- [x] POST /v1/comment/report
 - [ ] PUT /v1/comment/report/completed/{id}
 - [ ] GET /v1/comment/report/list
 - [ ] PUT /v1/comment/reported/{id}

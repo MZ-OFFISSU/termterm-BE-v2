@@ -8,6 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.domain.report.entity.Report;
+import site.termterm.api.domain.comment.domain.report.entity.ReportType;
+import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
@@ -29,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
 
@@ -51,6 +55,9 @@ class CommentServiceTest extends DummyObject {
     @Mock
     private CommentLikeRepository commentLikeRepository;
 
+    @Mock
+    private ReportRepository reportRepository;
+
     @DisplayName("나만의 용어 설명 등록 성공")
     @Test
     public void register_comment_success_test() throws Exception{
@@ -64,7 +71,7 @@ class CommentServiceTest extends DummyObject {
         Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
 
         //stub
-        when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
         when(termRepository.getReferenceById(any())).thenReturn(term);
 
         //when
@@ -185,6 +192,34 @@ class CommentServiceTest extends DummyObject {
         assertThat(commentLike.getStatus()).isEqualTo(CommentLikeStatus.NO);
 
     }
+
+    @DisplayName("나만의 용어 설명 신고 성공")
+    @Test
+    public void report_comment_success_test() throws Exception{
+        //given
+        Member djokovic = newMockMember(2L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, djokovic);
+
+        ReportSubmitRequestDto requestDto = new ReportSubmitRequestDto();
+        requestDto.setCommentId(1L);
+        requestDto.setType(ReportType.ABUSE.getName());
+        requestDto.setContent("신고");
+
+        //stub
+        when(memberRepository.getReferenceById(any())).thenReturn(djokovic);
+        when(commentRepository.getReferenceById(any())).thenReturn(comment);
+        when(reportRepository.save(any())).thenReturn(requestDto.toEntity(comment, djokovic));
+
+        //when
+        Report report = commentService.receiveReport(requestDto, 1L);
+
+        //then
+        assertThat(report.getType()).isEqualTo(ReportType.ABUSE);
+        assertThat(comment.getReportCnt()).isEqualTo(1);
+
+    }
+
 
 
 }

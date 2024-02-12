@@ -2,6 +2,9 @@ package site.termterm.api.global.dummy;
 
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.domain.report.entity.Report;
+import site.termterm.api.domain.comment.domain.report.entity.ReportStatus;
+import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
@@ -104,5 +107,30 @@ public class DummyObject {
 
     protected CommentLike newMockCommentLike(Comment comment, Member member, CommentLikeStatus status){
         return CommentLike.builder().comment(comment).member(member).status(status).build();
+    }
+
+    protected Report newReport(String content, ReportType reportType, ReportStatus reportStatus, Comment comment, Member member){
+        return Report.builder()
+                .content(content)
+                .type(reportType)
+                .status(reportStatus)
+                .comment(comment)
+                .member(member)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
+    }
+
+    protected Report newMockReport(Long id, String content, ReportType reportType, ReportStatus reportStatus, Comment comment, Member member){
+        return Report.builder()
+                .id(id)
+                .content(content)
+                .type(reportType)
+                .status(reportStatus)
+                .comment(comment)
+                .member(member)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
     }
 }
