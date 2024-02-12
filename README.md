@@ -1,6 +1,7 @@
 ## termterm v2 - auth server
 
 ### 10. 2024/02/12
+- Comment 신고 접수 API
 
 -- TODAY ISSUE
   - JWT 토큰 자체가 서명된 증명된 토큰이기 때문에, API 마다 다시 DB 를 통해 증명할 필요가 없다.
@@ -11,7 +12,7 @@
 ### 9. 2024/02/11
 - Comment 도메인 생성
 - Report 도메인 생성
-- 나만의 용어 설명 등록 API
+- 나만의 용어 설명(Comment) 등록 API
 - Comment 좋아요 API
 - Comment 좋아요 취소 API
 
