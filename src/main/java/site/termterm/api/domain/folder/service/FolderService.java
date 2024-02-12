@@ -37,11 +37,13 @@ public class FolderService {
      * 새로운 폴더를 생성합니다.
      */
     @Transactional
-    public FolderCreateResponseDto createNewFolder(FolderCreateRequestDto requestDto, Long id) {
-        Member memberPS = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+    public FolderCreateResponseDto createNewFolder(FolderCreateRequestDto requestDto, Long memberId) {
+        Member memberPS = memberRepository.getReferenceById(memberId);
 
-        if (Objects.equals(memberPS.getFolders().size(), memberPS.getFolderLimit())){
+        Integer memberFolderLimit = memberRepository.findFolderLimitById(memberId);
+        Integer memberFolderCount = folderRepository.countByMemberId(memberId);
+
+        if (Objects.equals(memberFolderCount, memberFolderLimit)){
             throw new CustomApiException("생성 가능한 폴더의 개수를 초과하였습니다.");
         }
 
@@ -213,11 +215,8 @@ public class FolderService {
      * 내 폴더 리스트 리턴
      */
     public List<FolderMinimumInfoDto> getMyFolderList(Long memberId) {
-        Member memberPS = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
-
-        List<Folder> folders = memberPS.getFolders();
-        List<FolderMinimumInfoDto> responseDtoList = folders.stream().map(FolderMinimumInfoDto::of).toList();
+        List<Folder> memberFolderList = memberRepository.findFoldersById(memberId);
+        List<FolderMinimumInfoDto> responseDtoList = memberFolderList.stream().map(FolderMinimumInfoDto::of).toList();
 
         return responseDtoList;
     }

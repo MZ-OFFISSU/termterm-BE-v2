@@ -1,5 +1,23 @@
 ## termterm v2 - auth server
 
+### 10. 2024/02/12
+- Comment 신고 접수 API
+
+-- TODAY ISSUE
+  - JWT 토큰 자체가 서명된 증명된 토큰이기 때문에, API 마다 다시 DB 를 통해 증명할 필요가 없다.
+    - 따라서 Service 클래스 내 메소드에서 member 를 검증하는 로직을 제외하였다. 
+  - 폴더 생성 Service 로직에서, Member 엔티티에서 폴더를 Convert 해서 저장하고 있기 때문에 JPQL 의 DTO Select 가 제대로 동작하지 않았다.
+    - Member Entity 에서 Folder 의 개수를 찾는 것이 아닌, Folder 테이블에서 memberId 를 COUNT 하는 방식으로 SQL 쿼리를 굉장히 단순화 하였다.  
+
+### 9. 2024/02/11
+- Comment 도메인 생성
+- Report 도메인 생성
+- 나만의 용어 설명(Comment) 등록 API
+- Comment 좋아요 API
+- Comment 좋아요 취소 API
+
+`TODO : 예외 메시지에 정확한 에러 변수를 String format 으로 삽입하기`
+
 
 ### 8. 2024/02/10
 - 폴더 상세 정보 보기 API
@@ -79,7 +97,7 @@
   - 그러나, List 의 크기가 최대 4개로 제한되는 조건을 확인하고 싶었다. 이럴 때는 어떻게 할까?
     - 리스트의 길이가 1이상 4이하 임을 검사하는 `@ListMaxSize4Constraint` 어노테이션을 만들어서 적용시켜주었다.  
 
-`TODO : 오늘 구현한 API 들 테스트코드 작성`
+~~`TODO : 오늘 구현한 API 들 테스트코드 작성`~~
 
 
 ### 3. 2024/02/05

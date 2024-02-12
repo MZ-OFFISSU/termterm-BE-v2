@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Profile;
 import static site.termterm.api.domain.category.CategoryEnum.*;
 
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -20,10 +23,18 @@ import java.util.List;
 public class DummyDevInit extends DummyObject {
     @Profile("dev")
     @Bean
-    CommandLineRunner init(MemberRepository memberRepository, TermRepository termRepository, FolderRepository folderRepository, TermBookmarkRepository termBookmarkRepository){
+    CommandLineRunner init(
+            MemberRepository memberRepository,
+            TermRepository termRepository,
+            FolderRepository folderRepository,
+            TermBookmarkRepository termBookmarkRepository,
+            CommentRepository commentRepository,
+            CommentLikeRepository commentLikeRepository
+    ){
         return args -> {
             Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
             Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+            Member member3 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
 
             Term term1 = termRepository.save(newTerm("Seamless :: 심리스", "IT 및 디자인 분야에서는 사용자 경험을 향상시키기 위해 요소들이 자연스럽게 조화롭게 어우러지는 상태를 묘사할 때 사용하고, 비즈니스에서는 프로세스나 서비스가 매끄럽고 효율적으로 진행되는 상태를 말해요.", List.of(IT, DEVELOPMENT)));
             Term term2 = termRepository.save(newTerm("PoC :: Proof of Concept", "@@Proof of Concept@@의 약자로 새로운 아이디어, 제품, 서비스 등이 실제로 구현 가능하며 성공할 수 있는지를 입증하는 것을 의미해요. IT에서는 신기술이나 도입 예정 제품을 요구사항에 맞는지 검증하는 절차를 말해요.", List.of(IT, DEVELOPMENT, MARKETING)));
@@ -50,6 +61,8 @@ public class DummyDevInit extends DummyObject {
             Folder folder2 = folderRepository.save(newFolder("새 폴더2", "새 폴더 설명2", member1));
             Folder folder3 = folderRepository.save(newFolder("새 폴더3", "새 폴더 설명3", member2));
 
+            Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term1));
+            Comment comment2 = commentRepository.save(newComment("용어 설명1", "내 머리", member2, term1));
         };
 
     }

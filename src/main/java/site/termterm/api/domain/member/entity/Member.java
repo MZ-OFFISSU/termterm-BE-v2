@@ -145,8 +145,11 @@ public class Member {
         return this;
     }
 
-    public void addFolderLimit() {
-        this.folderLimit += 1;
+    public Member addFolderLimit() {
+        this.folderLimit++;
+
+        return this;
     }
+
 
 }

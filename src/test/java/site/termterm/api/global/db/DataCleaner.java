@@ -50,7 +50,13 @@ public class DataCleaner {
         entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, "FALSE")).executeUpdate();
         for (String tableName : tableNames) {
             entityManager.createNativeQuery(String.format(TRUNCATE_FORMAT, tableName)).executeUpdate();
-            entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
+
+            if (tableName.equals("COMMENT_LIKE")){
+                entityManager.createNativeQuery("ALTER TABLE COMMENT_LIKE ALTER COLUMN COMMENT_ID RESTART WITH 1").executeUpdate();
+                entityManager.createNativeQuery("ALTER TABLE COMMENT_LIKE ALTER COLUMN MEMBER_ID RESTART WITH 1").executeUpdate();
+            }else {
+                entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
+            }
         }
         entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, "TRUE")).executeUpdate();
     }
