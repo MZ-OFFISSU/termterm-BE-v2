@@ -2,6 +2,11 @@
 
 ### 12. 2024/02/15
 - 폴더 상세페이지 API
+- 추후 Term 데이터를 NoSQL 기반 DB 로 옮길 것을 고려하여, Term 에서 모든 연관관계를 제거하였습니다.
+  - 기존에 연관되었던 테이블에는 전부 termId 라는 컬럼을 따로 만들었습니다.
+  - Folder 테이블에 termId 들을 convert 하여 저장하길 정말 잘했다는 생각이 듭니다 
+- Curation API 제작을 위해 폴더 구조 구성
+- Curation 등록 (for ADMIN) API
 
 ### 11. 2024/02/14
 

@@ -35,6 +35,21 @@ public class DummyObject {
                 .build();
     }
 
+    protected Member newAdmin(){
+        return Member.builder()
+                .socialId("admin")
+                .name("admin")
+                .email("admin@admin.com")
+                .nickname(UUID.randomUUID().toString())
+                .profileImg("image.com")
+                .role(MemberEnum.ADMIN)
+                .socialType(SocialLoginType.KAKAO)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .categories(List.of(CategoryEnum.IT, CategoryEnum.DESIGN, CategoryEnum.BUSINESS))
+                .build();
+    }
+
     protected Member newMockMember(Long id, String socialId, String email){
         return Member.builder()
                 .id(id)
