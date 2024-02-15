@@ -17,6 +17,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -26,9 +30,11 @@ import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,6 +67,12 @@ class FolderControllerTest extends DummyObject {
     private TermBookmarkRepository termBookmarkRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
@@ -78,9 +90,11 @@ class FolderControllerTest extends DummyObject {
 
         folder1.getTermIds().add(term1.getId());
         folder1.getTermIds().add(term2.getId());
+
         folder2.getTermIds().add(term1.getId());
         folder2.getTermIds().add(term5.getId());
         folder2.getTermIds().add(term3.getId());
+
         folderRepository.save(folder1);
         folderRepository.save(folder2);
 
@@ -108,11 +122,32 @@ class FolderControllerTest extends DummyObject {
         Term term16 = termRepository.save(newTerm("용어16", "용어16 설명", List.of(CategoryEnum.IT)));
 
         List<Term> terms = List.of(term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16);
-        for (int i=0; i<terms.size(); i++){
-            folder3.getTermIds().add((long) i+1);
-            termBookmarkRepository.save(newTermBookmark(terms.get(i), sinner, 1));
+        for (int i=6; i<6+terms.size(); i++){
+            folder3.getTermIds().add((long) i);
+            termBookmarkRepository.save(newTermBookmark(terms.get(i-6), sinner, 1));
         }
         folderRepository.save(folder3);
+
+        // for Folder Detail Each test
+        Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+        Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+        Member member3 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
+
+        Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term6).addLike().addLike().addLike());
+        Comment comment2 = commentRepository.save(newComment("용어 설명2", "내 머리", member2, term6).addLike());
+        Comment comment3 = commentRepository.save(newComment("용어 설명3", "내 머리", member3, term6));
+
+        for (Term term : terms.subList(1, terms.size())){
+            commentRepository.save(newComment("comment by member1", "comment source", member1, term));
+            commentRepository.save(newComment("comment by member2", "comment source", member2, term));
+            commentRepository.save(newComment("comment by member3", "comment source", member3, term));
+        }
+
+        commentLikeRepository.save(newMockCommentLike(comment1, sinner, CommentLikeStatus.YES));
+        commentLikeRepository.save(newMockCommentLike(comment1, member2, CommentLikeStatus.YES));
+        commentLikeRepository.save(newMockCommentLike(comment1, member3, CommentLikeStatus.YES));
+        commentLikeRepository.save(newMockCommentLike(comment2, member1, CommentLikeStatus.YES));
+        commentLikeRepository.save(newMockCommentLike(comment3, member1, CommentLikeStatus.NO));
 
         em.clear();
     }
@@ -461,5 +496,52 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.isExist").value("false"));
 
     }
+
+    @DisplayName("폴더에 포함된 용어들 상세 정보 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void folder_detail_each_success_test() throws Exception{
+        //given
+        Long targetFolderId = 3L;
+        int targetFolderSize = folderRepository.findById(targetFolderId).get().getTermIds().size();
+        Term term7 = termRepository.findById(7L).get();
+
+        // term7 의 Comment 는 4, 5, 6 이다. 그리고 작성자는 각각 Member1 (2L), Member2 (3L), Member3 (4L) 이다.
+        List<Comment> term7_comments = new ArrayList<>();
+        for (int i = 4; i < 7; i++){
+            term7_comments.add(commentRepository.findById((long) i).get());
+        }
+        List<Member> term7_comments_authors = List.of(
+                memberRepository.findById(2L).get(),
+                memberRepository.findById(3L).get(),
+                memberRepository.findById(4L).get()
+        );
+
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/detail/each/{folderId}", targetFolderId+""));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data", hasSize(targetFolderSize)));
+        resultActions.andExpect(jsonPath("$.data[0].comments", hasSize(3)));
+        resultActions.andExpect(jsonPath("$.data[0].comments[0].liked").value(CommentLikeStatus.YES.toString()));
+        resultActions.andExpect(jsonPath("$.data[0].comments[1].liked").value(CommentLikeStatus.NO.toString()));
+        resultActions.andExpect(jsonPath("$.data[0].comments[2].liked").value(CommentLikeStatus.NO.toString()));
+
+        resultActions.andExpect(jsonPath("$.data[1].id").value(term7.getId()));
+
+        for (int i = 0; i<3; i++) {
+            resultActions.andExpect(jsonPath(String.format("$.data[1].comments[%s].id", i)).value(term7_comments.get(i).getId()));
+            resultActions.andExpect(jsonPath(String.format("$.data[1].comments[%s].content", i)).value(term7_comments.get(i).getContent()));
+            resultActions.andExpect(jsonPath(String.format("$.data[1].comments[%s].authorName", i)).value(term7_comments_authors.get(i).getNickname()));
+            resultActions.andExpect(jsonPath(String.format("$.data[1].comments[%s].authorJob", i)).value(term7_comments_authors.get(i).getJob()));
+        }
+
+    }
+
 
 }

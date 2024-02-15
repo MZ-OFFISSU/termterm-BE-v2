@@ -1,5 +1,21 @@
 ## termterm v2 - auth server
 
+### 12. 2024/02/15
+- 폴더 상세페이지 API
+
+### 11. 2024/02/14
+
+- TODAY ISSUE
+  - 폴더 상세페이지 _ 하나씩 보기(/s/folder/detail/each/{folderId}) 구현 중에 마주친 문제...
+    - 현재 Folder 는 Term 과 연관관계가 맺어져 있지 않고, terms 컬럼에 id 들만 String 으로 저장하고 있습니다.
+    - 그런데 이 API 에서는, Folder 에 들어있는 Term 들을 불러오고, 이 Term 과 연관된 Comment 를 불러오고, Comment 와 연관된 CommentLike 도 불러와야 합니다.
+    - Folder 와 Term 이 연관되어 있지 않기 때문에, 만약 Folder 에 Term 이 50개 들어있고 이를 매번 Term 테이블에서 select 해온다면, 총 50번의 쿼리가 발생하게 될 것입니다.
+    - 충분히 쿼리문 1번으로 모두 가져올 수 있을거라고 생각이 들어 계속 검색해보고 공부하고 있는 중입니다.
+    - 6시간 동안 찾아봤지만 해결할 방법을 못 찾았다. 다음에 시간 여유로울 때 해 보는 걸로 합시다.
+    - Term 에 Comment 가 존재하지 않을 수도 있기 때문에, `JOIN FETCH t.comments` 가 아닌, `LEFT JOIN FETCH t.comments` 절을 써야합니다.
+    - 쿼리 문 2번만에 API 응답을 구성하였습니다. 후기는 다음으로 ->  https://thisisjoos.tistory.com/627
+
+
 ### 10. 2024/02/12
 - Comment 신고 접수 API
 

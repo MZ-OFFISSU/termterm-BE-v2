@@ -10,6 +10,7 @@ import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -61,8 +62,16 @@ public class DummyDevInit extends DummyObject {
             Folder folder2 = folderRepository.save(newFolder("새 폴더2", "새 폴더 설명2", member1));
             Folder folder3 = folderRepository.save(newFolder("새 폴더3", "새 폴더 설명3", member2));
 
-            Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term1));
-            Comment comment2 = commentRepository.save(newComment("용어 설명1", "내 머리", member2, term1));
+            Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term1).addLike().addLike().addLike());
+            Comment comment2 = commentRepository.save(newComment("용어 설명2", "내 머리", member2, term1).addLike());
+            Comment comment3 = commentRepository.save(newComment("용어 설명3", "내 머리", member3, term1));
+
+            commentLikeRepository.save(newMockCommentLike(comment1, member1, CommentLikeStatus.YES));
+            commentLikeRepository.save(newMockCommentLike(comment1, member2, CommentLikeStatus.YES));
+            commentLikeRepository.save(newMockCommentLike(comment1, member3, CommentLikeStatus.YES));
+            commentLikeRepository.save(newMockCommentLike(comment2, member1, CommentLikeStatus.YES));
+            commentLikeRepository.save(newMockCommentLike(comment3, member1, CommentLikeStatus.NO));
+
         };
 
     }

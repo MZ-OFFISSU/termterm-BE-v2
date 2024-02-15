@@ -1,11 +1,18 @@
 package site.termterm.api.domain.folder.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
+import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.entity.Member;
+import site.termterm.api.domain.term.entity.Term;
 
 import java.sql.Clob;
 import java.util.List;
+import java.util.Objects;
 
 public class FolderResponseDto {
 
@@ -105,4 +112,59 @@ public class FolderResponseDto {
         private Boolean isExist;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @Builder
+    public static class TermDetailInfoDto {
+        private Long id;
+        private String name;
+        private String description;
+
+        private List<CategoryEnum> categories;
+        private List<CommentDetailInfoDto> comments;
+        private BookmarkStatus bookmarked;
+
+        public TermDetailInfoDto(Term term) {
+            this.id = term.getId();
+            this.name = term.getName();
+            this.description = term.getDescription();
+            this.categories = term.getCategories();
+            this.bookmarked = BookmarkStatus.YES;
+        }
+
+        @Getter
+        @Setter
+        @AllArgsConstructor
+        @Builder
+        public static class CommentDetailInfoDto {
+            private Long id;
+
+            @JsonIgnore
+            private Long termId;
+            private String content;
+            private Integer likeCnt;
+            private String authorName;
+            private String authorJob;
+            private String authorProfileImageUrl;
+            private String createdDate;
+            private String source;
+            private CommentLikeStatus liked;
+
+            public CommentDetailInfoDto(Comment comment, String authorName, String authorJob, String authorProfileImageUrl, CommentLikeStatus liked, Long termId) {
+                this.id = comment.getId();
+                this.termId = termId;
+                this.content = comment.getContent();
+                this.likeCnt = comment.getLikeCnt();
+                this.authorName = authorName;
+                this.authorJob = authorJob;
+                this.authorProfileImageUrl = authorProfileImageUrl;
+                this.createdDate = comment.getCreatedDate().toString();
+                this.source = comment.getSource();
+
+                this.liked = Objects.requireNonNullElse(liked, CommentLikeStatus.NO);
+            }
+        }
+
+    }
 }

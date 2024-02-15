@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -32,6 +33,7 @@ public class FolderService {
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
     private final TermBookmarkRepository termBookmarkRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * 새로운 폴더를 생성합니다.
@@ -253,5 +255,34 @@ public class FolderService {
         boolean isExist = folderPS.getTermIds().contains(termId);
 
         return new FolderIsIncludingTermResponseDto(isExist);
+    }
+
+    /**
+     * 폴더 상세페이지_하나씩 보기
+     * 폴더 내 담긴 용어들을 detail 정보들과 함께 리턴합니다.
+     */
+    public List<TermDetailInfoDto> getFolderTermDetailEach(Long folderId, Long memberId) {
+        Folder folderPS = folderRepository.findById(folderId)
+                .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
+
+        if (folderPS.getMember().getId().longValue() !=  memberId.longValue()){
+            throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
+        }
+
+        List<TermDetailInfoDto> responseDtoList = termRepository.findTermsByIdList(folderPS.getTermIds());
+
+        List<TermDetailInfoDto.CommentDetailInfoDto> commentDetailByTermIdList = commentRepository.getCommentDetailByTermIdList(folderPS.getTermIds(), memberId);
+
+        for(TermDetailInfoDto responseDto: responseDtoList){
+            Long termId = responseDto.getId();
+
+            responseDto.setComments(
+                    commentDetailByTermIdList.stream()
+                            .filter(dto -> dto.getTermId().longValue() == termId.longValue())
+                            .toList()
+            );
+        }
+
+        return responseDtoList;
     }
 }
