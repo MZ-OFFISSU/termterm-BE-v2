@@ -20,17 +20,12 @@
 
 
 ### Curation
-- [ ] DELETE /v1/folder/{folderId}
-- [ ] GET /v1/folder/{folderId}/including/{termId}
-- [ ] GET /v1/folder/detail/each/{folderId}
-- [ ] GET /v1/folder/detail/sum/{folderId}
-- [ ] PUT /v1/folder/info
-- [ ] GET /v1/folder/list
-- [ ] POST /v1/folder/new
-- [ ] GET /v1/folder/related-info
-- [ ] POST /v1/folder/term
-- [ ] DELETE /v1/folder/term
-- [ ] GET /v1/folder/term/random-10
+- [ ] GET /v1/curation/archived
+- [ ] PUT /v1/curation/bookmark/{id} 
+- [ ] PUT /v1/curation/unbookmark/{id} 
+- [ ] GET /v1/curation/detail/{id}
+- [ ] GET /v1/curation/list
+- [ ] POST /v1/curation/register (ADMIN)
 
 ### Folder
 - [x] DELETE /v1/folder/{folderId}
