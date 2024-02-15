@@ -7,7 +7,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.member.entity.Member;
-import site.termterm.api.domain.comment.domain.report.entity.Report;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
@@ -52,9 +51,6 @@ public class Comment {
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<CommentLike> commentLikes;
-
-    @OneToMany(mappedBy = "comment")
-    private List<Report> reports;
 
     @CreatedDate        // Insert
     @Column(nullable = false)

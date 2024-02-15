@@ -3,6 +3,7 @@ package site.termterm.api.domain.term.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.global.converter.CategoryListConverter;
 
 import java.util.List;
@@ -28,5 +29,7 @@ public class Term {
     @Convert(converter = CategoryListConverter.class)
     private List<CategoryEnum> categories;
 
+    @OneToMany(mappedBy = "term")
+    private List<Comment> comments;
 
 }

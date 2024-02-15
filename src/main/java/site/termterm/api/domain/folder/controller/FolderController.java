@@ -145,4 +145,14 @@ public class FolderController {
         return new ResponseEntity<>(new ResponseDto<>(1, "폴더에 용어 포함 여부 조회 성공", responseDto), HttpStatus.OK);
     }
 
+    /**
+     * 폴더 상세페이지_하나씩 보기
+     * 폴더 내 담긴 용어들을 detail 정보들과 함께 리턴합니다.
+     */
+    @GetMapping("/s/folder/detail/each/{folderId}")
+    public ResponseEntity<ResponseDto<List<TermDetailInfoDto>>> getFolderTermDetailEach(@PathVariable(name = "folderId") Long folderId, @AuthenticationPrincipal LoginMember loginMember){
+        List<TermDetailInfoDto> responseDtoList = folderService.getFolderTermDetailEach(folderId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 상세 조회 성공", responseDtoList), HttpStatus.OK);
+    }
 }

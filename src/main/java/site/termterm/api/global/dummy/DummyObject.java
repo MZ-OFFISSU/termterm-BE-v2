@@ -39,7 +39,6 @@ public class DummyObject {
         return Member.builder()
                 .id(id)
                 .socialId(socialId)
-
                 .name("sinner")
                 .email(email)
                 .profileImg("image.com")

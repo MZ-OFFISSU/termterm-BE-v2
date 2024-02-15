@@ -35,7 +35,7 @@
 ### Folder
 - [x] DELETE /v1/folder/{folderId}
 - [x] GET /v1/folder/{folderId}/including/{termId}
-- [ ] GET /v1/folder/detail/each/{folderId}
+- [x] GET /v1/folder/detail/each/{folderId}
 - [x] GET /v1/folder/detail/sum/{folderId}
 - [x] PUT /v1/folder/info
 - [x] GET /v1/folder/list
