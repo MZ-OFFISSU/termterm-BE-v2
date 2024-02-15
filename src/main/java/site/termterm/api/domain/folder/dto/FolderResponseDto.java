@@ -116,6 +116,7 @@ public class FolderResponseDto {
     @Setter
     @AllArgsConstructor
     @Builder
+    @ToString
     public static class TermDetailInfoDto {
         private Long id;
         private String name;
@@ -137,6 +138,7 @@ public class FolderResponseDto {
         @Setter
         @AllArgsConstructor
         @Builder
+        @ToString
         public static class CommentDetailInfoDto {
             private Long id;
 
