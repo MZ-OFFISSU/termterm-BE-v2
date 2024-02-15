@@ -7,6 +7,8 @@
   - Folder 테이블에 termId 들을 convert 하여 저장하길 정말 잘했다는 생각이 듭니다 
 - Curation API 제작을 위해 폴더 구조 구성
 - Curation 등록 (for ADMIN) API
+- TermBookmark 테이블을 복합키로 변경하였음
+- Curation Bookmark API
 
 ### 11. 2024/02/14
 

@@ -8,6 +8,7 @@ import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
+import site.termterm.api.domain.curation.entity.Curation;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -145,6 +146,31 @@ public class DummyObject {
                 .member(member)
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
+                .build();
+    }
+
+    protected Curation newCuration(String title, List<Long> termIds, List<String> tags, List<CategoryEnum> categories){
+        return Curation.builder()
+                .title(title)
+                .description("큐레이션 설명입니다.")
+                .cnt(termIds.size())
+                .thumbnail("google.com")
+                .termIds(termIds)
+                .tags(tags)
+                .categories(categories)
+                .build();
+    }
+
+    protected Curation newMockCuration(Long id, String title, List<Long> termIds, List<String> tags, List<CategoryEnum> categories){
+        return Curation.builder()
+                .id(id)
+                .title(title)
+                .description("큐레이션 설명입니다.")
+                .cnt(termIds.size())
+                .thumbnail("google.com")
+                .termIds(termIds)
+                .tags(tags)
+                .categories(categories)
                 .build();
     }
 }

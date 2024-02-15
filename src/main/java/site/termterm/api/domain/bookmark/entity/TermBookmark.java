@@ -2,10 +2,8 @@ package site.termterm.api.domain.bookmark.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import site.termterm.api.domain.bookmark.composite_id.TermBookmarkId;
 import site.termterm.api.domain.member.entity.Member;
-import site.termterm.api.domain.term.entity.Term;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
@@ -13,15 +11,15 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @Builder
 @ToString
+@IdClass(TermBookmarkId.class)
 public class TermBookmark {
-    @Id @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "TERM_BOOKMARK_ID")
-    private Long id;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
+    @Id
     private Long termId;
 
     @Builder.Default

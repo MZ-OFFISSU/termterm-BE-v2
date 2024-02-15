@@ -21,7 +21,7 @@
 
 ### Curation
 - [ ] GET /v1/curation/archived
-- [ ] PUT /v1/curation/bookmark/{id} 
+- [x] PUT /v1/curation/bookmark/{id} 
 - [ ] PUT /v1/curation/unbookmark/{id} 
 - [ ] GET /v1/curation/detail/{id}
 - [ ] GET /v1/curation/list

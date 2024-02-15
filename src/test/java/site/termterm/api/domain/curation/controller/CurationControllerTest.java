@@ -15,6 +15,11 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
+import site.termterm.api.domain.bookmark.entity.CurationBookmark;
+import site.termterm.api.domain.bookmark.repository.CurationBookmarkRepository;
+import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.curation.entity.Curation;
 import site.termterm.api.domain.curation.repository.CurationRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
@@ -23,6 +28,7 @@ import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -55,6 +61,9 @@ class CurationControllerTest extends DummyObject {
     private CurationRepository curationRepository;
 
     @Autowired
+    private CurationBookmarkRepository curationBookmarkRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
@@ -62,6 +71,17 @@ class CurationControllerTest extends DummyObject {
         Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
         Member djokovic = memberRepository.save(newMember("1111", "djokovic@gmail.com"));
         Member admin = memberRepository.save(newAdmin());
+
+        Curation curation1 = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L), List.of("tag1", "tag2"), List.of(CategoryEnum.IT)));
+        Curation curation2 = curationRepository.save(newCuration("큐레이션2", List.of(3L, 4L, 5L), List.of("tag1", "tag3"), List.of(CategoryEnum.IT)));
+
+        CurationBookmark curationBookmark1 = CurationBookmark.of(curation1, djokovic);
+        curationBookmark1.setStatus(BookmarkStatus.NO);
+        curationBookmarkRepository.save(curationBookmark1);
+
+        CurationBookmark curationBookmark2 = CurationBookmark.of(curation2, djokovic);
+        curationBookmark1.setStatus(BookmarkStatus.YES);
+        curationBookmarkRepository.save(curationBookmark2);
 
         em.clear();
     }
@@ -96,7 +116,80 @@ class CurationControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.cnt").value(requestDto.getTermIds().size()));
         resultActions.andExpect(jsonPath("$.data.title").value(requestDto.getTitle()));
 
+
     }
+
+    @DisplayName("큐레이션 북마크 API 요청 - 성공 (최초)")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_bookmark_success1_test() throws Exception{
+        //given
+        Curation curation1 = curationRepository.getReferenceById(1L);
+        Member sinner = memberRepository.getReferenceById(1L);
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/curation/bookmark/{id}", 1L));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Optional<CurationBookmark> curationBookmarkOptional = curationBookmarkRepository.findByCurationAndMember(curation1, sinner);
+        assertThat(curationBookmarkOptional).isPresent();
+        assertThat(curationBookmarkOptional.get().getStatus()).isEqualTo(BookmarkStatus.YES);
+
+    }
+
+    @DisplayName("큐레이션 북마크 API 요청 - 성공 (NO -> YES)")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_bookmark_success2_test() throws Exception{
+        //given
+        Curation curation1 = curationRepository.getReferenceById(1L);
+        Member djokovic = memberRepository.getReferenceById(2L);
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/curation/bookmark/{id}", 1L));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Optional<CurationBookmark> curationBookmarkOptional = curationBookmarkRepository.findByCurationAndMember(curation1, djokovic);
+        assertThat(curationBookmarkOptional).isPresent();
+        assertThat(curationBookmarkOptional.get().getStatus()).isEqualTo(BookmarkStatus.YES);
+
+    }
+
+    @DisplayName("큐레이션 북마크 API 요청 - 실패 (YES -> YES)")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_bookmark_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/curation/bookmark/{id}", 2L));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+
+    }
+
 
 
 }

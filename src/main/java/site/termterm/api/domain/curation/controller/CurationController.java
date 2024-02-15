@@ -40,11 +40,11 @@ public class CurationController {
     /**
      * 큐레이션을 북마크합니다.
      */
-
     @PutMapping("/s/curation/bookmark/{id}")
     public ResponseEntity<ResponseDto<?>> bookmarkCuration(@PathVariable("id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
+        curationService.bookmark(curationId, loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "큐레이션 북마크 성공", null), HttpStatus.OK);
     }
 
     /**

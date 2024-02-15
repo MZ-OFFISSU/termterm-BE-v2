@@ -43,6 +43,7 @@ public class Curation {
 
     @Convert(converter = LongListConverter.class)
     @Builder.Default
+    @Column(nullable = false)
     private List<Long> termIds = new ArrayList<>();
 
     @Convert(converter = StringListConverter.class)

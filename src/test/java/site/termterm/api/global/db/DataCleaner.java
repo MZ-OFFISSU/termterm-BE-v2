@@ -27,6 +27,8 @@ public class DataCleaner {
 
     private final List<String> tableNames = new ArrayList<>();
 
+    private final List<String> compositeKeyTables = List.of("COMMENT_LIKE", "TERM_BOOKMARK", "CURATION_BOOKMARK");
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -51,10 +53,12 @@ public class DataCleaner {
         for (String tableName : tableNames) {
             entityManager.createNativeQuery(String.format(TRUNCATE_FORMAT, tableName)).executeUpdate();
 
-            if (tableName.equals("COMMENT_LIKE")){
-                entityManager.createNativeQuery("ALTER TABLE COMMENT_LIKE ALTER COLUMN COMMENT_ID RESTART WITH 1").executeUpdate();
-                entityManager.createNativeQuery("ALTER TABLE COMMENT_LIKE ALTER COLUMN MEMBER_ID RESTART WITH 1").executeUpdate();
-            }else {
+            // 복합키 엔티티일 경우 따로 처리
+            if (compositeKeyTables.contains(tableName)){
+                entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, tableName.split("_")[0])).executeUpdate();
+                entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN MEMBER_ID RESTART WITH 1", tableName)).executeUpdate();
+            }
+            else {
                 entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
             }
         }

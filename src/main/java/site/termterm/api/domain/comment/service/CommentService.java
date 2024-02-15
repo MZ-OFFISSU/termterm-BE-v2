@@ -70,7 +70,7 @@ public class CommentService {
         }else{
             CommentLike commentLikePS = commentLikeOptional.get();
 
-            if (commentLikePS.getStatus() == CommentLikeStatus.NO){
+            if (commentLikePS.getStatus().equals(CommentLikeStatus.NO)){
                 commentLikePS.setStatus(CommentLikeStatus.YES);
                 commentPS.addLike();
             }else{
