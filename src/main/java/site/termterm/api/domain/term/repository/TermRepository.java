@@ -23,12 +23,6 @@ public interface TermRepository extends JpaRepository<Term, Long> {
             "WHERE t.id = :termId")
     Optional<TermIdAndNameResponseDto> findIdAndNameById(@Param("termId") Long termId);
 
-    @Query("SELECT t " +
-            "FROM Term t " +
-            "LEFT JOIN FETCH t.comments " +
-            "WHERE t.id IN :termIdList")
-    List<Term> findTermsByIdList0(@Param("termIdList") List<Long> termIdList);
-
     @Query("SELECT new site.termterm.api.domain.folder.dto.FolderResponseDto$TermDetailInfoDto(t) " +
             "FROM Term t " +
             "WHERE t.id IN :termIdList")

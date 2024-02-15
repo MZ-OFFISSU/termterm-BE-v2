@@ -10,6 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.repository.CommentRepository;
+import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -49,6 +52,9 @@ class FolderServiceTest extends DummyObject {
 
     @Mock
     private TermBookmarkRepository termBookmarkRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @DisplayName("폴더 생성 성공")
     @Test
@@ -442,6 +448,41 @@ class FolderServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("폴더 상세페이지_하나씩 보기 성공")
+    @Test
+    public void folder_detail_each_test() throws Exception{
+        //given
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+
+        Folder folder = newMockFolder(1L, "폴더1", "폴더설명1", sinner);
+        folder.getTermIds().add(1L);
+        folder.getTermIds().add(3L);
+
+        Term term1 = newMockTerm(1L, "용어1", "용어 설명1", List.of(CategoryEnum.IT));
+        Term term3 = newMockTerm(3L, "용어3", "용어 설명3", List.of(CategoryEnum.IT));
+
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term1, sinner).addLike();
+
+        List<TermDetailInfoDto> dtoList = List.of(new TermDetailInfoDto(term1), new TermDetailInfoDto(term3));
+        List<TermDetailInfoDto.CommentDetailInfoDto> commentDtoList = List.of(new TermDetailInfoDto.CommentDetailInfoDto(comment, sinner.getNickname(), sinner.getJob(), sinner.getProfileImg(), CommentLikeStatus.NO, comment.getTerm().getId()));
+
+
+        //stub
+        when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
+        when(termRepository.findTermsByIdList(any())).thenReturn(dtoList);
+        when(commentRepository.getCommentDetailByTermIdList(any(), any())).thenReturn(commentDtoList);
+
+        //when
+        List<TermDetailInfoDto> responseDtoList = folderService.getFolderTermDetailEach(1L, 1L);
+        System.out.println(responseDtoList);
+
+        //then
+        assertThat(responseDtoList.size()).isEqualTo(2);
+        assertThat(responseDtoList.get(0).getName()).isEqualTo(term1.getName());
+        assertThat(responseDtoList.get(0).getComments().size()).isEqualTo(1);
+        assertThat(responseDtoList.get(0).getComments().get(0).getAuthorName()).isEqualTo(sinner.getNickname());
+
+    }
 
 
 }
