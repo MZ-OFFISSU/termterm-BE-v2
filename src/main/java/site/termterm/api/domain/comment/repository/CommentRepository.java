@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT new site.termterm.api.domain.folder.dto.FolderResponseDto$TermDetailInfoDto$CommentDetailInfoDto(c, c.member.nickname, c.member.job, c.member.profileImg, cl.status, c.term.id) " +
+    @Query("SELECT new site.termterm.api.domain.folder.dto.FolderResponseDto$TermDetailInfoDto$CommentDetailInfoDto(c, c.member.nickname, c.member.job, c.member.profileImg, cl.status, c.termId) " +
             "FROM Comment c " +
             "INNER JOIN Member m ON m.id = c.member.id " +
             "LEFT JOIN CommentLike cl " +
             "ON c.id = cl.comment.id AND cl.member.id = :loginMemberId " +
-            "WHERE c.term.id IN :termIdList")
+            "WHERE c.termId IN :termIdList")
     List<FolderResponseDto.TermDetailInfoDto.CommentDetailInfoDto> getCommentDetailByTermIdList(@Param("termIdList") List<Long> termIdList, @Param("loginMemberId") Long memberId);
 }

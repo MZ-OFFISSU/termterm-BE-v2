@@ -161,7 +161,7 @@ class FolderServiceTest extends DummyObject {
         when(folderRepository.findById(3L)).thenReturn(Optional.of(newMockFolder(3L, "폴더3", "폴더 설명3", sinner)));
 
         //stub2
-        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.empty());
+        when(termBookmarkRepository.findByTermIdAndMember(any(), any())).thenReturn(Optional.empty());
 
         //stub3
         when(termRepository.getReferenceById(any())).thenReturn(term);
@@ -170,14 +170,14 @@ class FolderServiceTest extends DummyObject {
         when(memberRepository.getReferenceById(any())).thenReturn(sinner);
 
         //stub5
-        when(termBookmarkRepository.save(any())).thenReturn(TermBookmark.of(term, sinner, requestDto.getFolderIds().size()));
+        when(termBookmarkRepository.save(any())).thenReturn(TermBookmark.of(term.getId(), sinner, requestDto.getFolderIds().size()));
 
         //when
         TermBookmark termBookmark = folderService.archiveTerm(requestDto, 1L);
         System.out.println(termBookmark);
 
         //then
-        assertThat(termBookmark.getTerm()).isEqualTo(term);
+        assertThat(termBookmark.getTermId()).isEqualTo(term.getId());
         assertThat(termBookmark.getMember()).isEqualTo(sinner);
         assertThat(termBookmark.getFolderCnt()).isEqualTo(3);
     }
@@ -199,7 +199,7 @@ class FolderServiceTest extends DummyObject {
         when(folderRepository.findById(3L)).thenReturn(Optional.of(newMockFolder(3L, "폴더3", "폴더 설명3", sinner)));
 
         //stub2
-        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(TermBookmark.of(term, sinner, 2)));
+        when(termBookmarkRepository.findByTermIdAndMember(any(), any())).thenReturn(Optional.of(TermBookmark.of(term.getId(), sinner, 2)));
 
         //stub3
         when(termRepository.getReferenceById(any())).thenReturn(term);
@@ -212,7 +212,7 @@ class FolderServiceTest extends DummyObject {
         System.out.println(termBookmark);
 
         //then
-        assertThat(termBookmark.getTerm()).isEqualTo(term);
+        assertThat(termBookmark.getTermId()).isEqualTo(term.getId());
         assertThat(termBookmark.getMember()).isEqualTo(sinner);
         assertThat(termBookmark.getFolderCnt()).isEqualTo(5);
     }
@@ -294,7 +294,7 @@ class FolderServiceTest extends DummyObject {
         Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner);
         Term term = newMockTerm(1L, "용어", "용어 설명", List.of(CategoryEnum.IT));
         folder.getTermIds().add(1L);
-        TermBookmark termBookmark = TermBookmark.of(term, sinner, 3);
+        TermBookmark termBookmark = TermBookmark.of(term.getId(), sinner, 3);
 
         //stub1
         when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
@@ -306,7 +306,7 @@ class FolderServiceTest extends DummyObject {
         when(termRepository.getReferenceById(any())).thenReturn(term);
 
         //stub4
-        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(termBookmark));
+        when(termBookmarkRepository.findByTermIdAndMember(any(), any())).thenReturn(Optional.of(termBookmark));
 
         //when
         folderService.deleteFolder(1L, 1L);
@@ -327,7 +327,7 @@ class FolderServiceTest extends DummyObject {
         Term term1 = newMockTerm(1L, "용어", "용어 설명", List.of(CategoryEnum.IT));
         folder.getTermIds().add(1L);
         folder.getTermIds().add(2L);
-        TermBookmark termBookmark1 = TermBookmark.of(term1, sinner, 3);
+        TermBookmark termBookmark1 = TermBookmark.of(term1.getId(), sinner, 3);
 
         UnArchiveTermRequestDto requestDto = new UnArchiveTermRequestDto();
         requestDto.setFolderId(1L);
@@ -337,7 +337,7 @@ class FolderServiceTest extends DummyObject {
         when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
         when(termRepository.getReferenceById(any())).thenReturn(term1);
         when(memberRepository.getReferenceById(any())).thenReturn(sinner);
-        when(termBookmarkRepository.findByTermAndMember(any(), any())).thenReturn(Optional.of(termBookmark1));
+        when(termBookmarkRepository.findByTermIdAndMember(any(), any())).thenReturn(Optional.of(termBookmark1));
 
         //when
         Folder updatedFolder = folderService.unArchiveTerm(requestDto, 1L);
@@ -464,7 +464,7 @@ class FolderServiceTest extends DummyObject {
         Comment comment = newMockComment(1L, "용어 설명", "내 머리", term1, sinner).addLike();
 
         List<TermDetailInfoDto> dtoList = List.of(new TermDetailInfoDto(term1), new TermDetailInfoDto(term3));
-        List<TermDetailInfoDto.CommentDetailInfoDto> commentDtoList = List.of(new TermDetailInfoDto.CommentDetailInfoDto(comment, sinner.getNickname(), sinner.getJob(), sinner.getProfileImg(), CommentLikeStatus.NO, comment.getTerm().getId()));
+        List<TermDetailInfoDto.CommentDetailInfoDto> commentDtoList = List.of(new TermDetailInfoDto.CommentDetailInfoDto(comment, sinner.getNickname(), sinner.getJob(), sinner.getProfileImg(), CommentLikeStatus.NO, comment.getTermId()));
 
 
         //stub

@@ -382,7 +382,7 @@ class FolderControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isOk());
-        assertThat(termBookmarkRepository.findByTermAndMember(newMockTerm(2L, "", "", null), newMockMember(1L, "", "")))
+        assertThat(termBookmarkRepository.findByTermIdAndMember(2L, newMockMember(1L, "", "")))
                 .isEqualTo(Optional.empty());
 
     }

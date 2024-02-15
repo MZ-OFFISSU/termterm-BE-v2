@@ -29,7 +29,4 @@ public class Term {
     @Convert(converter = CategoryListConverter.class)
     private List<CategoryEnum> categories;
 
-    @OneToMany(mappedBy = "term")
-    private List<Comment> comments;
-
 }

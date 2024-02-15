@@ -78,7 +78,7 @@ public class DummyObject {
     }
 
     protected TermBookmark newTermBookmark(Term term, Member member, int folderCnt){
-        return TermBookmark.of(term, member, folderCnt);
+        return TermBookmark.of(term.getId(), member, folderCnt);
     }
 
     protected Comment newComment(String content, String source, Member member, Term term){
@@ -86,7 +86,7 @@ public class DummyObject {
                 .content(content)
                 .source(source)
                 .member(member)
-                .term(term)
+                .termId(term.getId())
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();
@@ -98,7 +98,7 @@ public class DummyObject {
                 .content(content)
                 .source(source)
                 .member(member)
-                .term(term)
+                .termId(term.getId())
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();

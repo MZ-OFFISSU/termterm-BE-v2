@@ -87,7 +87,7 @@ public class FolderService {
         for(Long termId: folderPS.getTermIds()){
             Term termPS = termRepository.getReferenceById(termId);
 
-            TermBookmark termBookmarkPS = termBookmarkRepository.findByTermAndMember(termPS, memberPS)
+            TermBookmark termBookmarkPS = termBookmarkRepository.findByTermIdAndMember(termPS.getId(), memberPS)
                     .orElseThrow(() -> new CustomApiException("북마크 기록이 존재하지 않습니다. 데이터 동기화가 잘못 되었습니다.", "Folder : " + folderPS.getId() + "\nTerm : " + termId + "\nMember : " + memberId));
 
             if (termBookmarkPS.getFolderCnt() <= 1){        // 현재 이 용어는 하나의 폴더에만 속해 있으므로, 그대로 삭제하면 된다.
@@ -137,11 +137,11 @@ public class FolderService {
         Member memberPS = memberRepository.getReferenceById(memberId);
 
         // 북마크 테이블을 업데이트 합니다.
-        Optional<TermBookmark> termBookmarkOptional = termBookmarkRepository.findByTermAndMember(termPS, memberPS);
+        Optional<TermBookmark> termBookmarkOptional = termBookmarkRepository.findByTermIdAndMember(termPS.getId(), memberPS);
 
         if (termBookmarkOptional.isEmpty()){
             try {
-                return termBookmarkRepository.save(TermBookmark.of(termPS, memberPS, requestDto.getFolderIds().size()));
+                return termBookmarkRepository.save(TermBookmark.of(termPS.getId(), memberPS, requestDto.getFolderIds().size()));
             }catch (DataIntegrityViolationException e){
                 throw new CustomApiException("용어/사용자 가 존재하지 않습니다.");
             }
@@ -168,7 +168,7 @@ public class FolderService {
         Term termPS = termRepository.getReferenceById(requestDto.getTermId());
         Member memberPS = memberRepository.getReferenceById(memberId);
 
-        TermBookmark termBookmarkPS = termBookmarkRepository.findByTermAndMember(termPS, memberPS)
+        TermBookmark termBookmarkPS = termBookmarkRepository.findByTermIdAndMember(termPS.getId(), memberPS)
                 .orElseThrow(() -> new CustomApiException("북마크 이력이 존재하지 않습니다."));
 
         termBookmarkPS.addFolderCnt(-1);

@@ -40,7 +40,7 @@ public class CommentService {
 
         Term termPS = termRepository.getReferenceById(requestDto.getTermId());
 
-        Comment newComment = requestDto.toEntity(termPS, memberPS);
+        Comment newComment = requestDto.toEntity(termPS.getId(), memberPS);
         commentRepository.save(newComment);
 
         return newComment;

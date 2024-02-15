@@ -22,9 +22,7 @@ public class TermBookmark {
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TERM_ID")
-    private Term term;
+    private Long termId;
 
     @Builder.Default
     private Integer folderCnt = 1;
@@ -33,8 +31,8 @@ public class TermBookmark {
         this.folderCnt += plus;
     }
 
-    public static TermBookmark of(Term term, Member member, int folderCnt){
-        return TermBookmark.builder().term(term).member(member).folderCnt(folderCnt).build();
+    public static TermBookmark of(Long termId, Member member, int folderCnt){
+        return TermBookmark.builder().termId(termId).member(member).folderCnt(folderCnt).build();
     }
 
 }

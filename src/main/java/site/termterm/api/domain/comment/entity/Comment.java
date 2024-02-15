@@ -37,13 +37,12 @@ public class Comment {
     @Builder.Default
     private Integer reportCnt = 0;
 
+    @Column(nullable = false)
+    private Long termId;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private CommentStatus status = CommentStatus.WAITING;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TERM_ID")
-    private Term term;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID")

@@ -1,4 +1,4 @@
-package site.termterm.api.domain.curation;
+package site.termterm.api.domain.curation.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
