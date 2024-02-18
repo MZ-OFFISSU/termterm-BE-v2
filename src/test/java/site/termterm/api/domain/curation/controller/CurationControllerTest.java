@@ -30,12 +30,12 @@ import site.termterm.api.global.dummy.DummyObject;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 
 import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
 import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
@@ -115,6 +115,36 @@ class CurationControllerTest extends DummyObject {
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.cnt").value(requestDto.getTermIds().size()));
         resultActions.andExpect(jsonPath("$.data.title").value(requestDto.getTitle()));
+
+    }
+
+    @DisplayName("큐레이션 등록 API 요청 - 유효성 검사 실패")
+    @WithUserDetails(value = "3", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void register_curation_validation_fail_test() throws Exception{
+        //given
+        CurationRegisterRequestDto requestDto = new CurationRegisterRequestDto();
+        requestDto.setTitle("");
+        requestDto.setDescription("");
+        requestDto.setTermIds(List.of(-1L, 3L, 5L, 7L, 9L));
+        requestDto.setTags(List.of("", "tag2", "tag3"));
+        requestDto.setCategories(List.of("ITE"));
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/admin/curation/register")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.data", aMapWithSize(6)));
 
 
     }

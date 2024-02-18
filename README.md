@@ -1,5 +1,8 @@
 ## termterm v2 - auth server
 
+### 13. 2024/02/18
+- Curation 등록 API 요청서 유효성 검사 Test 코드 작성
+
 ### 12. 2024/02/15
 - 폴더 상세페이지 API
 - 추후 Term 데이터를 NoSQL 기반 DB 로 옮길 것을 고려하여, Term 에서 모든 연관관계를 제거하였습니다.
