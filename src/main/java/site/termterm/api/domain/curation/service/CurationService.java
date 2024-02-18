@@ -63,4 +63,31 @@ public class CurationService {
             return curationBookmarkPS;
         }
     }
+
+    /**
+     * 큐레이션 북마크를 취소합니다.
+     */
+    @Transactional
+
+    public CurationBookmark unBookmark(Long curationId, Long memberId) {
+        Curation curationPS = curationRepository.getReferenceById(curationId);
+        Member memberPS = memberRepository.getReferenceById(memberId);
+
+        Optional<CurationBookmark> curationBookmarkOptional = curationBookmarkRepository.findByCurationAndMember(curationPS, memberPS);
+
+        if(curationBookmarkOptional.isEmpty()){
+            throw new CustomApiException(String.format("Member(%s)는 Curation(%s)을 북마크한 이력이 없습니다.", memberId+"", curationId+""));
+        } else{
+            CurationBookmark curationBookmarkPS = curationBookmarkOptional.get();
+
+            if (curationBookmarkPS.getStatus().equals(BookmarkStatus.YES)) {
+                curationBookmarkPS.setStatus(BookmarkStatus.NO);
+            }else{
+                throw new CustomApiException(String.format("Member(%s)는 Curation(%s)을 북마크하지 않았습니다..", memberId+"", curationId+""));
+            }
+
+            return curationBookmarkPS;
+        }
+
+    }
 }

@@ -52,6 +52,7 @@ public class CurationController {
      */
     @PutMapping("/s/curation/unbookmark/{id}")
     public ResponseEntity<ResponseDto<?>> unBookmarkCuration(@PathVariable("id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
+        curationService.unBookmark(curationId, loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "", null), HttpStatus.OK);
     }

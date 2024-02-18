@@ -220,6 +220,50 @@ class CurationControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("큐레이션 북마크 취소 API 요청 - 성공 ")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_unBookmark_success2_test() throws Exception{
+        //given
+        Curation curation1 = curationRepository.getReferenceById(1L);
+        Member djokovic = memberRepository.getReferenceById(2L);
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/curation/unbookmark/{id}", 2L));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Optional<CurationBookmark> curationBookmarkOptional = curationBookmarkRepository.findByCurationAndMember(curation1, djokovic);
+        assertThat(curationBookmarkOptional).isPresent();
+        assertThat(curationBookmarkOptional.get().getStatus()).isEqualTo(BookmarkStatus.NO);
+
+    }
+
+    @DisplayName("큐레이션 북마크 API 취소 요청 - 실패 (NO -> NO)")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_unBookmark_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/s/curation/unbookmark/{id}", 1L));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+
+    }
 
 
 }

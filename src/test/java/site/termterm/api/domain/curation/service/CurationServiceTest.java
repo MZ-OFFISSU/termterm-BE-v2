@@ -88,4 +88,46 @@ class CurationServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("큐레이션 북마크 취소 성공")
+    @Test
+    public void curation_unBookmark_success_test() throws Exception{
+        //given
+        Curation curation = newMockCuration(1L, "큐레이션1", List.of(1L, 3L, 5L), List.of("태그1"), List.of(CategoryEnum.IT));
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        CurationBookmark curationBookmark = CurationBookmark.of(curation, sinner);
+        curationBookmark.setStatus(BookmarkStatus.YES);
+
+        //stub
+        when(curationRepository.getReferenceById(any())).thenReturn(curation);
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(curationBookmarkRepository.findByCurationAndMember(any(), any())).thenReturn(Optional.of(curationBookmark));
+
+        //when
+        CurationBookmark returnedCurationBookmark = curationService.unBookmark(1L, 1L);
+
+        //then
+        assertThat(returnedCurationBookmark.getStatus()).isEqualTo(BookmarkStatus.NO);
+
+    }
+
+    @DisplayName("큐레이션 북마크 취소 실패 - 이미 NO")
+    @Test
+    public void curation_unBookmark_fail_test() throws Exception{
+        //given
+        Curation curation = newMockCuration(1L, "큐레이션1", List.of(1L, 3L, 5L), List.of("태그1"), List.of(CategoryEnum.IT));
+        Member sinner = newMockMember(1L, "1111", "ema@i.l");
+        CurationBookmark curationBookmark = CurationBookmark.of(curation, sinner);
+        curationBookmark.setStatus(BookmarkStatus.NO);
+
+        //stub
+        when(curationRepository.getReferenceById(any())).thenReturn(curation);
+        when(memberRepository.getReferenceById(any())).thenReturn(sinner);
+        when(curationBookmarkRepository.findByCurationAndMember(any(), any())).thenReturn(Optional.of(curationBookmark));
+
+        //when
+
+        //then
+        assertThrows(CustomApiException.class, () -> curationService.unBookmark(1L, 1L));
+
+    }
 }
