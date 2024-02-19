@@ -58,6 +58,9 @@ public class DataCleaner {
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, tableName.split("_")[0])).executeUpdate();
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN MEMBER_ID RESTART WITH 1", tableName)).executeUpdate();
             }
+            else if(tableName.equals("CURATION_PAID")){
+                entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, "MEMBER")).executeUpdate();
+            }
             else {
                 entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
             }

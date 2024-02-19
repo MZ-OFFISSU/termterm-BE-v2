@@ -62,8 +62,9 @@ public class CurationController {
      */
     @GetMapping("/s/curation/detail/{id}")
     public ResponseEntity<ResponseDto<?>> getCurationDetail(@PathVariable("id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
+        CurationDetailResponseDto responseDto = curationService.getCurationDetail(curationId, loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "큐레이션 상세 조회 성공", responseDto), HttpStatus.OK);
     }
 
     /**

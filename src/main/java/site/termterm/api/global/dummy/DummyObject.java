@@ -1,5 +1,6 @@
 package site.termterm.api.global.dummy;
 
+import site.termterm.api.domain.bookmark.entity.CurationBookmark;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.domain.report.entity.Report;
@@ -8,6 +9,7 @@ import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
+import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPaid;
 import site.termterm.api.domain.curation.entity.Curation;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
@@ -173,4 +175,15 @@ public class DummyObject {
                 .categories(categories)
                 .build();
     }
+
+    protected CurationBookmark newCurationBookmark(Curation curation, Member member){
+        return CurationBookmark.of(curation, member);
+    }
+
+
+    protected CurationPaid newCurationPaid(Member member, List<Long> curationIds){
+        return CurationPaid.builder()
+                .id(member.getId()).curationIds(curationIds).createdDate(LocalDateTime.now()).build();
+    }
+
 }

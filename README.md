@@ -1,8 +1,20 @@
 ## termterm v2 - auth server
 
+
+### 14. 2024/02/19
+- Curation 상세정보 API 
+
+-- TODAY ISSUE
+  - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다. 
+    
+
 ### 13. 2024/02/18
 - Curation 등록 API 요청서 유효성 검사 Test 코드 작성
 - Curation 북마크 취소
+- Curation 상세정보 API 제작이 너무 힘들다.
+  - SQL 문도 복잡하고, 이를 내부 로직에서 처리하는 것도 복잡하다.
+
+`TODO : 유저 최근 로그인 일시 저장`
 
 ### 12. 2024/02/15
 - 폴더 상세페이지 API

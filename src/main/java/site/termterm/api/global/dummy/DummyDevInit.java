@@ -6,11 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import static site.termterm.api.domain.category.CategoryEnum.*;
 
+import site.termterm.api.domain.bookmark.repository.CurationBookmarkRepository;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
+import site.termterm.api.domain.curation.entity.Curation;
+import site.termterm.api.domain.curation.repository.CurationRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
@@ -30,7 +33,9 @@ public class DummyDevInit extends DummyObject {
             FolderRepository folderRepository,
             TermBookmarkRepository termBookmarkRepository,
             CommentRepository commentRepository,
-            CommentLikeRepository commentLikeRepository
+            CommentLikeRepository commentLikeRepository,
+            CurationRepository curationRepository,
+            CurationBookmarkRepository curationBookmarkRepository
     ){
         return args -> {
             Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
@@ -71,6 +76,14 @@ public class DummyDevInit extends DummyObject {
             commentLikeRepository.save(newMockCommentLike(comment1, member3, CommentLikeStatus.YES));
             commentLikeRepository.save(newMockCommentLike(comment2, member1, CommentLikeStatus.YES));
             commentLikeRepository.save(newMockCommentLike(comment3, member1, CommentLikeStatus.NO));
+
+
+            Curation curation1  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L), List.of("tag1", "tag2"), List.of(IT, BUSINESS)));
+            Curation curation2  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L), List.of("tag1", "tag2"), List.of(IT, DESIGN)));
+            Curation curation3  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L), List.of("tag1", "tag2"), List.of(BUSINESS)));
+
+            curationBookmarkRepository.save(newCurationBookmark(curation1, member1));
+            curationBookmarkRepository.save(newCurationBookmark(curation2, member1));
 
         };
 
