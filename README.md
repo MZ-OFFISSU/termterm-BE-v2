@@ -3,9 +3,16 @@
 
 ### 14. 2024/02/19
 - Curation 상세정보 API 
+- Curation List - 카테고리 미지정 시 관심사 기반
+- Curation List - 카테고리 지정  //TODO
 
 -- TODAY ISSUE
-  - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다. 
+  - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다.
+  - Member 는 `List<CategoryEnum>` 타입의 Categories 컬럼을 String 으로 Convert 하여 저장하고 있다. 
+    - 여기서 다음 JPQL 을 실행하면, 어떤 결과를 넘겨 받을까?
+      - `@Query("SELECT m.categories FROM Member m WHERE m.id = :memberId")`
+    - `List<ArrayList<CategoryEnum>>` 타입을 리턴한다. 
+    - 당연히 List 의 size 는 1이고, empty 예외 처리 이후 `get(0)` 을 해주어 `ArrayList<CategoryEnum>` 을 추출하여 행복 코딩하면 된다. 
     
 
 ### 13. 2024/02/18
