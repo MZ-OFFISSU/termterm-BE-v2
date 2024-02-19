@@ -4,7 +4,7 @@
 ### 14. 2024/02/19
 - Curation 상세정보 API 
 - Curation List - 카테고리 미지정 시 관심사 기반
-- Curation List - 카테고리 지정  //TODO
+- Curation List - 카테고리 지정 
 
 -- TODAY ISSUE
   - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다.
@@ -13,6 +13,19 @@
       - `@Query("SELECT m.categories FROM Member m WHERE m.id = :memberId")`
     - `List<ArrayList<CategoryEnum>>` 타입을 리턴한다. 
     - 당연히 List 의 size 는 1이고, empty 예외 처리 이후 `get(0)` 을 해주어 `ArrayList<CategoryEnum>` 을 추출하여 행복 코딩하면 된다. 
+  - ``` 
+        sql.append("SELECT DISTINCT c.curation_id, c.title, c.cnt, c.description, c.thumbnail, cb.status ");
+        sql.append("FROM curation c ");
+        sql.append("LEFT JOIN curation_bookmark cb ");
+        sql.append("ON cb.curation_id = c.curation_id AND cb.member_id = :memberId ");
+        sql.append("WHERE c.categories LIKE CONCAT('%', :category, '%') ");
+        sql.append("ORDER BY RAND() ");
+    ``` 
+    - DISTINCT 와 ORDER BY RAND() 는 함께 쓸 수 없다. 
+    - ORDER BY RAND() 를 뺴고, 애플리케이션 내부 로직에서 shuffle 해주기로 했다. 
+    - 큐레이션의 수가 많지 않기 때문에, 성능에는 영향을 주지 않을 것이라고 생각했다. 
+  - 카테고리 별로 큐레이션 추출에서, SQL 쿼리를 LIKE 절로 작성을 했는데, PM 은 DEVELOPMENT 에도 있어서 원하지 않는 결과까지 추출되는 문제 발생 
+    - PM 을 찾는 것이 아닌, "PM" 을 찾도록 SQL 쿼리를 변경했다.
     
 
 ### 13. 2024/02/18

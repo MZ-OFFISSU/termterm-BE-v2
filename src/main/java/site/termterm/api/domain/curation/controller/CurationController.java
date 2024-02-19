@@ -14,6 +14,8 @@ import site.termterm.api.domain.curation.service.CurationService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
 
+import java.util.List;
+
 import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
 import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
 
@@ -75,10 +77,22 @@ public class CurationController {
             @RequestParam(value = "category", required = false) String categoryName,
             @AuthenticationPrincipal LoginMember loginMember
     ){
+        // 쿼리로 category 가 넘어오지 않을 경우 사용자의 관심사를 바탕으로 추천 큐레이션을 리턴합니다.
+        List<CurationSimpleResponseDto> responseDtoList;
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "", null), HttpStatus.OK);
+        if (categoryName == null){
+            responseDtoList = curationService.getRecommendedCuration(loginMember.getMember().getId());
+        }else{
+            responseDtoList = curationService.getCurationByCategory(categoryName.toUpperCase(), loginMember.getMember().getId());
+        }
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "큐레이션 리스트 조회 성공", responseDtoList), HttpStatus.OK);
+
     }
 
+    /**
+     * 아카이브한 큐레이션들을 조회합니다.
+     */
     @GetMapping("/s/curation/archived")
     public ResponseEntity<ResponseDto<?>> getArchivedCuration(@AuthenticationPrincipal LoginMember loginMember){
 

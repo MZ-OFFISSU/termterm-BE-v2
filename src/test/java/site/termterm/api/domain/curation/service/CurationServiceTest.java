@@ -18,6 +18,7 @@ import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.global.dummy.DummyObject;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,9 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-
-import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
-import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -130,4 +128,28 @@ class CurationServiceTest extends DummyObject {
         assertThrows(CustomApiException.class, () -> curationService.unBookmark(1L, 1L));
 
     }
+
+    @DisplayName("Category 문자열을 CategoryEnum 변환에 성공한다 - 카테고리별 큐레이션 목록 조회")
+    @Test
+    public void convert_category_enum_success_test() throws Exception{
+        //given
+
+        //stub
+        when(curationRepository.getCurationsByCategory(any(), any())).thenReturn(Collections.emptyList());
+
+        //when
+
+        //then
+        assertDoesNotThrow(() -> curationService.getCurationByCategory("IT", 1L));
+
+    }
+
+    @DisplayName("Category 문자열을 CategoryEnum 변환에 실패한다 - 카테고리별 큐레이션 목록 조회")
+    @Test
+    public void convert_category_enum_fail_test() throws Exception{
+        //then
+        assertThrows(CustomApiException.class, () -> curationService.getCurationByCategory("Nothing", 1L));
+
+    }
+
 }

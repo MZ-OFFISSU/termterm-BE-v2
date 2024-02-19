@@ -24,7 +24,7 @@
 - [x] PUT /v1/curation/bookmark/{id} 
 - [x] PUT /v1/curation/unbookmark/{id} 
 - [x] GET /v1/curation/detail/{id}
-- [ ] GET /v1/curation/list
+- [X] GET /v1/curation/list
 - [x] POST /v1/curation/register (ADMIN)
 
 ### Folder

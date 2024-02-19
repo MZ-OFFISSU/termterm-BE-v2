@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
 import site.termterm.api.domain.bookmark.entity.CurationBookmark;
 import site.termterm.api.domain.bookmark.repository.CurationBookmarkRepository;
+import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPaid;
 import site.termterm.api.domain.curation.domain.curation_paid.repository.CurationPaidRepository;
 import static site.termterm.api.domain.curation.dto.CurationDatabaseDto.*;
@@ -17,8 +18,11 @@ import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
 import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
@@ -75,7 +79,6 @@ public class CurationService {
      * 큐레이션 북마크를 취소합니다.
      */
     @Transactional
-
     public CurationBookmark unBookmark(Long curationId, Long memberId) {
         Curation curationPS = curationRepository.getReferenceById(curationId);
         Member memberPS = memberRepository.getReferenceById(memberId);
@@ -102,12 +105,11 @@ public class CurationService {
      * 큐레이션의 상세정보를 조회합니다.
      */
     public CurationDetailResponseDto getCurationDetail(Long curationId, Long memberId) {
-        Member memberPS = memberRepository.getReferenceById(memberId);
         CurationInfoWithBookmarkDto curationInfoWithBookmarkDto = curationRepository.findByIdWithBookmarked(curationId, memberId)
                 .orElseThrow(() -> new CustomApiException(String.format("큐레이션 (ID: %s) 이 존재하지 않습니다.", curationId)));
 
         // 큐레이션 구매 여부 확인
-        Optional<CurationPaid> curationPaidOptional = curationPaidRepository.findById(memberPS.getId());
+        Optional<CurationPaid> curationPaidOptional = curationPaidRepository.findById(memberId);
         boolean paid = curationPaidOptional.isPresent() && curationPaidOptional.get().getCurationIds().contains(curationId);
 
         // 구매 했을 경우 전부 다, 구매하지 않았을 경우 5개만
@@ -116,14 +118,45 @@ public class CurationService {
 
 
         // 연관 큐레이션 불러오기
-        List<Object[]> curationDtoListByCategories = curationRepository.getCurationDtoListByCategories(curationId, curationInfoWithBookmarkDto.getCategories(), memberId);
-        List<CurationDetailResponseDto.MoreCurationDto> moreCurationList = curationDtoListByCategories.stream().map(CurationDetailResponseDto.MoreCurationDto::of).toList();
+        List<Object[]> queryResults = curationRepository.getCurationDtoListByCategoriesExceptMainCuration(curationId, curationInfoWithBookmarkDto.getCategories(), memberId);
+        List<CurationDetailResponseDto.MoreCurationDto> moreCurationList = queryResults.stream().map(CurationDetailResponseDto.MoreCurationDto::of).toList();
 
 
         // 응답 바디 구성
-        CurationDetailResponseDto responseDto = CurationDetailResponseDto.of(curationInfoWithBookmarkDto, paid, termsSimpleDtoList, moreCurationList);
+        return CurationDetailResponseDto.of(curationInfoWithBookmarkDto, paid, termsSimpleDtoList, moreCurationList);
 
-        return responseDto;
+    }
 
+    /**
+     * (1/2) 카테고리별 큐레이션 리스트를 조회할 때, 쿼리로 category 가 넘어오지 않을 경우 사용자의 관심사를 바탕으로 추천 큐레이션을 리턴합니다.
+     */
+    public List<CurationSimpleResponseDto> getRecommendedCuration(Long memberId) {
+        List<ArrayList<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
+
+        if (categoryEnumListOfList.isEmpty()){
+            throw new CustomApiException("Member Category 가 존재하지 않습니다.");
+        }
+
+        List<Object[]> queryResults = curationRepository.getCurationDtoListByCategoriesLimit6(categoryEnumListOfList.get(0), memberId);
+
+        return  queryResults.stream().map(CurationSimpleResponseDto::of).toList();
+    }
+
+    /**
+     * (2/2) 카테고리별 큐레이션 리스트를 조회할 때, 쿼리로 category 가 넘어왔을 경우 해당하는 큐레이션을 조회하여 리턴합니다.
+     */
+    public List<CurationSimpleResponseDto> getCurationByCategory(String categoryString, Long memberId) {
+        CategoryEnum categoryEnum;
+        try {
+            categoryEnum = CategoryEnum.valueOf(categoryString);
+        }catch (IllegalArgumentException e){
+            throw new CustomApiException(String.format("%s 에 해당하는 Category 가 존재하지 않습니다.", categoryString));
+        }
+
+        List<Object[]> queryResults = curationRepository.getCurationsByCategory(categoryEnum, memberId);
+        List<CurationSimpleResponseDto> responseDtoList = queryResults.stream().map(CurationSimpleResponseDto::of).collect(Collectors.toList());
+        Collections.shuffle(responseDtoList);
+
+        return responseDtoList;
     }
 }

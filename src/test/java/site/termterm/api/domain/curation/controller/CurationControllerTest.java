@@ -2,6 +2,9 @@ package site.termterm.api.domain.curation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -101,21 +104,23 @@ class CurationControllerTest extends DummyObject {
 
 
         Curation curation1 = curationRepository.save(newCuration("큐레이션1",  List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L), List.of("tag1", "tag2"), List.of(CategoryEnum.IT, CategoryEnum.DEVELOPMENT)));
-        Curation curation2 = curationRepository.save(newCuration("큐레이션2", List.of(4L, 8L, 10L,  13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.IT)));
-        Curation curation3 = curationRepository.save(newCuration("큐레이션3", List.of(7L, 8L, 12L, 14L, 15L), List.of("tag1", "tag3"), List.of(CategoryEnum.BUSINESS)));
-        Curation curation4 = curationRepository.save(newCuration("큐레이션4", List.of(1L, 2L, 13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.PM, CategoryEnum.DEVELOPMENT)));
+        Curation curation2 = curationRepository.save(newCuration("큐레이션2", List.of(4L, 8L, 10L,  13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.IT, CategoryEnum.PM)));
+        Curation curation3 = curationRepository.save(newCuration("큐레이션3", List.of(7L, 8L, 12L, 14L, 15L), List.of("tag1", "tag3"), List.of(CategoryEnum.BUSINESS, CategoryEnum.PM)));
+        Curation curation4 = curationRepository.save(newCuration("큐레이션4", List.of(1L, 2L, 13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.PM)));
+        Curation curation5 = curationRepository.save(newCuration("큐레이션5", List.of(1L, 2L, 13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.DESIGN, CategoryEnum.DEVELOPMENT, CategoryEnum.PM)));
 
         CurationBookmark curationBookmark1 = CurationBookmark.of(curation1, djokovic);
         curationBookmark1.setStatus(BookmarkStatus.NO);
         curationBookmarkRepository.save(curationBookmark1);
 
         CurationBookmark curationBookmark2 = CurationBookmark.of(curation2, djokovic);
-        curationBookmark1.setStatus(BookmarkStatus.YES);
         curationBookmarkRepository.save(curationBookmark2);
 
         CurationBookmark curationBookmark3 = CurationBookmark.of(curation4, sinner);
-        curationBookmark1.setStatus(BookmarkStatus.YES);
         curationBookmarkRepository.save(curationBookmark3);
+
+        CurationBookmark curationBookmark4 = CurationBookmark.of(curation5, sinner);
+        curationBookmarkRepository.save(curationBookmark4);
 
         curationPaidRepository.save(newCurationPaid(sinner, List.of(1L)));
 
@@ -404,6 +409,99 @@ class CurationControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.moreRecommendedCurations").isNotEmpty());
         resultActions.andExpect(jsonPath("$.data.moreRecommendedCurations.length()", lessThanOrEqualTo(3)));
         resultActions.andExpect(jsonPath("$.data.tags.length()", lessThanOrEqualTo(curationWithBookmarked.getTags().size())));
+
+    }
+
+    @DisplayName("카테고리별 큐레이션 조회 API - 카테고리 미 지정")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_by_category_empty_success_test() throws Exception{
+        //given
+        // 1L 의 Member 의 카테고리는 IT, DESIGN, BUSINESS 이고,
+        // 위 카테고리를 가지는 큐레이션은 1L, 2L, 3L, 5L
+        // curation4 만 북마크 하였다
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/list"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        JSONObject jsonObject = (JSONObject) new JSONParser().parse(resultActions.andReturn().getResponse().getContentAsString());
+        JSONArray dataArray = (JSONArray) jsonObject.get("data");
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(4));
+
+        for (int i = 0; i < 4; i++){
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].curationId", i), not(4)));
+        }
+
+        for (Object obj : dataArray) {
+            JSONObject dataObject = (JSONObject) obj;
+            if (Long.parseLong(dataObject.get("curationId").toString()) == 5) {
+                String bookmarked = dataObject.get("bookmarked").toString();
+                assertThat(bookmarked).isEqualTo("YES");
+            }else{
+                String bookmarked = dataObject.get("bookmarked").toString();
+                assertThat(bookmarked).isEqualTo("NO");
+            }
+        }
+
+    }
+
+    @DisplayName("카테고리별 큐레이션 조회 API - 카테고리 지정1")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_by_category_success_test1() throws Exception{
+        //given
+        /* IT : 1, 2
+         * DEVELOPMENT : 1, 5
+         * DESIGN : 5
+         * PM : 2, 3, 4, 5
+         * BUSINESS : 3
+         */
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/list")
+                        .param("category", "IT"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+
+    }
+
+    @DisplayName("카테고리별 큐레이션 조회 API - 카테고리 지정2")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_by_category_success_test2() throws Exception{
+        //given
+        /* IT : 1, 2
+         * DEVELOPMENT : 1, 5
+         * DESIGN : 5
+         * PM : 2, 3, 4, 5
+         * BUSINESS : 3
+         */
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/list")
+                        .param("category", "PM"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(4));
 
     }
 
