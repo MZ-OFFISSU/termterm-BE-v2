@@ -20,12 +20,12 @@
 
 
 ### Curation
-- [ ] GET /v1/curation/archived
-- [ ] PUT /v1/curation/bookmark/{id} 
-- [ ] PUT /v1/curation/unbookmark/{id} 
-- [ ] GET /v1/curation/detail/{id}
-- [ ] GET /v1/curation/list
-- [ ] POST /v1/curation/register (ADMIN)
+- [x] GET /v1/curation/archived
+- [x] PUT /v1/curation/bookmark/{id} 
+- [x] PUT /v1/curation/unbookmark/{id} 
+- [x] GET /v1/curation/detail/{id}
+- [X] GET /v1/curation/list
+- [x] POST /v1/curation/register (ADMIN)
 
 ### Folder
 - [x] DELETE /v1/folder/{folderId}

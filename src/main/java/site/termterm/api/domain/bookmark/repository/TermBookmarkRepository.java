@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TermBookmarkRepository extends JpaRepository<TermBookmark, Long> {
-    Optional<TermBookmark> findByTermAndMember(Term term, Member member);
+    @Query("SELECT tb FROM TermBookmark tb WHERE tb.termId = :termId AND tb.member = :member")
+    Optional<TermBookmark> findByTermIdAndMember(@Param("termId") Long termId, @Param("member") Member member);
 
     @Modifying
     @Query("DELETE FROM TermBookmark tb WHERE tb.id = :id")

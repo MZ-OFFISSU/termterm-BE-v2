@@ -40,7 +40,7 @@ public class CommentService {
 
         Term termPS = termRepository.getReferenceById(requestDto.getTermId());
 
-        Comment newComment = requestDto.toEntity(termPS, memberPS);
+        Comment newComment = requestDto.toEntity(termPS.getId(), memberPS);
         commentRepository.save(newComment);
 
         return newComment;
@@ -70,7 +70,7 @@ public class CommentService {
         }else{
             CommentLike commentLikePS = commentLikeOptional.get();
 
-            if (commentLikePS.getStatus() == CommentLikeStatus.NO){
+            if (commentLikePS.getStatus().equals(CommentLikeStatus.NO)){
                 commentLikePS.setStatus(CommentLikeStatus.YES);
                 commentPS.addLike();
             }else{

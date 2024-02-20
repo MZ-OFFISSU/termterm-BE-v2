@@ -23,9 +23,9 @@ public class CommentRequestDto {
         @Size(max = 255)
         private String source;
 
-        public Comment toEntity(Term term, Member member){
+        public Comment toEntity(Long termId, Member member){
             return Comment.builder()
-                    .term(term)
+                    .termId(termId)
                     .member(member)
                     .content(this.content)
                     .source(this.source)

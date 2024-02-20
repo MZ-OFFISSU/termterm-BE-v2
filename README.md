@@ -1,7 +1,52 @@
 ## termterm v2 - auth server
 
+### 15. 2024/02/20
+- 아카이브한 Curation API
+
+### 14. 2024/02/19
+- Curation 상세정보 API 
+- Curation List - 카테고리 미지정 시 관심사 기반
+- Curation List - 카테고리 지정 
+
+-- TODAY ISSUE
+  - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다.
+  - Member 는 `List<CategoryEnum>` 타입의 Categories 컬럼을 String 으로 Convert 하여 저장하고 있다. 
+    - 여기서 다음 JPQL 을 실행하면, 어떤 결과를 넘겨 받을까?
+      - `@Query("SELECT m.categories FROM Member m WHERE m.id = :memberId")`
+    - `List<ArrayList<CategoryEnum>>` 타입을 리턴한다. 
+    - 당연히 List 의 size 는 1이고, empty 예외 처리 이후 `get(0)` 을 해주어 `ArrayList<CategoryEnum>` 을 추출하여 행복 코딩하면 된다. 
+  - ``` 
+        sql.append("SELECT DISTINCT c.curation_id, c.title, c.cnt, c.description, c.thumbnail, cb.status ");
+        sql.append("FROM curation c ");
+        sql.append("LEFT JOIN curation_bookmark cb ");
+        sql.append("ON cb.curation_id = c.curation_id AND cb.member_id = :memberId ");
+        sql.append("WHERE c.categories LIKE CONCAT('%', :category, '%') ");
+        sql.append("ORDER BY RAND() ");
+    ``` 
+    - DISTINCT 와 ORDER BY RAND() 는 함께 쓸 수 없다. 
+    - ORDER BY RAND() 를 뺴고, 애플리케이션 내부 로직에서 shuffle 해주기로 했다. 
+    - 큐레이션의 수가 많지 않기 때문에, 성능에는 영향을 주지 않을 것이라고 생각했다. 
+  - 카테고리 별로 큐레이션 추출에서, SQL 쿼리를 LIKE 절로 작성을 했는데, PM 은 DEVELOPMENT 에도 있어서 원하지 않는 결과까지 추출되는 문제 발생 
+    - PM 을 찾는 것이 아닌, "PM" 을 찾도록 SQL 쿼리를 변경했다.
+    
+
+### 13. 2024/02/18
+- Curation 등록 API 요청서 유효성 검사 Test 코드 작성
+- Curation 북마크 취소
+- Curation 상세정보 API 제작이 너무 힘들다.
+  - SQL 문도 복잡하고, 이를 내부 로직에서 처리하는 것도 복잡하다.
+
+`TODO : 유저 최근 로그인 일시 저장`
+
 ### 12. 2024/02/15
 - 폴더 상세페이지 API
+- 추후 Term 데이터를 NoSQL 기반 DB 로 옮길 것을 고려하여, Term 에서 모든 연관관계를 제거하였습니다.
+  - 기존에 연관되었던 테이블에는 전부 termId 라는 컬럼을 따로 만들었습니다.
+  - Folder 테이블에 termId 들을 convert 하여 저장하길 정말 잘했다는 생각이 듭니다 
+- Curation API 제작을 위해 폴더 구조 구성
+- Curation 등록 (for ADMIN) API
+- TermBookmark 테이블을 복합키로 변경하였음
+- Curation Bookmark API
 
 ### 11. 2024/02/14
 

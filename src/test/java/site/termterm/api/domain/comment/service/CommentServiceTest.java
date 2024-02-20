@@ -78,7 +78,7 @@ class CommentServiceTest extends DummyObject {
         Comment comment = commentService.registerComment(requestDto, 1L);
 
         //then
-        assertThat(comment.getTerm().getId()).isEqualTo(1L);
+        assertThat(comment.getTermId()).isEqualTo(1L);
         assertThat(comment.getMember().getId()).isEqualTo(1L);
 
     }

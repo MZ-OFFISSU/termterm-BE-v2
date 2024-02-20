@@ -13,7 +13,7 @@ public class CustomResponseUtil {
     public static void fail(HttpServletResponse response, String message, HttpStatus httpStatus){
         try {
             ObjectMapper om = new ObjectMapper();
-            ResponseDto<?> responseDto = new ResponseDto<>(-1, message, null);
+            ResponseDto<?> responseDto = new ResponseDto<>(-2, message, null);
             String responseBody = om.writeValueAsString(responseDto);
 
             response.setContentType("application/json; charset=utf-8");

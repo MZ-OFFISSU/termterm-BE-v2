@@ -1,5 +1,6 @@
 package site.termterm.api.global.dummy;
 
+import site.termterm.api.domain.bookmark.entity.CurationBookmark;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.domain.report.entity.Report;
@@ -8,6 +9,8 @@ import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
+import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPaid;
+import site.termterm.api.domain.curation.entity.Curation;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -28,6 +31,21 @@ public class DummyObject {
                 .nickname(UUID.randomUUID().toString())
                 .profileImg("image.com")
                 .role(MemberEnum.CUSTOMER)
+                .socialType(SocialLoginType.KAKAO)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .categories(List.of(CategoryEnum.IT, CategoryEnum.DESIGN, CategoryEnum.BUSINESS))
+                .build();
+    }
+
+    protected Member newAdmin(){
+        return Member.builder()
+                .socialId("admin")
+                .name("admin")
+                .email("admin@admin.com")
+                .nickname(UUID.randomUUID().toString())
+                .profileImg("image.com")
+                .role(MemberEnum.ADMIN)
                 .socialType(SocialLoginType.KAKAO)
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
@@ -78,7 +96,7 @@ public class DummyObject {
     }
 
     protected TermBookmark newTermBookmark(Term term, Member member, int folderCnt){
-        return TermBookmark.of(term, member, folderCnt);
+        return TermBookmark.of(term.getId(), member, folderCnt);
     }
 
     protected Comment newComment(String content, String source, Member member, Term term){
@@ -86,7 +104,7 @@ public class DummyObject {
                 .content(content)
                 .source(source)
                 .member(member)
-                .term(term)
+                .termId(term.getId())
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();
@@ -98,7 +116,7 @@ public class DummyObject {
                 .content(content)
                 .source(source)
                 .member(member)
-                .term(term)
+                .termId(term.getId())
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();
@@ -132,4 +150,40 @@ public class DummyObject {
                 .modifiedDate(LocalDateTime.now())
                 .build();
     }
+
+    protected Curation newCuration(String title, List<Long> termIds, List<String> tags, List<CategoryEnum> categories){
+        return Curation.builder()
+                .title(title)
+                .description("큐레이션 설명입니다.")
+                .cnt(termIds.size())
+                .thumbnail("google.com")
+                .termIds(termIds)
+                .tags(tags)
+                .categories(categories)
+                .build();
+    }
+
+    protected Curation newMockCuration(Long id, String title, List<Long> termIds, List<String> tags, List<CategoryEnum> categories){
+        return Curation.builder()
+                .id(id)
+                .title(title)
+                .description("큐레이션 설명입니다.")
+                .cnt(termIds.size())
+                .thumbnail("google.com")
+                .termIds(termIds)
+                .tags(tags)
+                .categories(categories)
+                .build();
+    }
+
+    protected CurationBookmark newCurationBookmark(Curation curation, Member member){
+        return CurationBookmark.of(curation, member);
+    }
+
+
+    protected CurationPaid newCurationPaid(Member member, List<Long> curationIds){
+        return CurationPaid.builder()
+                .id(member.getId()).curationIds(curationIds).createdDate(LocalDateTime.now()).build();
+    }
+
 }
