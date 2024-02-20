@@ -151,10 +151,9 @@ public class CurationService {
         }
 
         List<Object[]> queryResults = curationRepository.getCurationsByCategory(categoryEnum, memberId);
-        List<CurationSimpleResponseDto> responseDtoList = queryResults.stream().map(CurationSimpleResponseDto::of).collect(Collectors.toList());
-        Collections.shuffle(responseDtoList);
 
-        return responseDtoList;
+        return queryResults.stream().map(CurationSimpleResponseDto::of).collect(Collectors.toList());
+
     }
 
     /**
