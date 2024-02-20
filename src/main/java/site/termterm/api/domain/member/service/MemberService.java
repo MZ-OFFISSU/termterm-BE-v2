@@ -117,11 +117,9 @@ public class MemberService {
     /**
      * 사용자의 프로필 사진 주소를 리턴합니다.
      */
-    public String getMemberProfileImage(Long id) {
-        Member memberPS = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+    public String getMemberProfileImage(Long memberId) {
+        return memberRepository.getProfileImgById(memberId);
 
-        return memberPS.getProfileImg();
     }
 
     /**
@@ -142,14 +140,10 @@ public class MemberService {
     /**
      * AWS 로부터 Presigned-url 을 발급 받습니다.
      */
-    public String getPresignedUrl(Long id) {
-        Member memberPS = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+    public String getPresignedUrl(Long memberId) {
+        String identifier = memberRepository.getIdentifierById(memberId);
 
-        String presignedUrl = amazonS3Util.getPresignedUrl(memberPS.getIdentifier());
-
-        return presignedUrl;
-
+        return amazonS3Util.getPresignedUrl(identifier);
     }
 
     /**

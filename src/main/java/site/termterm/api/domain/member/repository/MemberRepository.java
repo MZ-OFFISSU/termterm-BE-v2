@@ -24,4 +24,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.categories FROM Member m WHERE m.id = :memberId")
     List<ArrayList<CategoryEnum>> getCategoriesById(@Param("memberId") Long memberId);
+
+    @Query("SELECT m.profileImg FROM Member m WHERE m.id = :memberId")
+    String getProfileImgById(@Param("memberId") Long memberId);
+
+    @Query("SELECT m.identifier FROM Member m WHERE m.id = :memberId")
+    String getIdentifierById(@Param("memberId") Long memberId);
 }
