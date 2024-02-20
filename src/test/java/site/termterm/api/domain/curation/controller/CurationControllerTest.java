@@ -122,6 +122,9 @@ class CurationControllerTest extends DummyObject {
         CurationBookmark curationBookmark4 = CurationBookmark.of(curation5, sinner);
         curationBookmarkRepository.save(curationBookmark4);
 
+        CurationBookmark curationBookmark5 = CurationBookmark.of(curation5, djokovic);
+        curationBookmarkRepository.save(curationBookmark5);
+
         curationPaidRepository.save(newCurationPaid(sinner, List.of(1L)));
 
         em.clear();
@@ -502,6 +505,48 @@ class CurationControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.length()").value(4));
+
+    }
+
+    @DisplayName("아카이브 큐레이션 조회 API 성공")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archived_curation_success_test() throws Exception{
+        //given
+        // 큐레이션 1은 NO, 2와 5에 YES 인 상태
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/archived"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+        resultActions.andExpect(jsonPath("$.data[0].status").value("YES"));
+        resultActions.andExpect(jsonPath("$.data[1].status").value("YES"));
+
+    }
+
+    @DisplayName("아카이브 큐레이션 조회 API 성공 - 아카이브 x")
+    @WithUserDetails(value = "3", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archived_curation_success2_test() throws Exception{
+        //given
+        // 큐레이션 1은 NO, 2와 5에 YES 인 상태
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/archived"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-1));
 
     }
 

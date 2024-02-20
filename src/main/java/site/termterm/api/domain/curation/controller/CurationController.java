@@ -15,6 +15,7 @@ import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
 
 import java.util.List;
+import java.util.Set;
 
 import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
 import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
@@ -95,7 +96,8 @@ public class CurationController {
      */
     @GetMapping("/s/curation/archived")
     public ResponseEntity<ResponseDto<?>> getArchivedCuration(@AuthenticationPrincipal LoginMember loginMember){
+        Set<CurationSimpleResponseDtoNamedStatus> responseDtoList = curationService.getArchivedCuration(loginMember.getMember().getId());
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "아카이브 큐레이션 조회 성공", responseDtoList), HttpStatus.OK);
     }
 }

@@ -18,10 +18,7 @@ import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static site.termterm.api.domain.curation.dto.CurationRequestDto.*;
@@ -158,5 +155,18 @@ public class CurationService {
         Collections.shuffle(responseDtoList);
 
         return responseDtoList;
+    }
+
+    /**
+     * 아카이브한 큐레이션들을 조회합니다.
+     */
+    public Set<CurationSimpleResponseDtoNamedStatus> getArchivedCuration(Long memberId) {
+        Set<CurationSimpleResponseDtoNamedStatus> responseDtoSet = curationRepository.getArchivedCurationsWithBookmarked(memberId, BookmarkStatus.YES);
+
+        if (responseDtoSet.isEmpty()){
+            throw new CustomApiException("아카이브한 큐레이션이 존재하지 않습니다.");
+        }
+
+        return responseDtoSet;
     }
 }

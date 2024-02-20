@@ -12,11 +12,35 @@ public class CurationResponseDto {
     @Getter
     @Setter
     @Builder
+    @AllArgsConstructor
+    public static class CurationSimpleResponseDtoNamedStatus {
+        private Long curationId;
+        private String title;
+        private String description;
+        private Integer cnt;
+        private String thumbnail;
+        private BookmarkStatus status;
+
+        public static CurationSimpleResponseDtoNamedStatus of(Object[] objects){
+            return CurationSimpleResponseDtoNamedStatus.builder()
+                    .curationId((Long) objects[0])
+                    .title((String) objects[1])
+                    .description((String) objects[2])
+                    .cnt((Integer) objects[3])
+                    .thumbnail((String) objects[4])
+                    .status(objects[5] == BookmarkStatus.YES.getStatus() ? BookmarkStatus.YES : BookmarkStatus.NO)
+                    .build();
+        }
+    }
+
+    @Getter
+    @Setter
+    @Builder
     public static class CurationSimpleResponseDto {
         private Long curationId;
         private String title;
-        private Integer cnt;
         private String description;
+        private Integer cnt;
         private String thumbnail;
         private BookmarkStatus bookmarked;
 

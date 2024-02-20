@@ -20,7 +20,7 @@
 
 
 ### Curation
-- [ ] GET /v1/curation/archived
+- [x] GET /v1/curation/archived
 - [x] PUT /v1/curation/bookmark/{id} 
 - [x] PUT /v1/curation/unbookmark/{id} 
 - [x] GET /v1/curation/detail/{id}

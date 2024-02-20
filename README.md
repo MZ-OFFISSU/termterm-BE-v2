@@ -1,5 +1,7 @@
 ## termterm v2 - auth server
 
+### 15. 2024/02/20
+- 아카이브한 Curation API
 
 ### 14. 2024/02/19
 - Curation 상세정보 API 
