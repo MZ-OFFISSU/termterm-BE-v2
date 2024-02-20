@@ -15,8 +15,8 @@ import java.util.List;
 public class TermService {
     private final TermRepository termRepository;
 
-    public List<TermIdAndNameAndBookmarkStatusResponseDto> searchTerm(String name) {
+    public List<TermIdAndNameAndBookmarkStatusResponseDto> searchTerm(String name, Long memberId) {
 
-        return termRepository.getSearchResults(name);
+        return termRepository.getSearchResults(name, memberId);
     }
 }

@@ -26,7 +26,7 @@ public class TermController {
      */
     @GetMapping("/s/term/search/{name}")
     public ResponseEntity<ResponseDto<List<TermIdAndNameAndBookmarkStatusResponseDto>>> searchTerm(@PathVariable(value = "name") String name, @AuthenticationPrincipal LoginMember loginMember){
-        List<TermIdAndNameAndBookmarkStatusResponseDto> responseDtoList = termService.searchTerm(name);
+        List<TermIdAndNameAndBookmarkStatusResponseDto> responseDtoList = termService.searchTerm(name, loginMember.getMember().getId());
 
         if (responseDtoList.isEmpty()){
             return new ResponseEntity<>(new ResponseDto<>(-1, "검색 결과가 존재하지 않습니다.", responseDtoList), HttpStatus.NOT_FOUND);

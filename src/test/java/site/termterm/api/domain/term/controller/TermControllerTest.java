@@ -60,6 +60,7 @@ class TermControllerTest extends DummyObject {
     @BeforeEach
     public void setUp(){
         Member member1 = memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        Member member2 = memberRepository.save(newMember("2222", "2222@gmail.com"));
 
         Term term1 = termRepository.save(newTerm("용어111", "용어1의 설명입니다.", List.of(IT, BUSINESS)));
         Term term2 = termRepository.save(newTerm("용어122", "용어2의 설명입니다.", List.of(DESIGN, MARKETING)));
@@ -71,12 +72,11 @@ class TermControllerTest extends DummyObject {
         em.clear();
     }
 
-    @DisplayName("용어 검색 API 요청 - 성공")
+    @DisplayName("용어 검색 API 요청 - 성공1")
     @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
-    public void search_term_success_test() throws Exception{
+    public void search_term_success1_test() throws Exception{
         //given
-
 
         //when
         System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
@@ -95,6 +95,29 @@ class TermControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("용어 검색 API 요청 - 성공2")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void search_term_success2_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/term/search/{name}", "22"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+        resultActions.andExpect(jsonPath("$.data[0].id").value(2));
+        resultActions.andExpect(jsonPath("$.data[1].id").value(3));
+        resultActions.andExpect(jsonPath("$.data[0].bookmarked").value("NO"));
+        resultActions.andExpect(jsonPath("$.data[1].bookmarked").value("NO"));
+
+    }
+
     @DisplayName("용어 검색 API 요청 - 결과 없음")
     @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
@@ -105,7 +128,6 @@ class TermControllerTest extends DummyObject {
         ResultActions resultActions = mvc.perform(
                 get("/v2/s/term/search/{name}", "결과없을쿼리"));
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
-
 
         //then
         resultActions.andExpect(status().isNotFound());

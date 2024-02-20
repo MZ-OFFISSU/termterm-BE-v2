@@ -17,9 +17,9 @@ public interface TermRepository extends JpaRepository<Term, Long> {
     @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermIdAndNameAndBookmarkStatusResponseDto(t.id, t.name, tb) " +
             "FROM Term t " +
             "LEFT JOIN TermBookmark tb " +
-            "ON tb.termId = t.id " +
+            "ON tb.termId = t.id AND tb.member.id = :memberId " +
             "WHERE t.name LIKE CONCAT('%', :name, '%') ")
-    List<TermIdAndNameAndBookmarkStatusResponseDto> getSearchResults(@Param("name") String name);
+    List<TermIdAndNameAndBookmarkStatusResponseDto> getSearchResults(@Param("name") String name, @Param("memberId") Long memberId);
 
     @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermIdAndNameResponseDto(t.id, t.name) " +
             "FROM Term t " +
