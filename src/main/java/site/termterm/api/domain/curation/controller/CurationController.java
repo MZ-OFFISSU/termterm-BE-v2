@@ -31,7 +31,7 @@ public class CurationController {
      * 새로운 큐레이션을 등록합니다. (for ADMIN)
      */
     @PostMapping("/admin/curation/register")
-    public ResponseEntity<ResponseDto<?>> registerCurationForAdmin(
+    public ResponseEntity<ResponseDto<Curation>> registerCurationForAdmin(
             @RequestBody @Valid CurationRegisterRequestDto curationRegisterRequestDto,
             BindingResult bindingResult,
             @AuthenticationPrincipal LoginMember loginMember){
@@ -64,7 +64,7 @@ public class CurationController {
      * 큐레이션의 상세정보를 조회합니다.
      */
     @GetMapping("/s/curation/detail/{id}")
-    public ResponseEntity<ResponseDto<?>> getCurationDetail(@PathVariable("id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
+    public ResponseEntity<ResponseDto<CurationDetailResponseDto>> getCurationDetail(@PathVariable("id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
         CurationDetailResponseDto responseDto = curationService.getCurationDetail(curationId, loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "큐레이션 상세 조회 성공", responseDto), HttpStatus.OK);
@@ -74,7 +74,7 @@ public class CurationController {
      * 카테고리별 큐레이션 리스트를 조회합니다.
      */
     @GetMapping("/s/curation/list")
-    public ResponseEntity<ResponseDto<?>> getCurationList(
+    public ResponseEntity<ResponseDto<List<CurationSimpleResponseDto>>> getCurationList(
             @RequestParam(value = "category", required = false) String categoryName,
             @AuthenticationPrincipal LoginMember loginMember
     ){
@@ -95,7 +95,7 @@ public class CurationController {
      * 아카이브한 큐레이션들을 조회합니다.
      */
     @GetMapping("/s/curation/archived")
-    public ResponseEntity<ResponseDto<?>> getArchivedCuration(@AuthenticationPrincipal LoginMember loginMember){
+    public ResponseEntity<ResponseDto<Set<CurationSimpleResponseDtoNamedStatus>>> getArchivedCuration(@AuthenticationPrincipal LoginMember loginMember){
         Set<CurationSimpleResponseDtoNamedStatus> responseDtoList = curationService.getArchivedCuration(loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "아카이브 큐레이션 조회 성공", responseDtoList), HttpStatus.OK);

@@ -7,7 +7,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.member.entity.Member;
-import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,19 +68,25 @@ public class Comment {
         this.likeCnt--;
     }
 
-    public void setAccepted(){
+    public Comment setAccepted(){
         this.status = CommentStatus.ACCEPTED;
+        return this;
     }
 
-    public void setRejected(){
+    public Comment setRejected(){
         this.status = CommentStatus.REJECTED;
+        return this;
     }
 
-    public void setWaiting(){
+    public Comment setWaiting(){
         this.status = CommentStatus.WAITING;
+        return this;
     }
 
-    public void setReported(){this.status = CommentStatus.REPORTED;}
+    public Comment setReported(){
+        this.status = CommentStatus.REPORTED;
+        return this;
+    }
 
     public Comment addReportCnt(){
         this.reportCnt++;

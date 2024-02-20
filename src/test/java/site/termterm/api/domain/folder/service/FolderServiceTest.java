@@ -470,7 +470,7 @@ class FolderServiceTest extends DummyObject {
         //stub
         when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
         when(termRepository.findTermsByIdList(any())).thenReturn(dtoList);
-        when(commentRepository.getCommentDetailByTermIdList(any(), any())).thenReturn(commentDtoList);
+        when(commentRepository.getCommentDetailByTermIdList(any(), any(), any(), any())).thenReturn(commentDtoList);
 
         //when
         List<TermDetailInfoDto> responseDtoList = folderService.getFolderTermDetailEach(1L, 1L);

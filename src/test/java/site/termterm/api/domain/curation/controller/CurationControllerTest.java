@@ -475,12 +475,10 @@ class CurationControllerTest extends DummyObject {
 
         for (Object obj : dataArray) {
             JSONObject dataObject = (JSONObject) obj;
-            if (Long.parseLong(dataObject.get("curationId").toString()) == 5) {
-                String bookmarked = dataObject.get("bookmarked").toString();
-                assertThat(bookmarked).isEqualTo("YES");
+            if (dataObject.get("curationId").equals(5L)) {
+                assertThat(dataObject.get("bookmarked")).isEqualTo("YES");
             }else{
-                String bookmarked = dataObject.get("bookmarked").toString();
-                assertThat(bookmarked).isEqualTo("NO");
+                assertThat(dataObject.get("bookmarked")).isEqualTo("NO");
             }
         }
 
