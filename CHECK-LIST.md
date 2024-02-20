@@ -86,4 +86,4 @@
 - [ ] GET /v1/term/daily
 - [ ] GET /v1/term/detail/{id}
 - [ ] POST /v1/term/list
-- [ ] GET /v1/term/search/{name}  // TODO : Response 에 BookmarkStatus 추가
+- [x] GET /v1/term/search/{name}  // TODO : Response 에 BookmarkStatus 추가

@@ -2,6 +2,8 @@
 
 ### 15. 2024/02/20
 - 아카이브한 Curation API
+- Term 검색 응답에 BookmarkStatus 추가
+- 
 
 ### 14. 2024/02/19
 - Curation 상세정보 API 

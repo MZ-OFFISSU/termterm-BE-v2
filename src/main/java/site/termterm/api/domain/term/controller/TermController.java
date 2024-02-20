@@ -26,12 +26,12 @@ public class TermController {
      */
     @GetMapping("/s/term/search/{name}")
     public ResponseEntity<ResponseDto<List<TermIdAndNameAndBookmarkStatusResponseDto>>> searchTerm(@PathVariable(value = "name") String name, @AuthenticationPrincipal LoginMember loginMember){
-        List<TermIdAndNameAndBookmarkStatusResponseDto> responseDtos = termService.searchTerm(name, loginMember.getMember().getId());
+        List<TermIdAndNameAndBookmarkStatusResponseDto> responseDtoList = termService.searchTerm(name);
 
-        if (responseDtos.isEmpty()){
-            return new ResponseEntity<>(new ResponseDto<>(-1, "검색 결과가 존재하지 않습니다.", responseDtos), HttpStatus.NOT_FOUND);
+        if (responseDtoList.isEmpty()){
+            return new ResponseEntity<>(new ResponseDto<>(-1, "검색 결과가 존재하지 않습니다.", responseDtoList), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new ResponseDto<>(1, "용어 검색에 성공하였습니다.", responseDtos), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "용어 검색에 성공하였습니다.", responseDtoList), HttpStatus.OK);
 
     }
 }

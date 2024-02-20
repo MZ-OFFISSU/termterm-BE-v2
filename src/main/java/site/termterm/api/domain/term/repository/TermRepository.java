@@ -14,8 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TermRepository extends JpaRepository<Term, Long> {
-    @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermIdAndNameAndBookmarkStatusResponseDto(t.id, t.name) " +
+    @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermIdAndNameAndBookmarkStatusResponseDto(t.id, t.name, tb) " +
             "FROM Term t " +
+            "LEFT JOIN TermBookmark tb " +
+            "ON tb.termId = t.id " +
             "WHERE t.name LIKE CONCAT('%', :name, '%') ")
     List<TermIdAndNameAndBookmarkStatusResponseDto> getSearchResults(@Param("name") String name);
 

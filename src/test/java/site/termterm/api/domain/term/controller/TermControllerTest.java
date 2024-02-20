@@ -18,7 +18,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static site.termterm.api.domain.category.CategoryEnum.*;
 
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
@@ -49,15 +52,22 @@ class TermControllerTest extends DummyObject {
     private MemberRepository memberRepository;
 
     @Autowired
+    private TermBookmarkRepository termBookmarkRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
     public void setUp(){
-        memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        Member member1 = memberRepository.save(newMember("1111", "sinner@gmail.com"));
 
-        termRepository.save(newTerm("용어111", "용어1의 설명입니다.", List.of(IT, BUSINESS)));
-        termRepository.save(newTerm("용어122", "용어2의 설명입니다.", List.of(DESIGN, MARKETING)));
-        termRepository.save(newTerm("용어223", "용어3의 설명입니다.", List.of(PM, IT, DEVELOPMENT)));
+        Term term1 = termRepository.save(newTerm("용어111", "용어1의 설명입니다.", List.of(IT, BUSINESS)));
+        Term term2 = termRepository.save(newTerm("용어122", "용어2의 설명입니다.", List.of(DESIGN, MARKETING)));
+        Term term3 = termRepository.save(newTerm("용어223", "용어3의 설명입니다.", List.of(PM, IT, DEVELOPMENT)));
+
+        termBookmarkRepository.save(newTermBookmark(term1, member1, 1));
+        termBookmarkRepository.save(newTermBookmark(term2, member1, 1));
+
         em.clear();
     }
 
@@ -69,13 +79,19 @@ class TermControllerTest extends DummyObject {
 
 
         //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
         ResultActions resultActions = mvc.perform(
                 get("/v2/s/term/search/{name}", "22"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
-
 
         //then
         resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+        resultActions.andExpect(jsonPath("$.data[0].id").value(2));
+        resultActions.andExpect(jsonPath("$.data[1].id").value(3));
+        resultActions.andExpect(jsonPath("$.data[0].bookmarked").value("YES"));
+        resultActions.andExpect(jsonPath("$.data[1].bookmarked").value("NO"));
 
     }
 
@@ -84,7 +100,6 @@ class TermControllerTest extends DummyObject {
     @Test
     public void search_term_no_result_test() throws Exception{
         //given
-
 
         //when
         ResultActions resultActions = mvc.perform(
