@@ -3,7 +3,8 @@
 ### 15. 2024/02/20
 - 아카이브한 Curation API
 - Term 검색 응답에 BookmarkStatus 추가
-- 
+  - 이전 버전에서는 Bookmark 가 null 로 나갈 때도 있었지만, 여기서는 무조건 NO 로 나간다. 프론트님들께 말씀드리기
+- Curation 상세에서 bookmark 가 제대로 반영되지 않던 버그 수정
 
 ### 14. 2024/02/19
 - Curation 상세정보 API 
