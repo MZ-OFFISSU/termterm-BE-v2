@@ -85,5 +85,5 @@
 ### Term
 - [ ] GET /v1/term/daily
 - [x] GET /v1/term/detail/{id}
-- [ ] POST /v1/term/list
+- [x] POST /v1/term/list
 - [x] GET /v1/term/search/{name}  // TODO : Response 에 BookmarkStatus 추가

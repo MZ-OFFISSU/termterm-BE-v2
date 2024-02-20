@@ -6,6 +6,9 @@
   - 이전 버전에서는 Bookmark 가 null 로 나갈 때도 있었지만, 여기서는 무조건 NO 로 나간다. 프론트님들께 말씀드리기
 - Curation 상세에서 bookmark 가 제대로 반영되지 않던 버그 수정
 - Term 상세 API
+- Term List API 
+  - Page 로 구현을 했는데, 요청할 때마다 전체의 리스트를 불러와서 잘라내고 있다.
+  - 그냥 그 자른 만큼만 DB 에서 불러오는 방법은 없을까?
 
 -- TODAY ISSUE
   - 어제, `m.categories` 를 호출할 떄는 `List<ArrayList<CategoryEnum>>` 타입이 잘 반환되었었는데, 이는 `m.categories` 를 그대로 SELECT 하면 그렇게 된다.

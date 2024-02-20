@@ -13,7 +13,7 @@ import site.termterm.api.domain.term.entity.Term;
 import java.util.List;
 import java.util.Optional;
 
-public interface TermRepository extends JpaRepository<Term, Long> {
+public interface TermRepository extends JpaRepository<Term, Long>, Dao {
     @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermIdAndNameAndBookmarkStatusResponseDto(t.id, t.name, tb) " +
             "FROM Term t " +
             "LEFT JOIN TermBookmark tb " +
