@@ -12,6 +12,7 @@ import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -47,9 +48,11 @@ class JwtAuthorizationFilterTest {
 
         //when
         ResultActions resultActions = mvc.perform(get("/v2/s/authentication-test"));
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
         resultActions.andExpect(status().isUnauthorized());
+        resultActions.andExpect(jsonPath("$.status").value(-2));
 
     }
 
@@ -77,9 +80,11 @@ class JwtAuthorizationFilterTest {
 
         //when
         ResultActions resultActions = mvc.perform(get("/v2/admin/authorization-test").header(jwtVO.getHeader(), jwtVO.getTokenPrefix() + jwtToken));
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
         resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.status").value(-2));
 
     }
 
