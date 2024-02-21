@@ -81,11 +81,18 @@ public class TermResponseDto {
     @Builder
     @AllArgsConstructor
     @ToString
-    public static class TermSimpleDto {
+    public static class TermSimpleDto implements Comparable<TermSimpleDto>{
         private Long id;
         private String name;
         private String description;
         private BookmarkStatus bookmarked;
+
+        public TermSimpleDto(Long id, String name, String description, TermBookmark termBookmark) {
+            this.id = id;
+            this.name = name;
+            this.description = description;
+            this.bookmarked = termBookmark != null ? BookmarkStatus.YES : BookmarkStatus.NO;
+        }
 
         public static TermSimpleDto of(Object[] objects){
             return TermSimpleDto.builder()
@@ -116,6 +123,16 @@ public class TermResponseDto {
                     this.name.equals(termSimpleDto.name) &&
                     this.description.equals(termSimpleDto.description) &&
                     this.bookmarked.name().equals(termSimpleDto.bookmarked.name());
+        }
+
+        @Override
+        public int compareTo(TermSimpleDto that) {
+            if (that.id < this.id){
+                return 1;
+            } else if (that.id > this.id) {
+                return -1;
+            }
+            return 0;
         }
     }
 

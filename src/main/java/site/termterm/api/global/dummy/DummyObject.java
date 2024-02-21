@@ -11,6 +11,7 @@ import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeStatus;
 import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPaid;
 import site.termterm.api.domain.curation.entity.Curation;
+import site.termterm.api.domain.daily_term.entity.DailyTerm;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -184,6 +185,10 @@ public class DummyObject {
     protected CurationPaid newCurationPaid(Member member, List<Long> curationIds){
         return CurationPaid.builder()
                 .id(member.getId()).curationIds(curationIds).createdDate(LocalDateTime.now()).build();
+    }
+
+    protected DailyTerm newMockDailyTerm(Long memberId, List<Long> termIds){
+        return DailyTerm.builder().id(memberId).termIds(termIds).build();
     }
 
 }

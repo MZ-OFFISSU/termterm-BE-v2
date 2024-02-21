@@ -29,7 +29,7 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
     @Query("SELECT new site.termterm.api.domain.folder.dto.FolderResponseDto$TermDetailInfoDto(t) " +
             "FROM Term t " +
             "WHERE t.id IN :termIdList")
-    List<FolderResponseDto.TermDetailInfoDto> findTermsByIdList(@Param("termIdList") List<Long> termIdList);
+    List<FolderResponseDto.TermDetailInfoDto> findTermsByIdListAlwaysBookmarked(@Param("termIdList") List<Long> termIdList);
 
     @Query("SELECT new site.termterm.api.domain.curation.dto.CurationResponseDto$CurationDetailResponseDto$TermSimpleDto(t.id, t.name, t.description, tb) " +
             "FROM Term t " +
@@ -44,5 +44,12 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
         "ON tb.termId = t.id AND tb.member.id = :memberId " +
         "WHERE t.id = :termId ")
     TermDetailDto getTermDetailDto(@Param("termId") Long termId, @Param("memberId") Long memberId);
+
+    @Query("SELECT new site.termterm.api.domain.term.dto.TermResponseDto$TermSimpleDto(t.id, t.name, t.description, tb) " +
+            "FROM Term t " +
+            "LEFT JOIN TermBookmark tb " +
+            "ON tb.termId = t.id AND tb.member.id = :memberId " +
+            "WHERE t.id IN :termIdList")
+    List<TermSimpleDto> getTermsByIdList(@Param("termIdList") List<Long> termIdList, @Param("memberId") Long memberId);
 
 }

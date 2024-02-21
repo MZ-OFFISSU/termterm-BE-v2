@@ -26,7 +26,6 @@ import site.termterm.api.global.handler.exceptions.CustomApiException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -469,7 +468,7 @@ class FolderServiceTest extends DummyObject {
 
         //stub
         when(folderRepository.findById(any())).thenReturn(Optional.of(folder));
-        when(termRepository.findTermsByIdList(any())).thenReturn(dtoList);
+        when(termRepository.findTermsByIdListAlwaysBookmarked(any())).thenReturn(dtoList);
         when(commentRepository.getCommentDetailByTermIdList(any(), any(), any(), any())).thenReturn(commentDtoList);
 
         //when

@@ -26,11 +26,13 @@ import static site.termterm.api.domain.category.CategoryEnum.*;
 
 import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.entity.CommentStatus;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment.service.CommentService;
-import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
+import site.termterm.api.domain.daily_term.entity.DailyTerm;
+import site.termterm.api.domain.daily_term.repository.DailyTermRepository;
 import site.termterm.api.domain.folder.dto.FolderResponseDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
@@ -46,9 +48,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(DataClearExtension.class)
 @ActiveProfiles("test")
@@ -74,7 +76,7 @@ class TermControllerTest extends DummyObject {
     private CommentRepository commentRepository;
 
     @Autowired
-    private CommentLikeRepository commentLikeRepository;
+    private DailyTermRepository dailyTermRepository;
 
     @Autowired
     private CommentService commentService;
@@ -96,6 +98,8 @@ class TermControllerTest extends DummyObject {
         Term term6 = termRepository.save(newTerm("용어666", "용어6의 설명입니다.", List.of(MARKETING)));
         Term term7 = termRepository.save(newTerm("용어777", "용어7의 설명입니다.", List.of(DESIGN)));
         Term term8 = termRepository.save(newTerm("용어888", "용어8의 설명입니다.", List.of(DEVELOPMENT)));
+        Term term9 = termRepository.save(newTerm("용어999", "용어9의 설명입니다.", List.of(DEVELOPMENT, BUSINESS)));
+
 
         termBookmarkRepository.save(newTermBookmark(term1, member1, 1));
         termBookmarkRepository.save(newTermBookmark(term2, member1, 1));
@@ -109,6 +113,12 @@ class TermControllerTest extends DummyObject {
         commentService.like(1L, 1L);
         commentService.like(2L, 1L);
         commentService.like(1L, 2L);
+
+        dailyTermRepository.save(newMockDailyTerm(1L, List.of(2L, 5L, 7L, 8L)));
+
+        DailyTerm dailyTerm2 = newMockDailyTerm(3L, List.of(2L, 5L, 7L, 8L));
+        dailyTerm2.setLastRefreshedDate(LocalDate.EPOCH);
+        dailyTermRepository.save(dailyTerm2);
 
         em.clear();
     }
@@ -262,7 +272,6 @@ class TermControllerTest extends DummyObject {
         JSONObject dataObject = (JSONObject) jsonObject.get("data");
         JSONArray commentArray = (JSONArray) dataObject.get("comments");
 
-
         //then
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.id").value(1L));
@@ -299,7 +308,6 @@ class TermControllerTest extends DummyObject {
         TermRequestDto.TermListCategoryRequestDto requestDto = new TermRequestDto.TermListCategoryRequestDto();
         requestDto.setCategories(List.of());
 
-
         String requestBody = om.writeValueAsString(requestDto);
 
         //when
@@ -314,7 +322,7 @@ class TermControllerTest extends DummyObject {
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
-        resultActions.andExpect(status().isOk());   // 1, 2, 4, 7 의 용어가 나와야 한다.
+        resultActions.andExpect(status().isOk());   // 1, 2, 4, 7, 8 의 용어가 나와야 한다.
         resultActions.andExpect(jsonPath("$.data.content.length()").value(3));
         resultActions.andExpect(jsonPath("$.data.content[0].id").value(1));
         resultActions.andExpect(jsonPath("$.data.content[1].id").value(2));
@@ -337,9 +345,11 @@ class TermControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isOk());
-        resultActions.andExpect(jsonPath("$.data.content.length()").value(1));
+        resultActions.andExpect(jsonPath("$.data.content.length()").value(2));
         resultActions.andExpect(jsonPath("$.data.content[0].id").value(7));
+        resultActions.andExpect(jsonPath("$.data.content[1].id").value(9));
         resultActions.andExpect(jsonPath("$.data.content[0].bookmarked").value("NO"));
+        resultActions.andExpect(jsonPath("$.data.content[1].bookmarked").value("NO"));
 
 
     }
@@ -395,6 +405,104 @@ class TermControllerTest extends DummyObject {
 
         resultActions.andExpect(jsonPath("$.data.content[0].bookmarked").value("NO"));
         resultActions.andExpect(jsonPath("$.data.content[1].bookmarked").value("NO"));
+    }
+
+    @DisplayName("오늘의 용어 조회 API 성공 - 1.존재하고 날짜도 오늘이다.")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_daily_terms_success1_test() throws Exception{
+        //given
+        // Member1 은 Term(2, 5, 7, 8) 이 Daily Term 에 이미 있다
+        List<Long> termIdList = List.of(2L, 5L, 7L, 8L);
+
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/term/daily"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(4));
+
+        for (int i = 0; i < 4; i++){
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].id", i)).value(termIdList.get(i)));
+
+            if (i == 0){    // 2L Term 에 대해서만 Bookmark 되어 있다
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].bookmarked", i)).value("YES"));
+            }else{
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].bookmarked", i)).value("NO"));
+            }
+        }
+
+    }
+
+    @DisplayName("오늘의 용어 조회 API 성공 - 2.존재하지 않는다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_daily_terms_success2_test() throws Exception {
+        //given
+        List<CategoryEnum> memberCategories = List.of(CategoryEnum.IT, CategoryEnum.DESIGN, CategoryEnum.BUSINESS);
+        // 나와야 하는 용어 : 1, 2, 4, 7, 9 중 4개
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/term/daily"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        JSONObject jsonObject = (JSONObject) new JSONParser().parse(resultActions.andReturn().getResponse().getContentAsString());
+        JSONArray dataArray = (JSONArray) jsonObject.get("data");
+        List<Long> termIds = new ArrayList<>();
+        for (Object obj : dataArray){
+            JSONObject o = (JSONObject) obj;
+            termIds.add((Long) o.get("id"));
+        }
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(4));
+
+        for(Long id : termIds){
+            List<CategoryEnum> categories = termRepository.findById(id).get().getCategories();
+            assertThat(memberCategories.stream().anyMatch(categories::contains)).isEqualTo(true);
+        }
+    }
+
+    @DisplayName("오늘의 용어 조회 API 성공 - 3.존재하지만, 오늘 날짜가 아니다")
+    @WithUserDetails(value = "3", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_daily_terms_success3_test() throws Exception {
+        //given
+        List<CategoryEnum> memberCategories = List.of(CategoryEnum.IT, CategoryEnum.DESIGN, CategoryEnum.BUSINESS);
+        // 나와야 하는 용어 : 1, 2, 4, 7, 9 중 4개
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/term/daily"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        JSONObject jsonObject = (JSONObject) new JSONParser().parse(resultActions.andReturn().getResponse().getContentAsString());
+        JSONArray dataArray = (JSONArray) jsonObject.get("data");
+        List<Long> termIds = new ArrayList<>();
+        for (Object obj : dataArray){
+            JSONObject o = (JSONObject) obj;
+            termIds.add((Long) o.get("id"));
+        }
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(4));
+
+        for(Long id : termIds){
+            List<CategoryEnum> categories = termRepository.findById(id).get().getCategories();
+            assertThat(memberCategories.stream().anyMatch(categories::contains)).isEqualTo(true);
+        }
     }
 
 }

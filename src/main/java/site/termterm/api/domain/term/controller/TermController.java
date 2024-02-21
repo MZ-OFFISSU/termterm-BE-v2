@@ -69,4 +69,14 @@ public class TermController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "전체 용어 리스트 조회 완료", responseDtoPage), HttpStatus.OK);
     }
+
+    /**
+     * 오늘의 용어
+     */
+    @GetMapping("/s/term/daily")
+    public ResponseEntity<ResponseDto<List<TermSimpleDto>>> getDailyTerms(@AuthenticationPrincipal LoginMember loginMember){
+        List<TermSimpleDto> responseDto = termService.getDailyTerms(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "오늘의 용어 조회 성공", responseDto), HttpStatus.OK);
+    }
 }
