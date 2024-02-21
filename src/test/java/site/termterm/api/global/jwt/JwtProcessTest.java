@@ -30,10 +30,10 @@ class JwtProcessTest {
         String jwtToken1 = jwtProcess.create(member1);
         System.out.println("1L 의 토큰 : " + jwtToken1);
 
-        String jwtToken2 = jwtProcess.create(member1);
+        String jwtToken2 = jwtProcess.create(member2);
         System.out.println("2L 의 토큰 : " + jwtToken2);
 
-        String jwtToken3 = jwtProcess.create(member1);
+        String jwtToken3 = jwtProcess.create(member3);
         System.out.println("3L 의 토큰 (ADMIN): " + jwtToken3);
 
         //then
