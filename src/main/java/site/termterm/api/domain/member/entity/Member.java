@@ -151,5 +151,11 @@ public class Member {
         return this;
     }
 
+    public Member setPoint(Integer point){
+        this.point = point;
+
+        return this;
+    }
+
 
 }

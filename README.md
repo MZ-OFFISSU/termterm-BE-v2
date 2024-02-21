@@ -33,6 +33,7 @@
 - Curation 상세정보 API 
 - Curation List - 카테고리 미지정 시 관심사 기반
 - Curation List - 카테고리 지정 
+- 현재 보유 Point API
 
 -- TODAY ISSUE
   - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다.
