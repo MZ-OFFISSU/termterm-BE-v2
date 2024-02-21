@@ -10,7 +10,6 @@ import java.util.List;
 interface Dao {
     List<Object[]> getCurationDtoListByCategoriesExceptMainCuration(Long mainCurationId, List<CategoryEnum> categories, Long memberId);
     List<Object[]> getCurationDtoListByCategoriesLimit6(List<CategoryEnum> categories, Long memberId);
-
     List<Object[]> getCurationsByCategory(CategoryEnum category, Long memberId);
 }
 
@@ -20,11 +19,12 @@ public class CurationRepositoryImpl implements Dao {
 
     @Override
     public List<Object[]> getCurationsByCategory(CategoryEnum category, Long memberId) {
-        String sql = "SELECT DISTINCT c.curation_id, c.title, c.description, c.cnt, c.thumbnail, cb.status " +
+        String sql = "SELECT c.curation_id, c.title, c.description, c.cnt, c.thumbnail, cb.status " +
                 "FROM curation c " +
                 "LEFT JOIN curation_bookmark cb " +
                 "ON cb.curation_id = c.curation_id AND cb.member_id = :memberId " +
-                "WHERE c.categories LIKE CONCAT('%\"', :category, '\"%') ";
+                "WHERE c.categories LIKE CONCAT('%\"', :category, '\"%') " +
+                "ORDER BY RAND()";
 
         Query query = em.createNativeQuery(sql);
 

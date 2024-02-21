@@ -1,7 +1,31 @@
 ## termterm v2 - auth server
 
+### 16. 2024/02/21
+- 오늘의 용어를 선정하는 로직에서, 4개의 용어를 무작위로 추출하기 위해 `ORDER BY RAND() LIMIT 4` 를 사용하고 있다.
+  - 데이터의 개수가 적은 테이블에서 이 쿼리를 실행하는 것은 괜찮으나, 수많은 데이터가 있는 테이블에서 `ORDER BY RAND()` 는 DB 에 부하를 굉장히 많이 주는 작업이다. 
+  - 이 역시 해결법이 있고, 이는 추후 수정하도록 하자. TODO
+- 오늘의 용어 API 
+
 ### 15. 2024/02/20
 - 아카이브한 Curation API
+- Term 검색 응답에 BookmarkStatus 추가
+  - 이전 버전에서는 Bookmark 가 null 로 나갈 때도 있었지만, 여기서는 무조건 NO 로 나간다. 프론트님들께 말씀드리기
+- Curation 상세에서 bookmark 가 제대로 반영되지 않던 버그 수정
+- Term 상세 API
+- Term List API 
+  - Page 로 구현을 했는데, 요청할 때마다 전체의 리스트를 불러와서 잘라내고 있다.
+  - 그냥 그 자른 만큼만 DB 에서 불러오는 방법은 없을까?
+
+-- TODAY ISSUE
+  - 어제, `m.categories` 를 호출할 떄는 `List<ArrayList<CategoryEnum>>` 타입이 잘 반환되었었는데, 이는 `m.categories` 를 그대로 SELECT 하면 그렇게 된다.
+    - `@Query("SELECT new TermDetailDto(t.id, t.name, t.description, t.categories, tb) " +`
+      - 여기에서는 `List<CategoryEnum>` 타입으로 리턴이 된다.
+  - Term 상세 API 에서, CommentDto 에 대해서 아래와 같은 에러가 발생했다.
+    - `org.springframework.http.converter.HttpMessageConversionException: Type definition error: [simple type, class`
+    - 원인 : Controller 에서 return 하여 넘긴 데이터를 Spring 내부적으로 JSON 형태로 변환하려 하였으나, 넘긴 객체의 필드 중에 getter 메소드가 없었고, 해당 필드의 접근제어자도 private 였기에, 해당 데이터의 필드 값을 읽어서 처리할 수가 없다.
+    - 해결 : 필드들을 읽을 수 있게 @Getter 어노테이션을 붙어주었다.
+
+`TODO : Comment 리턴 시 Comment Status 고려하여 포함 여부 결정하기`
 
 ### 14. 2024/02/19
 - Curation 상세정보 API 

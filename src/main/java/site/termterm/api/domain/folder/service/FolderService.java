@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
+import site.termterm.api.domain.comment.entity.CommentStatus;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
@@ -269,9 +270,9 @@ public class FolderService {
             throw new CustomApiException("폴더의 소유자가 로그인한 사용자가 아닙니다.");
         }
 
-        List<TermDetailInfoDto> responseDtoList = termRepository.findTermsByIdList(folderPS.getTermIds());
+        List<TermDetailInfoDto> responseDtoList = termRepository.findTermsByIdListAlwaysBookmarked(folderPS.getTermIds());
 
-        List<TermDetailInfoDto.CommentDetailInfoDto> commentDetailByTermIdList = commentRepository.getCommentDetailByTermIdList(folderPS.getTermIds(), memberId);
+        List<TermDetailInfoDto.CommentDetailInfoDto> commentDetailByTermIdList = commentRepository.getCommentDetailByTermIdList(folderPS.getTermIds(), memberId, CommentStatus.ACCEPTED, CommentStatus.REPORTED);
 
         for(TermDetailInfoDto responseDto: responseDtoList){
             Long termId = responseDto.getId();

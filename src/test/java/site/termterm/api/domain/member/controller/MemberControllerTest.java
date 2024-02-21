@@ -156,11 +156,13 @@ class MemberControllerTest extends DummyObject {
         System.out.println(requestBody);
 
         //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>쿼리 요청 시작");
         ResultActions resultActions = mvc.perform(
                 put("/v2/s/member/info")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
         );
+        System.out.println("<<<<<<<<<<<<<<<<<<<쿼리 요청 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
@@ -255,8 +257,10 @@ class MemberControllerTest extends DummyObject {
     public void member_profile_image_request_success_test() throws Exception{
         //given
         //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>쿼리 요청 시작");
         ResultActions resultActions = mvc.perform(
                 get("/v2/s/member/info/profile-image"));
+        System.out.println("<<<<<<<<<<<<<<<<<<<쿼리 요청 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then

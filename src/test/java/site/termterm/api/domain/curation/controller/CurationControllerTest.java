@@ -35,6 +35,7 @@ import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -309,10 +310,10 @@ class CurationControllerTest extends DummyObject {
 
     }
 
-    @DisplayName("큐레이션 상세 조회 API 요청 성공 - 구매 큐레이션")
+    @DisplayName("큐레이션 상세 조회 API 요청 성공 - 구매 큐레이션1")
     @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
-    public void curation_paid_detail_success_test() throws Exception{
+    public void curation_paid_detail_success_test1() throws Exception{
         // given
         // Curation 은 현재 1L 부터 4L 까지 있다
         // 이 사용자는 curation4 를 북마크 했고, curation1 에 대해 포인트를 지불했다.
@@ -342,7 +343,36 @@ class CurationControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.termSimples[3].bookmarked").value("YES"));
         resultActions.andExpect(jsonPath("$.data.moreRecommendedCurations.length()", lessThanOrEqualTo(3)));
 
+    }
 
+    @DisplayName("큐레이션 상세 조회 API 요청 성공 - 구매 큐레이션2")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void curation_paid_detail_success_test2() throws Exception{
+        // given
+        // Curation 은 현재 1L 부터 4L 까지 있다
+        Long targetCurationId = 1L;
+        CurationDatabaseDto.CurationInfoWithBookmarkDto curationWithBookmarked = curationRepository.findByIdWithBookmarked(targetCurationId, 2L).get();
+        CurationPaid curationPaid = curationPaidRepository.findById(2L).orElse(new CurationPaid(2L, List.of(), LocalDateTime.now()));
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/curation/detail/{id}", targetCurationId));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.title").value(curationWithBookmarked.getTitle()));
+        resultActions.andExpect(jsonPath("$.data.bookmarked").value(BookmarkStatus.NO.getStatus()));
+        resultActions.andExpect(jsonPath("$.data.paid").value(curationPaid.getCurationIds().contains(targetCurationId)));
+        resultActions.andExpect(jsonPath("$.data.paid").value("false"));
+        resultActions.andExpect(jsonPath("$.data.termSimples", hasSize(5)));
+        resultActions.andExpect(jsonPath("$.data.termSimples[2].bookmarked").value("NO"));
+        resultActions.andExpect(jsonPath("$.data.termSimples[3].bookmarked").value("NO"));
+        resultActions.andExpect(jsonPath("$.data.moreRecommendedCurations.length()", lessThanOrEqualTo(3)));
 
     }
 
@@ -445,12 +475,10 @@ class CurationControllerTest extends DummyObject {
 
         for (Object obj : dataArray) {
             JSONObject dataObject = (JSONObject) obj;
-            if (Long.parseLong(dataObject.get("curationId").toString()) == 5) {
-                String bookmarked = dataObject.get("bookmarked").toString();
-                assertThat(bookmarked).isEqualTo("YES");
+            if (dataObject.get("curationId").equals(5L)) {
+                assertThat(dataObject.get("bookmarked")).isEqualTo("YES");
             }else{
-                String bookmarked = dataObject.get("bookmarked").toString();
-                assertThat(bookmarked).isEqualTo("NO");
+                assertThat(dataObject.get("bookmarked")).isEqualTo("NO");
             }
         }
 

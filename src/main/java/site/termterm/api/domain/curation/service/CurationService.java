@@ -111,7 +111,7 @@ public class CurationService {
 
         // 구매 했을 경우 전부 다, 구매하지 않았을 경우 5개만
         List<Long> termIds = paid ? curationInfoWithBookmarkDto.getTermIds() : curationInfoWithBookmarkDto.getTermIds().subList(0, 5);
-        List<CurationDetailResponseDto.TermSimpleDto> termsSimpleDtoList = termRepository.getTermsSimpleDtoListByIdList(termIds);
+        List<CurationDetailResponseDto.TermSimpleDto> termsSimpleDtoList = termRepository.getTermsSimpleDtoListByIdList(termIds, memberId);
 
 
         // 연관 큐레이션 불러오기
@@ -151,10 +151,9 @@ public class CurationService {
         }
 
         List<Object[]> queryResults = curationRepository.getCurationsByCategory(categoryEnum, memberId);
-        List<CurationSimpleResponseDto> responseDtoList = queryResults.stream().map(CurationSimpleResponseDto::of).collect(Collectors.toList());
-        Collections.shuffle(responseDtoList);
 
-        return responseDtoList;
+        return queryResults.stream().map(CurationSimpleResponseDto::of).collect(Collectors.toList());
+
     }
 
     /**

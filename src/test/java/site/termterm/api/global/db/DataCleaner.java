@@ -28,6 +28,7 @@ public class DataCleaner {
     private final List<String> tableNames = new ArrayList<>();
 
     private final List<String> compositeKeyTables = List.of("COMMENT_LIKE", "TERM_BOOKMARK", "CURATION_BOOKMARK");
+    private final List<String> memberKeyTables = List.of("CURATION_PAID", "DAILY_TERM");
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -58,7 +59,7 @@ public class DataCleaner {
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, tableName.split("_")[0])).executeUpdate();
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN MEMBER_ID RESTART WITH 1", tableName)).executeUpdate();
             }
-            else if(tableName.equals("CURATION_PAID")){
+            else if(memberKeyTables.contains(tableName)){
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, "MEMBER")).executeUpdate();
             }
             else {

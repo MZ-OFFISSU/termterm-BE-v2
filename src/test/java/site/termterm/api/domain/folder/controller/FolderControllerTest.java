@@ -133,15 +133,16 @@ class FolderControllerTest extends DummyObject {
         Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
         Member member3 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
 
-        Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term6).addLike().addLike().addLike());
-        Comment comment2 = commentRepository.save(newComment("용어 설명2", "내 머리", member2, term6).addLike());
-        Comment comment3 = commentRepository.save(newComment("용어 설명3", "내 머리", member3, term6));
+        Comment comment1 = commentRepository.save(newComment("용어 설명1", "내 머리", member1, term6).addLike().addLike().addLike().setAccepted());
+        Comment comment2 = commentRepository.save(newComment("용어 설명2", "내 머리", member2, term6).addLike().setReported());
+        Comment comment3 = commentRepository.save(newComment("용어 설명3", "내 머리", member3, term6).setAccepted());
 
         for (Term term : terms.subList(1, terms.size())){
-            commentRepository.save(newComment("comment by member1", "comment source", member1, term));
-            commentRepository.save(newComment("comment by member2", "comment source", member2, term));
-            commentRepository.save(newComment("comment by member3", "comment source", member3, term));
+            commentRepository.save(newComment("comment by member1", "comment source", member1, term).setAccepted());
+            commentRepository.save(newComment("comment by member2", "comment source", member2, term).setAccepted());
+            commentRepository.save(newComment("comment by member3", "comment source", member3, term).setReported());
         }
+        Comment comment8 = commentRepository.save(newComment("용어 설명8", "내 머리", member3, term6));
 
         commentLikeRepository.save(newMockCommentLike(comment1, sinner, CommentLikeStatus.YES));
         commentLikeRepository.save(newMockCommentLike(comment1, member2, CommentLikeStatus.YES));
