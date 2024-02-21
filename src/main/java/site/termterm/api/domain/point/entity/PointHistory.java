@@ -13,6 +13,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class PointHistory {
     @Id @GeneratedValue(strategy = IDENTITY)
     @Column(name = "POINT_HISTORY_ID")
@@ -28,12 +29,13 @@ public class PointHistory {
 
     @Column(name = "val")
     private Integer value;
+
     private Integer memberPoint;
 
     @Setter
     private String subText;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
@@ -45,6 +47,11 @@ public class PointHistory {
                 .memberPoint(beforeMemberPoint + type.getPoint())
                 .member(member)
                 .build();
+    }
+
+    public PointHistory setDate(LocalDate date){
+        this.date = date;
+        return this;
     }
 
 }

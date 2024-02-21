@@ -17,6 +17,8 @@ import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
 import site.termterm.api.domain.member.entity.SocialLoginType;
+import site.termterm.api.domain.point.entity.PointHistory;
+import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
@@ -189,6 +191,10 @@ public class DummyObject {
 
     protected DailyTerm newMockDailyTerm(Long memberId, List<Long> termIds){
         return DailyTerm.builder().id(memberId).termIds(termIds).build();
+    }
+
+    protected PointHistory newPointHistory(PointPaidType type, Member member, Integer beforePoint){
+        return PointHistory.of(type, member, beforePoint);
     }
 
 }

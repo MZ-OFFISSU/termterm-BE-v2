@@ -1,10 +1,51 @@
-## termterm v2 - auth server
+# termterm back-end server v2
 
+
+---
 ### 16. 2024/02/21
 - 오늘의 용어를 선정하는 로직에서, 4개의 용어를 무작위로 추출하기 위해 `ORDER BY RAND() LIMIT 4` 를 사용하고 있다.
   - 데이터의 개수가 적은 테이블에서 이 쿼리를 실행하는 것은 괜찮으나, 수많은 데이터가 있는 테이블에서 `ORDER BY RAND()` 는 DB 에 부하를 굉장히 많이 주는 작업이다. 
   - 이 역시 해결법이 있고, 이는 추후 수정하도록 하자. TODO
 - 오늘의 용어 API 
+- 현재 보유 포인트 조회 API
+- 포인트 내역 조회 API
+
+-- TODAY ISSUE
+  - `PointHistory` 에는 `value` 라는 필드가 있었다.  
+    - 엔티티에서 테이블을 생성하는 과정에서, 에러가 발생했다.  
+    - H2 Database 에서, `value` 는 예약어이기 때문에, `CREATE` SQL 문을 생성하지 못한 것.
+    - `@Column(name = "val") private Integer value;` 의 방식으로, DB 에서 컬럼 이름을 `value` 가 아닌 `val` 로 처리를 해주었다. 
+  ```java
+    List<PointHistory> pointHistoryList = pointHistoryRepository.findByMemberOrderByDateDesc(memberPS);
+
+    Map<LocalDate, List<PointHistory>> groupedByDate =
+            pointHistoryList.stream().collect(Collectors.groupingBy(PointHistory::getDate, TreeMap::new, Collectors.toList()));
+   ```
+  - Point 내역을 조회하는 API 의 응답 바디를 구성하는 과정에서, DB 에서 불러온 `Point History` 엔티티를 날짜별로 분류하는 로직이 필요했다.
+    - `Collectors.groupingBy()` 메서드로 `LocalDate` 를 기준으로 그룹화 해주었다. 
+    - `Map` 타입으로 리턴되는 데, Key 값으로는 기준이 되었던 LocalDate, Value 값으로는 새로운 List 가 들어간다.
+    - 응답 바디에는 시간에 따른 순서가 있기 때문에, 생성되는 Map 에서도 순서를 유지하는 것이 중요했다.
+    - 그러나 일반 Map 타입은 순서를 보장해주지 않기 때문에, 정렬할 수 있는 Map 타입인 `TreeMap` 으로 변환하여 저장했다. 
+
+  ```java
+    List<PointHistoryEachDto> eachDtoList = 
+        entry.getValue().stream().map(PointHistoryEachDto::of).sorted(Comparator.reverseOrder()).toList();
+
+    public static class PointHistoryEachDto implements Comparable<PointHistoryEachDto>{...}
+  ```
+  - dto 객체에 대해서 sorted 를 하고 싶다면, `Comparable` 를 implement 하고, `compareTo()` 메서드를 override 해주어야 한다.   
+
+  ```java
+    List<PointHistory> pointHistoryList = pointHistoryRepository.findByMemberOrderByDate(memberPS);
+  ```
+  - `PointHistory` 테이블에 대해서 한번만 SELECT 하면 되는데, 어째서인지 조회 후 `SELECT Member` 쿼리가 한번 더 발생했다.
+  - 문제의 코드: `PointHistory.java`
+    - `@ManyToOne @JoinColumn(name = "MEMBER_ID") private Member member;`
+    - 멍청한 것.
+    - Lazy Fetch 를 빼먹었지 않느냐...
+  - 수정한 코드:
+    - `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "MEMBER_ID") private Member member;`
+    - 이제 `SELECT MEMBER` 쿼리가 추가로 발생하지 않는다!
 
 ---
 ### 15. 2024/02/20
@@ -34,6 +75,9 @@
 - Curation List - 카테고리 미지정 시 관심사 기반
 - Curation List - 카테고리 지정 
 - 현재 보유 Point API
+- 포인트 내역 API
+  - 포인트 내역이 기록될 때마다 사용자의 해당 시점에서의 포인트를 `memberPoint` 라는 필드에 담아 같이 응답하고 있다.
+  - Test 코드 작성과, 추후 혹시라도 추가될 기능을 위해 담아두었으니, 프론트 개발자님들은 현재 단계에서는 그냥 안 쓰시면 된다.
 
 -- TODAY ISSUE
   - CurationPaid 에서 Member 와의 OneToOne 관계를 끊고, CurationPaid 의 PK 값에 항상 MemberId 를 주입하는 방식으로 OneToOne 구현방식을 변경했다.

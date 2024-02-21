@@ -18,9 +18,13 @@ import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.point.entity.PointPaidType;
+import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 @Configuration
@@ -35,7 +39,8 @@ public class DummyDevInit extends DummyObject {
             CommentRepository commentRepository,
             CommentLikeRepository commentLikeRepository,
             CurationRepository curationRepository,
-            CurationBookmarkRepository curationBookmarkRepository
+            CurationBookmarkRepository curationBookmarkRepository,
+            PointHistoryRepository pointHistoryRepository
     ){
         return args -> {
             Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
@@ -84,6 +89,17 @@ public class DummyDevInit extends DummyObject {
 
             curationBookmarkRepository.save(newCurationBookmark(curation1, member1));
             curationBookmarkRepository.save(newCurationBookmark(curation2, member1));
+
+            pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member1, 0).setDate(LocalDate.EPOCH));
+            pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()));
+            member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
+            pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()).setDate(LocalDate.EPOCH));
+            member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
+            pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()).setDate(LocalDate.of(1998, Month.AUGUST, 16)));
+            member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
+
+            pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member2, 0));
+            pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member3, 0));
 
         };
 
