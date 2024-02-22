@@ -18,7 +18,6 @@ import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
-import site.termterm.api.global.handler.exceptions.CustomStatusApiException;
 
 import static site.termterm.api.domain.point.dto.PointResponseDto.*;
 import static site.termterm.api.domain.point.dto.PointResponseDto.PointHistoryResponseDto.*;
@@ -122,7 +121,7 @@ public class PointService {
 
         // 사용자의 포인트를 확인하여, 구매 가능 여부 확인
         if (memberPS.getPoint() < PointPaidType.FOLDER.getPoint()){
-            throw new CustomStatusApiException(-12, "폴더 생성에 필요한 포인트가 부족합니다.");
+            throw new CustomApiException("폴더 생성에 필요한 포인트가 부족합니다.", -12);
         }
 
         // 사용자 폴더 생성 한도 1 추가
@@ -130,7 +129,7 @@ public class PointService {
         try {
             memberPS.addFolderLimit();
         } catch(RuntimeException e){
-            throw new CustomStatusApiException(-11, "사용자의 폴더 생성 한도가 최대입니다.");
+            throw new CustomApiException("사용자의 폴더 생성 한도가 최대입니다.", -11);
         }
 
         // Point History 저장

@@ -360,7 +360,7 @@ class PointControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isBadRequest());
-        resultActions.andExpect(jsonPath("$.status").value(-12));
+        resultActions.andExpect(jsonPath("$.data").value(-12));
     }
 
     @DisplayName("폴더 구매 API 실패 - 생성 한도 초과")
@@ -378,7 +378,7 @@ class PointControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isBadRequest());
-        resultActions.andExpect(jsonPath("$.status").value(-11));
+        resultActions.andExpect(jsonPath("$.data").value(-11));
     }
 
 }

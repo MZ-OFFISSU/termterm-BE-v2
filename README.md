@@ -7,6 +7,12 @@
 - 폴더 구매 API
 
 ###### Memo 🤔
+- 폴더 구매 API 응답에서 예외 발생 시, 응답 Body 의 data 값 (400 BAD_REQUEST 와 함께 그냥 정수값만.) :
+  * $.data
+    * -11 : 사용자의 폴더 생성 한도 == 시스템 폴더 개수 한도 == 9
+    * -12 : 포인트 부족
+  * 프론트 개발자님들께 말씀 드리기
+
 - 테스트 코드에서, stub 으로 member 를 리턴하게 해주고, service 단의 메서드를 호출하면, 메서드 내 member 필드 값을 수정하는 로직이 있을 경우, 테스트 코드 메서드 내 member 에도 변화가 전달된다.
   ```
     //given
@@ -22,7 +28,7 @@
   - 폴더에 용어를 추가하면, 서비스 로직에서는 다음과 같은 코드로 DB에 반영한다.
     - `folder.getTermIds().add(termId);`
     - 이것 보다는, 아래와 같이 하면 어떨까?
-    - ```java
+    - ```
         public void addTerm(Long termId){
             // 여기에 폴더 사이즈를 조사하는 로직 추가
             this.termIds.add(termId);

@@ -18,7 +18,6 @@ import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.dummy.DummyObject;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
-import site.termterm.api.global.handler.exceptions.CustomStatusApiException;
 import site.termterm.api.global.vo.SystemVO;
 
 import java.util.ArrayList;
@@ -143,7 +142,7 @@ class PointServiceTest extends DummyObject {
         //when
 
         //then
-        assertThrows(CustomStatusApiException.class, () -> pointService.payForFolder(1L));
+        assertThrows(CustomApiException.class, () -> pointService.payForFolder(1L));
 
     }
 
@@ -160,7 +159,7 @@ class PointServiceTest extends DummyObject {
         //when
 
         //then
-        assertThrows(CustomStatusApiException.class, () -> pointService.payForFolder(1L));
+        assertThrows(CustomApiException.class, () -> pointService.payForFolder(1L));
 
     }
 

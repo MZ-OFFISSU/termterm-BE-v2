@@ -55,7 +55,7 @@ public class PointController {
 
     /**
      * 폴더 구매
-     * status
+     * 예외 발생 시, 응답 Body 의 data 값
      * -11 : 사용자의 폴더 생성 한도 == 시스템 폴더 개수 한도 == 9
      * -12 : 포인트 부족
      */
