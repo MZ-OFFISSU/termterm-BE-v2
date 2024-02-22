@@ -7,16 +7,16 @@
 
 ### Comment
 - [x] POST /v1/comment
-- [ ] PUT /v1/comment/accept/{id}   (ADMIN)
+- [ ] PUT /v1/comment/accept/{id}            (ADMIN)
 - [x] PUT /v1/comment/dislike/{id}
 - [x] PUT /v1/comment/like/{id}
-- [ ] GET /v1/comment/list            (ADMIN)
-- [ ] PUT /v1/comment/reject/{id}  (ADMIN)
+- [ ] GET /v1/comment/list                   (ADMIN)
+- [ ] PUT /v1/comment/reject/{id}            (ADMIN)
 - [x] POST /v1/comment/report
 - [ ] PUT /v1/comment/report/completed/{id}  (ADMIN)
-- [ ] GET /v1/comment/report/list     (ADMIN)
-- [ ] PUT /v1/comment/reported/{id}      (ADMIN)
-- [ ] PUT /v1/comment/wait/{id}   (ADMIN)
+- [ ] GET /v1/comment/report/list            (ADMIN)
+- [ ] PUT /v1/comment/reported/{id}          (ADMIN)
+- [ ] PUT /v1/comment/wait/{id}              (ADMIN)
 
 
 ### Curation
@@ -48,11 +48,11 @@
 
 
 ### Inquiry
-- [ ] POST /v1/inquiry
-- [ ] GET /v1/inquiry/{id}
-- [ ] GET /v1/inquiry/list
-- [ ] PUT /v1/inquiry/to-completed/{id}
-- [ ] PUT /v1/inquiry/to-waiting/{id}
+- [x] POST /v1/inquiry
+- [ ] GET /v1/inquiry/{id}                     (ADMIN)
+- [ ] GET /v1/inquiry/list                     (ADMIN)
+- [ ] PUT /v1/inquiry/to-completed/{id}        (ADMIN)
+- [ ] PUT /v1/inquiry/to-waiting/{id}          (ADMIN)
 
 
 ### Member
@@ -64,7 +64,7 @@
 - [x] GET /v1/member/info/profile-image/presigned-url
 - [x] GET /v1/member/info/profile-image/sync  __-------------> PUT__
 - [x] GET /v1/member/nickname/check
-- [x] GET /v1/member/withdraw  __-------------> PUT__
+- [x] GET /v1/member/withdraw                 __-------------> PUT__
 
 
 ### Point

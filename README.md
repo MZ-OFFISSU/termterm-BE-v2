@@ -7,6 +7,7 @@
 - 폴더 구매 API
 - 폴더에 용어 저장 API 에서 예외 상황 data 추가
   - 폴더에 용어 저장 실패 시 Controller test 추가
+- 문의사항 등록 API
 
 ###### Memo 🤔
 - 폴더에 용어 저장시,
