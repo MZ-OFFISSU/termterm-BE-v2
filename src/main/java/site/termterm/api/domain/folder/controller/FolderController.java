@@ -65,6 +65,7 @@ public class FolderController {
      * 폴더에 용어를 저장합니다. (아카이빙)
      * 한 번에 여러 폴더에 저장할 수 있습니다.
      * 그러나 폴더에 이미 해당 용어가 담겨 있을 경우, 이미 담은 폴더명들을 리스트로 반환합니다.
+     * 폴더가 꽉 차서 더 이상 저장할 수 없는 경우, data 에 -11 을 반환합니다.
      */
     @PostMapping("/s/folder/term")
     public ResponseEntity<ResponseDto<?>> archiveTermIntoFolders(

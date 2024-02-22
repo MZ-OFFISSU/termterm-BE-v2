@@ -128,6 +128,14 @@ class FolderControllerTest extends DummyObject {
         }
         folderRepository.save(folder3);
 
+        // for Full Folder Fail test
+        Folder folder4 = newFolder("꽉 찬 폴더4", "꽉 찬 설명3", sinner);
+        for (int i = 100; i<150; i++){
+            folder4.getTermIds().add((long) i);
+        }
+        folderRepository.save(folder4);
+
+
         // for Folder Detail Each test
         Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
         Member member2 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
@@ -282,6 +290,69 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(status().isOk());
 
     }
+
+    @DisplayName("용어 아카이브 API 요청 - 실패 (폴더 꽉 참)")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archive_term_fail_full_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(4L, 2L));
+        requestDto.setTermId(14L);
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/folder/term")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.data").value(-11));
+
+    }
+
+    @DisplayName("용어 아카이브 API 요청 - 실패 (기저장)")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archive_term_fail_already_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(3L, 2L, 1L));
+        requestDto.setTermId(1L);
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        String title1 = folderRepository.findById(1L).get().getTitle();
+        String title2 = folderRepository.findById(2L).get().getTitle();
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/folder/term")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.data").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data[0]").value(title1));
+        resultActions.andExpect(jsonPath("$.data[1]").value(title2));
+
+
+    }
+
+
 
     @DisplayName("폴더 삭제 API 요청 - 성공")
     @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
