@@ -7,6 +7,9 @@ import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.member.utils.SocialLoginUtil;
+import site.termterm.api.domain.point.entity.PointHistory;
+import site.termterm.api.domain.point.entity.PointPaidType;
+import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.aws.AmazonS3Util;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 import site.termterm.api.global.jwt.JwtProcess;
@@ -27,6 +30,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final SocialLoginUtil socialLoginUtil;
     private final AmazonS3Util amazonS3Util;
+    private final PointHistoryRepository pointHistoryRepository;
 
     private static final String S3_BUCKET_BASE_URL = "https://termterm-bucket-dev.s3.ap-northeast-2.amazonaws.com";
     private static final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
@@ -47,7 +51,13 @@ public class MemberService {
 
         // DB 에 이미 있는지 확인하고, 없으면 회원가입 진행
         Member memberPS = memberRepository.findBySocialIdAndEmail(memberInfo.getSocialId(), memberInfo.getEmail())
-                .orElse(memberRepository.save(memberInfo.toEntity()));  // 존재하지 않으므로 회원가입 진행
+                .orElseGet(() -> {
+                    Member newMember = memberRepository.save(memberInfo.toEntity());
+
+                    // 기본 포인트 지급 내역 Point History 에 저장
+                    pointHistoryRepository.save(PointHistory.of(PointPaidType.SIGNUP_DEFAULT, newMember, 0));
+                    return newMember;
+                });         // 존재하지 않으므로 회원가입 진행
 
         return memberPS;
     }

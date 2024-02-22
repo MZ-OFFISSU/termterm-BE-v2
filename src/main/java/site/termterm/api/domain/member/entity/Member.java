@@ -2,6 +2,7 @@ package site.termterm.api.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,6 +11,7 @@ import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberRequestDto;
 import site.termterm.api.global.converter.CategoryListConverter;
+import site.termterm.api.global.vo.SystemVO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)  // 이게 있어야만 createdAt, modifiedAt 작동
 @Entity
 @ToString
+@DynamicUpdate
 public class Member {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MEMBER_ID")
@@ -63,7 +66,6 @@ public class Member {
     private SocialLoginType socialType;
 
     @Builder.Default
-    @Setter
     private Integer folderLimit = 3;
 
     @Builder.Default
@@ -146,7 +148,26 @@ public class Member {
     }
 
     public Member addFolderLimit() {
+        if (this.getFolderLimit() >= SystemVO.SYSTEM_FOLDER_LIMIT){
+            throw new RuntimeException();
+        }
+
         this.folderLimit++;
+        return this;
+    }
+
+    public Member setPoint(Integer point){
+        this.point = point;
+
+        return this;
+    }
+
+    public Member setFolderLimit(Integer limit){
+        if (limit > SystemVO.SYSTEM_FOLDER_LIMIT){
+            throw new RuntimeException();
+        }
+
+        this.folderLimit = limit;
 
         return this;
     }

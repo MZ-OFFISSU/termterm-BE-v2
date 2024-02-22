@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,6 +78,7 @@ class FolderControllerTest extends DummyObject {
     public void setUp(){
         // folder1 : {1, 2} , folder2 : {1, 5, 3}
         Member sinner =memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
+        Member djokovic =memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
 
         Folder folder1 = newFolder("새 폴더1", "새 폴더 설명1", sinner);
         Folder folder2 = newFolder("새 폴더2", "새 폴더 설명2", sinner);
@@ -127,6 +127,31 @@ class FolderControllerTest extends DummyObject {
             termBookmarkRepository.save(newTermBookmark(terms.get(i-6), sinner, 1));
         }
         folderRepository.save(folder3);
+
+
+        // for Full Folder Fail test
+        Folder folder4 = newFolder("꽉 찬 폴더4", "꽉 찬 설명4", djokovic);
+
+        for (int i = 100; i<150; i++){
+            folder4.getTermIds().add((long) i);
+        }
+        folderRepository.save(folder4);
+
+        Folder folder5 = newFolder("새 폴더5", "새 폴더 5", djokovic);
+        Folder folder6 = newFolder("새 폴더6", "새 폴더 6", djokovic);
+        Folder folder7 = newFolder("새 폴더7", "새 폴더 7", djokovic);
+        folder5.getTermIds().add(term1.getId());
+        folder5.getTermIds().add(term2.getId());
+
+        folder6.getTermIds().add(term1.getId());
+        folder6.getTermIds().add(term5.getId());
+        folder6.getTermIds().add(term3.getId());
+
+        folderRepository.save(folder5);
+        folderRepository.save(folder6);
+        folderRepository.save(folder7);
+
+
 
         // for Folder Detail Each test
         Member member1 = memberRepository.save(newMember("This-is-social-id", "this-is@an.email"));
@@ -282,6 +307,70 @@ class FolderControllerTest extends DummyObject {
         resultActions.andExpect(status().isOk());
 
     }
+
+    @DisplayName("용어 아카이브 API 요청 - 실패 (폴더 꽉 참)")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archive_term_fail_full_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(4L));
+        requestDto.setTermId(14L);
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/folder/term")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.data").value(-11));
+
+    }
+
+    @DisplayName("용어 아카이브 API 요청 - 실패 (기저장)")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void archive_term_fail_already_test() throws Exception{
+        //given
+        ArchiveTermRequestDto requestDto = new ArchiveTermRequestDto();
+        requestDto.setFolderIds(List.of(6L, 5L, 7L));
+        requestDto.setTermId(1L);
+
+        String requestBody = om.writeValueAsString(requestDto);
+        System.out.println(requestBody);
+
+        String title5 = folderRepository.findById(5L).get().getTitle();
+        String title6 = folderRepository.findById(6L).get().getTitle();
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                post("/v2/s/folder/term")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.data").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+        resultActions.andExpect(jsonPath("$.data[0]").value(title5));
+        resultActions.andExpect(jsonPath("$.data[1]").value(title6));
+
+
+    }
+
+
 
     @DisplayName("폴더 삭제 API 요청 - 성공")
     @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
@@ -513,9 +602,9 @@ class FolderControllerTest extends DummyObject {
             term7_comments.add(commentRepository.findById((long) i).get());
         }
         List<Member> term7_comments_authors = List.of(
-                memberRepository.findById(2L).get(),
                 memberRepository.findById(3L).get(),
-                memberRepository.findById(4L).get()
+                memberRepository.findById(4L).get(),
+                memberRepository.findById(5L).get()
         );
 
 

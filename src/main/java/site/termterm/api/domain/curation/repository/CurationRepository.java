@@ -26,4 +26,7 @@ public interface CurationRepository extends JpaRepository<Curation, Long>, Dao {
             "ON cb.curation.id = c.id AND cb.member.id = :memberId " +
             "WHERE cb.status = :status ")
     Set<CurationResponseDto.CurationSimpleResponseDtoNamedStatus> getArchivedCurationsWithBookmarked(@Param("memberId") Long memberId, @Param("status") BookmarkStatus status);
+
+    @Query("SELECT c.title FROM Curation c WHERE c.id = :curationId")
+    String getTitleById(@Param("curationId") Long curationId);
 }

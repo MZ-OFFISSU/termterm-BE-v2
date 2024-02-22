@@ -98,7 +98,7 @@ class TermControllerTest extends DummyObject {
         Term term6 = termRepository.save(newTerm("용어666", "용어6의 설명입니다.", List.of(MARKETING)));
         Term term7 = termRepository.save(newTerm("용어777", "용어7의 설명입니다.", List.of(DESIGN)));
         Term term8 = termRepository.save(newTerm("용어888", "용어8의 설명입니다.", List.of(DEVELOPMENT)));
-        Term term9 = termRepository.save(newTerm("용어999", "용어9의 설명입니다.", List.of(DEVELOPMENT, BUSINESS)));
+        Term term9 = termRepository.save(newTerm("용어999", "용어9의 설명입니다.", List.of(BUSINESS)));
 
 
         termBookmarkRepository.save(newTermBookmark(term1, member1, 1));

@@ -111,7 +111,7 @@ public class FolderService {
     public TermBookmark archiveTerm(ArchiveTermRequestDto requestDto, Long memberId) {
         List<String> alreadyArchivedFolderNames = new ArrayList<>();
 
-        for (Long folderId: requestDto.getFolderIds()){
+        for (Long folderId: requestDto.getFolderIds().stream().sorted().toList()){
             Folder folderPS = folderRepository.findById(folderId).orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
 
             if (folderPS.getMember().getId().longValue() != memberId.longValue()) {
@@ -119,7 +119,7 @@ public class FolderService {
             }
 
             if (folderPS.getTermIds().size() >= folderPS.getSaveLimit()){
-                throw new CustomApiException("폴더가 다 찼습니다.");
+                throw new CustomApiException("폴더가 다 찼습니다.", -11);
             }
 
             if (folderPS.getTermIds().contains(requestDto.getTermId())){

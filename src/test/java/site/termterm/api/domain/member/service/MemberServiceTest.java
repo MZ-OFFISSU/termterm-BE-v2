@@ -12,6 +12,7 @@ import site.termterm.api.domain.member.dto.MemberRequestDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.member.utils.SocialLoginUtil;
+import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.dummy.DummyObject;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
@@ -36,6 +37,9 @@ class MemberServiceTest extends DummyObject {
 
     @Mock
     private SocialLoginUtil socialLoginUtil;
+
+    @Mock
+    private PointHistoryRepository pointHistoryRepository;
 
     @Test
     public void 로그인_성공_test() throws Exception{
