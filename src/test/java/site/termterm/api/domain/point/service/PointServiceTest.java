@@ -18,6 +18,8 @@ import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.dummy.DummyObject;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
+import site.termterm.api.global.handler.exceptions.CustomStatusApiException;
+import site.termterm.api.global.vo.SystemVO;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,5 +109,83 @@ class PointServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("폴더 구매에 성공한다.")
+    @Test
+    public void folder_pay_success_test() throws Exception{
+        //given
+        Member member = newMember("1111", "1111").setPoint(2000);
+        Integer beforeMemberPoint = member.getPoint();
+        Integer beforeMemberFolderLimit = member.getFolderLimit();
+
+        //stub
+        when(memberRepository.findById(any())).thenReturn(Optional.of(member));
+
+        //when
+        pointService.payForFolder(1L);
+
+        //then
+        assertThat(member.getFolderLimit()).isEqualTo(beforeMemberFolderLimit + 1);
+        assertThat(member.getFolderLimit()).isEqualTo(4);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint - PointPaidType.FOLDER.getPoint());
+        assertThat(member.getPoint()).isEqualTo(1000);
+
+    }
+
+    @DisplayName("폴더 구매에 실패한다. - 포인트 부족")
+    @Test
+    public void folder_pay_fail1_test() throws Exception{
+        //given
+        Member member = newMember("1111", "1111").setPoint(900);
+
+        //stub
+        when(memberRepository.findById(any())).thenReturn(Optional.of(member));
+
+        //when
+
+        //then
+        assertThrows(CustomStatusApiException.class, () -> pointService.payForFolder(1L));
+
+    }
+
+    @DisplayName("폴더 구매에 실패한다. - 생성 한도 초과")
+    @Test
+    public void folder_pay_fail2_test() throws Exception{
+        //given
+        Member member = newMember("1111", "1111").setPoint(1200).setFolderLimit(SystemVO.SYSTEM_FOLDER_LIMIT);
+
+
+        //stub
+        when(memberRepository.findById(any())).thenReturn(Optional.of(member));
+
+        //when
+
+        //then
+        assertThrows(CustomStatusApiException.class, () -> pointService.payForFolder(1L));
+
+    }
+
+    @DisplayName("Member 엔티티에서 폴더 한도를 시스템 한도보다 크게 하려고 시도하면 예외를 던진다.1")
+    @Test
+    public void throw_exception_when_try_to_add_folder_limit_over_system_limit_test() throws Exception{
+        //given
+        Member member = newMockMember(1L, "", "").setFolderLimit(9);
+
+        //when
+        //then
+        assertThrows(RuntimeException.class, () -> member.addFolderLimit());
+
+    }
+
+    @DisplayName("Member 엔티티에서 폴더 한도를 시스템 한도보다 크게 하려고 시도하면 예외를 던진다.2")
+    @Test
+    public void throw_exception_when_try_to_set_folder_limit_over_system_limit_test() throws Exception{
+        //given
+        Member member = newMockMember(1L, "", "");
+
+        //when
+        //then
+        assertThrows(RuntimeException.class, () -> member.setFolderLimit(10));
+
+    }
 
 }

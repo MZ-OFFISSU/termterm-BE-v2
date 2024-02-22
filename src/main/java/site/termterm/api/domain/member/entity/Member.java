@@ -11,6 +11,7 @@ import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberRequestDto;
 import site.termterm.api.global.converter.CategoryListConverter;
+import site.termterm.api.global.vo.SystemVO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,7 +66,6 @@ public class Member {
     private SocialLoginType socialType;
 
     @Builder.Default
-    @Setter
     private Integer folderLimit = 3;
 
     @Builder.Default
@@ -148,13 +148,26 @@ public class Member {
     }
 
     public Member addFolderLimit() {
-        this.folderLimit++;
+        if (this.getFolderLimit() >= SystemVO.SYSTEM_FOLDER_LIMIT){
+            throw new RuntimeException();
+        }
 
+        this.folderLimit++;
         return this;
     }
 
     public Member setPoint(Integer point){
         this.point = point;
+
+        return this;
+    }
+
+    public Member setFolderLimit(Integer limit){
+        if (limit > SystemVO.SYSTEM_FOLDER_LIMIT){
+            throw new RuntimeException();
+        }
+
+        this.folderLimit = limit;
 
         return this;
     }

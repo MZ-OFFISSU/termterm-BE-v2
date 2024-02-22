@@ -79,6 +79,7 @@ class PointControllerTest extends DummyObject {
         Member member2 = memberRepository.save(newMember("2222", "2222@gmail.com").setPoint(1500));
         Member member3 = memberRepository.save(newMember("3333", "3333@gmail.com"));
         Member member4 = memberRepository.save(newMember("4444", "4444@gmail.com"));
+        Member member5 = memberRepository.save(newMember("5555", "5555@gmail.com").setPoint(2000).setFolderLimit(9));
 
         pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member1, 0).setDate(LocalDate.EPOCH));
         pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member2, 0).setDate(LocalDate.EPOCH));
@@ -314,4 +315,70 @@ class PointControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.status").value(-1));
 
     }
+
+    @DisplayName("폴더 구매 API 성공")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_folder_success_test() throws Exception{
+        //given
+        // member2 의 보유 포인트는 1500이다.
+        Member beforeMember = memberRepository.findById(2L).get();
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/folder"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Member afterMember = memberRepository.findById(2L).get();
+        assertThat(afterMember.getPoint()).isEqualTo(beforeMember.getPoint() - PointPaidType.FOLDER.getPoint());
+        assertThat(afterMember.getFolderLimit()).isEqualTo(beforeMember.getFolderLimit() + 1);
+
+        List<PointHistory> list = pointHistoryRepository.findByMemberOrderByDate(afterMember);
+        PointHistory pointHistory = list.get(list.size()-1);
+        assertThat(pointHistory.getMemberPoint()).isEqualTo(afterMember.getPoint());
+        assertThat(pointHistory.getValue()).isEqualTo(PointPaidType.FOLDER.getPoint());
+        assertThat(pointHistory.getSign()).isEqualTo(PointPaidType.FOLDER.getSign());
+    }
+
+    @DisplayName("폴더 구매 API 실패 - 포인트 부족")
+    @WithUserDetails(value = "3", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_folder_point_lack_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/folder"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-12));
+    }
+
+    @DisplayName("폴더 구매 API 실패 - 생성 한도 초과")
+    @WithUserDetails(value = "5", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_folder_over_limit_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/folder"));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-11));
+    }
+
 }

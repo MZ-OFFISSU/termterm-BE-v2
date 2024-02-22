@@ -18,6 +18,7 @@ import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
+import site.termterm.api.global.handler.exceptions.CustomStatusApiException;
 
 import static site.termterm.api.domain.point.dto.PointResponseDto.*;
 import static site.termterm.api.domain.point.dto.PointResponseDto.PointHistoryResponseDto.*;
@@ -75,27 +76,6 @@ public class PointService {
 
     /**
      * 큐레이션 구매
-     * 쿼리 발생
-     * -- 있을 경우
-     * 1. select member
-     * 2. select curation_paid
-     * 3. select curation.title
-     * 4. insert point_history
-     * 5. select curation_bookmark
-     * 6. insert curation_bookmark
-     * 7. update member
-     * 8. update curation_paid
-     *
-     * -- 없을 경우
-     * 1. select member
-     * 2. select curation_paid
-     * 3. select curation_paid (2랑 똑같음 (?))
-     * 4. select curation.title
-     * 5. insert curation_paid
-     * 6. insert point_history
-     * 7. select curation_bookmark
-     * 8. insert curation_bookmark
-     * 9. update member
      */
     @Transactional
     public void payForCuration(Long curationId, Long memberId) {
@@ -135,5 +115,29 @@ public class PointService {
     /**
      * 폴더 구매
      */
-    public void payForFolder(Long memberId){}
+    @Transactional
+    public void payForFolder(Long memberId){
+        Member memberPS = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomApiException("사용자가 존재하지 않습니다."));
+
+        // 사용자의 포인트를 확인하여, 구매 가능 여부 확인
+        if (memberPS.getPoint() < PointPaidType.FOLDER.getPoint()){
+            throw new CustomStatusApiException(-12, "폴더 생성에 필요한 포인트가 부족합니다.");
+        }
+
+        // 사용자 폴더 생성 한도 1 추가
+        // 동시에 사용자의 폴더 생성 한계가, 시스템 한도와 같은지 여부 확인
+        try {
+            memberPS.addFolderLimit();
+        } catch(RuntimeException e){
+            throw new CustomStatusApiException(-11, "사용자의 폴더 생성 한도가 최대입니다.");
+        }
+
+        // Point History 저장
+        pointHistoryRepository.save(PointHistory.of(PointPaidType.FOLDER, memberPS, memberPS.getPoint()));
+
+        // 사용자 포인트 차감
+        memberPS.setPoint(memberPS.getPoint() - PointPaidType.FOLDER.getPoint());
+
+    }
 }

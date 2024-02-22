@@ -55,5 +55,14 @@ public class PointController {
 
     /**
      * 폴더 구매
+     * status
+     * -11 : 사용자의 폴더 생성 한도 == 시스템 폴더 개수 한도 == 9
+     * -12 : 포인트 부족
      */
+    @GetMapping("/s/point/pay/folder")
+    public ResponseEntity<ResponseDto<?>> payForFolder(@AuthenticationPrincipal LoginMember loginMember){
+        pointService.payForFolder(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "폴더 구매 성공", null), HttpStatus.OK);
+    }
 }
