@@ -6,10 +6,19 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.termterm.api.domain.bookmark.entity.CurationBookmark;
+import site.termterm.api.domain.bookmark.repository.CurationBookmarkRepository;
+import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPaid;
+import site.termterm.api.domain.curation.domain.curation_paid.repository.CurationPaidRepository;
+import site.termterm.api.domain.curation.entity.Curation;
+import site.termterm.api.domain.curation.repository.CurationRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.point.entity.PointHistory;
+import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
+import site.termterm.api.global.handler.exceptions.CustomApiException;
+
 import static site.termterm.api.domain.point.dto.PointResponseDto.*;
 import static site.termterm.api.domain.point.dto.PointResponseDto.PointHistoryResponseDto.*;
 
@@ -26,6 +35,9 @@ public class PointService {
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
     private final MemberRepository memberRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final CurationPaidRepository curationPaidRepository;
+    private final CurationRepository curationRepository;
+    private final CurationBookmarkRepository curationBookmarkRepository;
 
     /**
      * 사용자의 현재 보유 포인트를 조회합니다.
@@ -60,4 +72,68 @@ public class PointService {
         final int end = Math.min((start + pageable.getPageSize()), responseDtoList.size());
         return new PageImpl<>(responseDtoList.subList(start, end), pageable, responseDtoList.size());
     }
+
+    /**
+     * 큐레이션 구매
+     * 쿼리 발생
+     * -- 있을 경우
+     * 1. select member
+     * 2. select curation_paid
+     * 3. select curation.title
+     * 4. insert point_history
+     * 5. select curation_bookmark
+     * 6. insert curation_bookmark
+     * 7. update member
+     * 8. update curation_paid
+     *
+     * -- 없을 경우
+     * 1. select member
+     * 2. select curation_paid
+     * 3. select curation_paid (2랑 똑같음 (?))
+     * 4. select curation.title
+     * 5. insert curation_paid
+     * 6. insert point_history
+     * 7. select curation_bookmark
+     * 8. insert curation_bookmark
+     * 9. update member
+     */
+    @Transactional
+    public void payForCuration(Long curationId, Long memberId) {
+        // 큐레이션을 구매할 만큼 포인트가 충분히 있는지 확인
+        Member memberPS = memberRepository.findById(memberId).orElseThrow(() -> new CustomApiException("사용자가 존재하지 않습니다."));
+
+        if (memberPS.getPoint() < PointPaidType.CURATION.getPoint()){
+            throw new CustomApiException("포인트가 부족합니다.");
+        }
+
+        // 구매 여부 확인 -> 이미 구매한 큐레이션일 경우 throw
+        Optional<CurationPaid> paidOptional = curationPaidRepository.findById(memberId);
+
+        if (paidOptional.isPresent() && paidOptional.get().getCurationIds().contains(curationId)){
+            throw new CustomApiException(String.format("사용자 (id : %s)가 이미 큐레이션 (id: %s) 을 구매하였습니다.", memberId, curationId));
+        }
+
+        // Curation_Paid 엔티티 생성 후 save
+        paidOptional.ifPresentOrElse(
+                curationPaid -> curationPaid.getCurationIds().add(curationId),
+                () -> curationPaidRepository.save(CurationPaid.builder().id(memberId).curationIds(List.of(curationId)).build()));
+
+
+        // Point_History 저장, subText 로 큐레이션 제목이 들어간다.
+        // of() 메서드의 3번째 인자는 Member 의 이전 포인트이므로, 포인트 차감과의 순서를 반드시 준수해야 한다.
+        String curationTitle = curationRepository.getTitleById(curationId);
+        pointHistoryRepository.save(PointHistory.of(PointPaidType.CURATION, memberPS, memberPS.getPoint()).setSubText(curationTitle));
+
+        // member 의 포인트 차감
+        memberPS.setPoint(memberPS.getPoint() - PointPaidType.CURATION.getPoint());
+
+        // 자동 북마크 처리
+        Curation curationPS = curationRepository.getReferenceById(curationId);
+        curationBookmarkRepository.save(CurationBookmark.of(curationPS, memberPS));
+    }
+
+    /**
+     * 폴더 구매
+     */
+    public void payForFolder(Long memberId){}
 }

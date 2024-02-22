@@ -186,7 +186,7 @@ public class DummyObject {
 
     protected CurationPaid newCurationPaid(Member member, List<Long> curationIds){
         return CurationPaid.builder()
-                .id(member.getId()).curationIds(curationIds).createdDate(LocalDateTime.now()).build();
+                .id(member.getId()).curationIds(curationIds).modifiedDate(LocalDateTime.now()).build();
     }
 
     protected DailyTerm newMockDailyTerm(Long memberId, List<Long> termIds){

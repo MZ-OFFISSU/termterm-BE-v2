@@ -1,5 +1,26 @@
 # termterm back-end server v2
 
+### 17. 2024/02/22
+- 테스트 코드에서, stub 으로 member 를 리턴하게 해주고, service 단의 메서드를 호출하면, 메서드 내 member 필드 값을 수정하는 로직이 있을 경우, 테스트 코드 메서드 내 member 에도 변화가 전달된다.
+  ```
+    //given
+    Member member = newMember("1111", "1111");
+    //stub
+    when(memberRepository.findById(any())).thenReturn(Optional.of(member));
+    //when
+    pointService.payForCuration(1L, 1L);
+   ```
+  - 따라서 불필요하게 test 코드를 확인하려고 `payForCuration` 메서드 타입을 Member 로 지정하고 리턴할 필요가 없다.
+- 큐레이션 구매 API
+
+-- TODAY ISSUE
+  - 각각 다른 사용자가 공유 자원에 대해서 update 를 요청하면, 동시성 이슈가 발생하여 Lock 이 필요함을 느꼈다.
+    - 예를 들어, 여러 명의 사용자가 Comment 에 like 를 거의 동시에 누를 경우, 좋아요 갯수에 대해서 동시성 문제가 발생할 수 있다.
+    - TODO : https://giron.tistory.com/147
+  - 큐레이션을 구매할 때, 더티체킹을 통해 Member 엔티티의 Point 값을 변경하고 있다. 
+    - 기본적으로 더티 체킹을 실행하면, SQL 에서는 변경된 엔티티의 모든 필드에 대해 update 쿼리로 만들어 전달한다.
+    - Member 의 필드는 적지 않은 편인데, 이 전체 필드를 update 하는게 비효율적일 수도 있겠다고 생각했다. 
+    - @DynamicUpdate 를 해당 Entity 에 선언하여 변경 필드만 반영시키도록 해 주었다.
 
 ---
 ### 16. 2024/02/21
@@ -15,7 +36,7 @@
     - 엔티티에서 테이블을 생성하는 과정에서, 에러가 발생했다.  
     - H2 Database 에서, `value` 는 예약어이기 때문에, `CREATE` SQL 문을 생성하지 못한 것.
     - `@Column(name = "val") private Integer value;` 의 방식으로, DB 에서 컬럼 이름을 `value` 가 아닌 `val` 로 처리를 해주었다. 
-  ```java
+  ```
     List<PointHistory> pointHistoryList = pointHistoryRepository.findByMemberOrderByDateDesc(memberPS);
 
     Map<LocalDate, List<PointHistory>> groupedByDate =
@@ -27,7 +48,7 @@
     - 응답 바디에는 시간에 따른 순서가 있기 때문에, 생성되는 Map 에서도 순서를 유지하는 것이 중요했다.
     - 그러나 일반 Map 타입은 순서를 보장해주지 않기 때문에, 정렬할 수 있는 Map 타입인 `TreeMap` 으로 변환하여 저장했다. 
 
-  ```java
+  ```
     List<PointHistoryEachDto> eachDtoList = 
         entry.getValue().stream().map(PointHistoryEachDto::of).sorted(Comparator.reverseOrder()).toList();
 
@@ -35,7 +56,7 @@
   ```
   - dto 객체에 대해서 sorted 를 하고 싶다면, `Comparable` 를 implement 하고, `compareTo()` 메서드를 override 해주어야 한다.   
 
-  ```java
+  ```
     List<PointHistory> pointHistoryList = pointHistoryRepository.findByMemberOrderByDate(memberPS);
   ```
   - `PointHistory` 테이블에 대해서 한번만 SELECT 하면 되는데, 어째서인지 조회 후 `SELECT Member` 쿼리가 한번 더 발생했다.

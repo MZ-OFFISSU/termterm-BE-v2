@@ -17,8 +17,15 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
+import site.termterm.api.domain.bookmark.repository.CurationBookmarkRepository;
+import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.curation.domain.curation_paid.repository.CurationPaidRepository;
+import site.termterm.api.domain.curation.entity.Curation;
+import site.termterm.api.domain.curation.repository.CurationRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.config.auth.LoginMember;
@@ -28,8 +35,8 @@ import site.termterm.api.global.dummy.DummyObject;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,11 +64,21 @@ class PointControllerTest extends DummyObject {
     @Autowired
     private PointHistoryRepository pointHistoryRepository;
 
+    @Autowired
+    private CurationRepository curationRepository;
+
+    @Autowired
+    private CurationPaidRepository curationPaidRepository;
+
+    @Autowired
+    private CurationBookmarkRepository curationBookmarkRepository;
+
     @BeforeEach
     public void setUp() {
         Member member1 = memberRepository.save(newMember("1111", "sinner@gmail.com"));  // IT, DESIGN, BUSINESS
         Member member2 = memberRepository.save(newMember("2222", "2222@gmail.com").setPoint(1500));
         Member member3 = memberRepository.save(newMember("3333", "3333@gmail.com"));
+        Member member4 = memberRepository.save(newMember("4444", "4444@gmail.com"));
 
         pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member1, 0).setDate(LocalDate.EPOCH));
         pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member2, 0).setDate(LocalDate.EPOCH));
@@ -75,6 +92,14 @@ class PointControllerTest extends DummyObject {
 
         pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()));
         member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
+
+        Curation curation1 = curationRepository.save(newCuration("큐레이션1",  List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L), List.of("tag1", "tag2"), List.of(CategoryEnum.IT, CategoryEnum.DEVELOPMENT)));
+        Curation curation2 = curationRepository.save(newCuration("큐레이션2", List.of(4L, 8L, 10L,  13L, 14L, 15L, 16L), List.of("tag1", "tag3"), List.of(CategoryEnum.IT, CategoryEnum.PM)));
+
+        curationPaidRepository.save(newCurationPaid(member3, List.of(1L)));
+        newCurationBookmark(curation1, member3).setStatus(BookmarkStatus.YES);
+
+        curationBookmarkRepository.save(newCurationBookmark(curation1, member4).setStatus(BookmarkStatus.NO));
 
         em.clear();
     }
@@ -137,8 +162,156 @@ class PointControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.content[2].dailyHistories[1].point").value("+500"));
         resultActions.andExpect(jsonPath("$.data.content[2].dailyHistories[1].currentMemberPoint").value(500));
 
+    }
+
+    @DisplayName("큐레이션 구매 API 성공 - 1")
+    @WithUserDetails(value = "3", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_curation_success1_test() throws Exception{
+        //given
+        // member3 는 curation1 을 이미 구매했다. 즉, Curation_paid 에 memberId 가 3인 튜플이 존재
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        LoginMember principal = (LoginMember) authentication.getPrincipal();
+        Integer beforeMemberPoint = principal.getMember().getPoint();
+
+        Long memberId = 3L;
+        Curation curation = curationRepository.findById(2L).get();
+        Member member = memberRepository.getReferenceById(memberId);
+
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/curation/{id}", 2L));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        Integer afterMemberPoint = memberRepository.getPointById(memberId);
+        assertThat(afterMemberPoint).isEqualTo(beforeMemberPoint - PointPaidType.CURATION.getPoint());
+        assertThat(afterMemberPoint).isNotNegative();
+        assertThat(curationPaidRepository.findById(memberId).get().getCurationIds().contains(2L)).isEqualTo(true);
+        assertThat(curationBookmarkRepository.findByCurationAndMember(curation, member).get().getStatus()).isEqualTo(BookmarkStatus.YES);
+
+        List<PointHistory> list = pointHistoryRepository.findByMemberOrderByDate(member);
+        PointHistory pointHistory = list.get(list.size()-1);
+        assertThat(pointHistory.getSubText()).isEqualTo(curation.getTitle());
+        assertThat(pointHistory.getMemberPoint()).isEqualTo(afterMemberPoint);
+        assertThat(pointHistory.getValue()).isEqualTo(PointPaidType.CURATION.getPoint());
+        assertThat(pointHistory.getSign()).isEqualTo(PointPaidType.CURATION.getSign());
 
     }
 
+    @DisplayName("큐레이션 구매 API 성공 - 2")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_curation_success2_test() throws Exception{
+        //given
+        // member4는 아직 아무것도 구매하지 않았다. 즉, Curation_paid 에 memberId 가 4인 튜플이 존재하지 않는다.
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        LoginMember principal = (LoginMember) authentication.getPrincipal();
+        Integer beforeMemberPoint = principal.getMember().getPoint();
 
+        Long memberId = 4L;
+        Curation curation = curationRepository.findById(2L).get();
+        Member member = memberRepository.getReferenceById(memberId);
+
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/curation/{id}", 2L));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        Integer afterMemberPoint = memberRepository.getPointById(memberId);
+        assertThat(afterMemberPoint).isEqualTo(beforeMemberPoint - PointPaidType.CURATION.getPoint());
+        assertThat(afterMemberPoint).isNotNegative();
+
+        List<Long> curationIds = curationPaidRepository.findById(memberId).get().getCurationIds();
+        assertThat(curationIds.contains(2L)).isEqualTo(true);
+        assertThat(curationIds.size()).isEqualTo(1);
+        assertThat(curationBookmarkRepository.findByCurationAndMember(curation, member).get().getStatus()).isEqualTo(BookmarkStatus.YES);
+
+        List<PointHistory> list = pointHistoryRepository.findByMemberOrderByDate(member);
+        PointHistory pointHistory = list.get(list.size()-1);
+        assertThat(pointHistory.getSubText()).isEqualTo(curation.getTitle());
+        assertThat(pointHistory.getMemberPoint()).isEqualTo(afterMemberPoint);
+        assertThat(pointHistory.getValue()).isEqualTo(PointPaidType.CURATION.getPoint());
+        assertThat(pointHistory.getSign()).isEqualTo(PointPaidType.CURATION.getSign());
+
+    }
+
+    @DisplayName("큐레이션 구매 API 성공 - 3")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_curation_success3_test() throws Exception{
+        //given
+        // member4 는 큐레이션1 을 사려고 한다. DB 에는 큐레이션4 의 BookmarkStatus 가 No 이다.
+        Long memberId = 4L;
+        Curation curation = curationRepository.findById(1L).get();
+        Member member = memberRepository.getReferenceById(memberId);
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/curation/{id}", 1L));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        List<Long> curationIds = curationPaidRepository.findById(memberId).get().getCurationIds();
+        assertThat(curationIds.contains(1L)).isEqualTo(true);
+        assertThat(curationIds.size()).isEqualTo(1);
+        assertThat(curationBookmarkRepository.findByCurationAndMember(curation, member).get().getStatus()).isEqualTo(BookmarkStatus.YES);
+
+    }
+
+    @DisplayName("큐레이션 구매 API 실패 - curation 없음")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_curation_not_exist_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/curation/{id}", 100L));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-2));
+
+    }
+
+    @DisplayName("큐레이션 구매 API 실패 - point 부족")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void pay_curation_point_lack_fail_test() throws Exception{
+        //given
+        Member member4 = memberRepository.findById(4L).get().setPoint(10);
+        memberRepository.save(member4);
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>쿼리 요청 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/point/pay/curation/{id}", 1L));
+        System.out.println("<<<<<<<<<<<<<<<쿼리 요청 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-1));
+
+    }
 }

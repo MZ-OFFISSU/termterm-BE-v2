@@ -2,7 +2,7 @@ package site.termterm.api.domain.curation.domain.curation_paid.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import site.termterm.api.global.converter.LongListConverter;
 
@@ -25,7 +25,7 @@ public class CurationPaid {
     @Builder.Default
     private List<Long> curationIds = new ArrayList<>();
 
-    @CreatedDate        // Insert
+    @LastModifiedDate   // Insert, Update
     @Column(nullable = false)
-    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
 }

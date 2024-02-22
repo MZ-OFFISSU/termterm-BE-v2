@@ -32,7 +32,6 @@ public class PointHistory {
 
     private Integer memberPoint;
 
-    @Setter
     private String subText;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,12 +43,17 @@ public class PointHistory {
                 .detail(type.getDetail())
                 .sign(type.getSign())
                 .value(type.getPoint())
-                .memberPoint(beforeMemberPoint + type.getPoint())
+                .memberPoint(type.getSign().equals(Sign.PLUS) ? beforeMemberPoint + type.getPoint() : beforeMemberPoint - type.getPoint())
                 .member(member)
                 .build();
     }
 
-    public PointHistory setDate(LocalDate date){
+    public PointHistory setSubText(String text){
+        this.subText = text;
+        return this;
+    }
+
+    public PointHistory setDate(LocalDate date){    // for Test
         this.date = date;
         return this;
     }

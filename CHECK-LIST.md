@@ -70,7 +70,7 @@
 ### Point
 - [x] GET /v1/point/current
 - [x] GET /v1/point/history
-- [ ] PUT /v1/point/pay/curation/{id}
+- [x] PUT /v1/point/pay/curation/{id}
 - [ ] PUT /v1/point/pay/folder
 
 

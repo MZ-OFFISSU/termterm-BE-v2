@@ -84,18 +84,18 @@ public class DummyDevInit extends DummyObject {
 
 
             Curation curation1  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L), List.of("tag1", "tag2"), List.of(IT, BUSINESS)));
-            Curation curation2  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L), List.of("tag1", "tag2"), List.of(IT, DESIGN)));
-            Curation curation3  = curationRepository.save(newCuration("큐레이션1", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L), List.of("tag1", "tag2"), List.of(BUSINESS)));
+            Curation curation2  = curationRepository.save(newCuration("큐레이션2", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L), List.of("tag1", "tag2"), List.of(IT, DESIGN)));
+            Curation curation3  = curationRepository.save(newCuration("큐레이션3", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L), List.of("tag1", "tag2"), List.of(BUSINESS)));
 
             curationBookmarkRepository.save(newCurationBookmark(curation1, member1));
             curationBookmarkRepository.save(newCurationBookmark(curation2, member1));
 
             pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member1, 0).setDate(LocalDate.EPOCH));
-            pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()));
-            member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
             pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()).setDate(LocalDate.EPOCH));
             member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
             pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()).setDate(LocalDate.of(1998, Month.AUGUST, 16)));
+            member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
+            pointHistoryRepository.save(newPointHistory(PointPaidType.DAILY_QUIZ_PERFECT, member1, member1.getPoint()));
             member1 = memberRepository.save(member1.setPoint(member1.getPoint() + PointPaidType.DAILY_QUIZ_PERFECT.getPoint()));
 
             pointHistoryRepository.save(newPointHistory(PointPaidType.SIGNUP_DEFAULT, member2, 0));

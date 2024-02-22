@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.termterm.api.domain.point.dto.PointResponseDto;
@@ -35,7 +36,7 @@ public class PointController {
      * 정책 상 size = 5
      */
     @GetMapping("/s/point/history")
-    public ResponseEntity<ResponseDto<?>> getPointHistories(Pageable pageable, @AuthenticationPrincipal LoginMember loginMember){
+    public ResponseEntity<ResponseDto<Page<PointResponseDto.PointHistoryResponseDto>>> getPointHistories(Pageable pageable, @AuthenticationPrincipal LoginMember loginMember){
         Page<PointResponseDto.PointHistoryResponseDto> pointHistories = pointService.getPointHistories(pageable, loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "포인트 내역 조회 성공", pointHistories), HttpStatus.OK);
@@ -44,6 +45,12 @@ public class PointController {
     /**
      * 큐레이션 구매
      */
+    @GetMapping("/s/point/pay/curation/{id}")
+    public ResponseEntity<ResponseDto<?>> payForCuration(@PathVariable(name = "id") Long curationId, @AuthenticationPrincipal LoginMember loginMember){
+        pointService.payForCuration(curationId, loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, String.format("큐레이션 (id: %s) 구매 성공", curationId), null), HttpStatus.OK);
+    }
 
 
     /**

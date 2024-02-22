@@ -25,10 +25,15 @@ public class CurationBookmark {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    @Setter //TODO : Cron 으로 매일 자정 NO 인 튜플 삭제
     private BookmarkStatus status = BookmarkStatus.YES;
 
     public static CurationBookmark of(Curation curation, Member member){
         return CurationBookmark.builder().curation(curation).member(member).build();
+    }
+
+    //TODO : Cron 으로 매일 자정 NO 인 튜플 삭제
+    public CurationBookmark setStatus(BookmarkStatus status){
+        this.status = status;
+        return this;
     }
 }
