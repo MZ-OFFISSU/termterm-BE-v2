@@ -48,7 +48,7 @@
 
 
 ### Inquiry
-- [ ] POST /v1/inquiry
+- [x] POST /v1/inquiry
 - [ ] GET /v1/inquiry/{id}
 - [ ] GET /v1/inquiry/list
 - [ ] PUT /v1/inquiry/to-completed/{id}
