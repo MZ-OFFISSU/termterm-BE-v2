@@ -42,9 +42,9 @@
 
 ### Home - 상단 Title (우선순위 제일 아래...)
 - [ ] GET /v1/home/subtitle                    (ADMIN)
-- [ ] POST /v1/home/subtitle                   (ADMIN)
+- [x] POST /v1/home/subtitle                   (ADMIN)
 - [ ] DELETE /v1/home/subtitle                 (ADMIN)
-- [ ] GET /v1/home/title
+- [x] GET /v1/home/title
 
 
 ### Inquiry

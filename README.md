@@ -1,9 +1,10 @@
 # termterm back-end server v2
 
-### 18. 2024/02/23
+### 18. 2024/02/24
 
-###### TODO 📝
-- HomeTitle API 작성
+###### Today I Did 🥳
+- HomeTitle 조회 API
+- HomeTitle 등록 API
 
 ---
 ### 17. 2024/02/22
