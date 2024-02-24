@@ -41,9 +41,9 @@
 - [x] GET /v1/folder/term/random-10
 
 ### Home - 상단 Title (우선순위 제일 아래...)
-- [ ] GET /v1/home/subtitle
-- [ ] POST /v1/home/subtitle
-- [ ] DELETE /v1/home/subtitle
+- [ ] GET /v1/home/subtitle                    (ADMIN)
+- [ ] POST /v1/home/subtitle                   (ADMIN)
+- [ ] DELETE /v1/home/subtitle                 (ADMIN)
 - [ ] GET /v1/home/title
 
 
