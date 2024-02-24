@@ -62,6 +62,8 @@ public class DataCleaner {
             else if(memberKeyTables.contains(tableName)){
                 entityManager.createNativeQuery(String.format("ALTER TABLE %s ALTER COLUMN %s_ID RESTART WITH 1", tableName, "MEMBER")).executeUpdate();
             }
+            else if(tableName.equals("HOME_SUBTITLE")){
+            }
             else {
                 entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
             }

@@ -33,4 +33,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.point FROM Member m WHERE m.id = :memberId")
     Integer getPointById(@Param("memberId") Long memberId);
+
+    @Query("SELECT m.nickname FROM Member m WHERE m.id = :memberId")
+    String getNicknameById(@Param("memberId") Long memberId);
 }
