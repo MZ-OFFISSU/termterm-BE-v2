@@ -19,6 +19,9 @@ import site.termterm.api.domain.member.entity.MemberEnum;
 import site.termterm.api.domain.member.entity.SocialLoginType;
 import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
+import site.termterm.api.domain.quiz.entity.Quiz;
+import site.termterm.api.domain.quiz.entity.QuizTerm;
+import site.termterm.api.domain.quiz.entity.WrongChoice;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
@@ -195,6 +198,31 @@ public class DummyObject {
 
     protected PointHistory newPointHistory(PointPaidType type, Member member, Integer beforePoint){
         return PointHistory.of(type, member, beforePoint);
+    }
+
+    protected WrongChoice newWrongChoice(QuizTerm quizTerm, List<Long> termIds){
+        return WrongChoice.builder().quizTerm(quizTerm).termIds(termIds).build();
+    }
+
+    protected WrongChoice newMockWrongChoice(Long id, QuizTerm quizTerm, List<Long> termIds){
+        return WrongChoice.builder().id(id).quizTerm(quizTerm).termIds(termIds).build();
+    }
+
+    protected QuizTerm newQuizTerm(Quiz quiz, Long termId){
+        return QuizTerm.builder().quiz(quiz).termId(termId).build();
+    }
+
+    protected QuizTerm newMockQuizTerm(Long id, Quiz quiz, Long termId){
+        return QuizTerm.builder().id(id).quiz(quiz).termId(termId).build();
+    }
+
+
+    protected Quiz newQuiz(Member member){
+        return Quiz.builder().member(member).build();
+    }
+
+    protected Quiz newMockQuiz(Long id, Member member){
+        return Quiz.builder().id(id).member(member).createdDate(LocalDateTime.now()).build();
     }
 
 }

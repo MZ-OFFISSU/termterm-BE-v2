@@ -75,7 +75,7 @@
 
 
 ### Quiz
-- [ ] GET /v1/quiz/daily
+- [x] GET /v1/quiz/daily
 - [ ] GET /v1/quiz/final-quiz-review
 - [ ] GET /v1/quiz/review
 - [ ] GET /v1/quiz/status
