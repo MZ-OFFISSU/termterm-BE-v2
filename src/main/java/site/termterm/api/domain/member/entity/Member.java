@@ -2,6 +2,7 @@ package site.termterm.api.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Entity
 @ToString
 @DynamicUpdate
+@DynamicInsert
 public class Member {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MEMBER_ID")
