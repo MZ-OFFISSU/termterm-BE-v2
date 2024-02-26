@@ -1,6 +1,7 @@
 package site.termterm.api.domain.quiz.dto;
 
 import lombok.*;
+import site.termterm.api.domain.quiz.entity.QuizStatus;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.util.List;
@@ -52,7 +53,16 @@ public class QuizResponseDto {
                         .collect(Collectors.toList());
             }
         }
+    }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class DailyQuizStatusDto {
+        private QuizStatus status;
 
+        public static DailyQuizStatusDto of(QuizStatus status){
+            return new DailyQuizStatusDto(status);
+        }
     }
 }

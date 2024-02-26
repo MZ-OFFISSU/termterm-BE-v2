@@ -29,4 +29,17 @@ public class QuizController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "데일리 퀴즈 조회 성공", responseDtoList), HttpStatus.OK);
     }
+
+    /**
+     * 데일리 퀴즈 응시 여부 (홈 화면)
+     * NOT_STARTED : 시작 전
+     * IN_PROGRESS: 응시 했으나 몇 개 틀려서 복습퀴즈가 남음
+     * COMPLETED: 다 맞힘
+     */
+    @GetMapping("/s/quiz/status")
+    public ResponseEntity<ResponseDto<DailyQuizStatusDto>> getDailyQuizStatus(@AuthenticationPrincipal LoginMember loginMember){
+        DailyQuizStatusDto responseDto = quizService.getDailyQuizStatus(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "퀴즈 상태 조회 성공", responseDto), HttpStatus.OK);
+    }
 }

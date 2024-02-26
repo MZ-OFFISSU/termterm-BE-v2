@@ -22,6 +22,7 @@ import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.quiz.entity.Quiz;
+import site.termterm.api.domain.quiz.entity.QuizStatus;
 import site.termterm.api.domain.quiz.repository.QuizRepository;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
@@ -29,7 +30,6 @@ import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -150,6 +150,25 @@ class QuizControllerTest extends DummyObject {
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data", hasSize(5)));
         Assertions.assertArrayEquals(termIds.toArray(), List.of("1", "2", "3", "4", "5").toArray());
+
+    }
+
+    @DisplayName("퀴즈 상태 조회 API 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_quiz_status_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/status"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.status").value(QuizStatus.NOT_STARTED.getStatus()));
 
     }
 

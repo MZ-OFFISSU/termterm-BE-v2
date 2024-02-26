@@ -11,6 +11,7 @@ import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.dto.MemberRequestDto;
+import site.termterm.api.domain.quiz.entity.QuizStatus;
 import site.termterm.api.global.converter.CategoryListConverter;
 import site.termterm.api.global.vo.SystemVO;
 
@@ -72,6 +73,10 @@ public class Member {
 
     @Builder.Default
     private String identifier = UUID.randomUUID().toString();
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private QuizStatus quizStatus = QuizStatus.NOT_STARTED;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -171,6 +176,11 @@ public class Member {
 
         this.folderLimit = limit;
 
+        return this;
+    }
+
+    public Member setQuizStatus(QuizStatus status){
+        this.quizStatus = status;
         return this;
     }
 

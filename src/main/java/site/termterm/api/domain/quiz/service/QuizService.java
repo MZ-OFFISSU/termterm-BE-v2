@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.quiz.entity.Quiz;
+import site.termterm.api.domain.quiz.entity.QuizStatus;
 import site.termterm.api.domain.quiz.entity.QuizTerm;
 import site.termterm.api.domain.quiz.repository.QuizRepository;
 import site.termterm.api.domain.term.entity.Term;
@@ -58,5 +59,17 @@ public class QuizService {
         }).toList();
 
         return responseDtoList;
+    }
+
+    /**
+     * 데일리 퀴즈 응시 여부 (홈 화면)
+     * NOT_STARTED : 시작 전
+     * IN_PROGRESS: 응시 했으나 몇 개 틀려서 복습퀴즈가 남음
+     * COMPLETED: 다 맞힘
+     */
+    public DailyQuizStatusDto getDailyQuizStatus(Long memberId) {
+        QuizStatus quizStatus = memberRepository.getQuizStatusById(memberId);
+
+        return DailyQuizStatusDto.of(quizStatus);
     }
 }
