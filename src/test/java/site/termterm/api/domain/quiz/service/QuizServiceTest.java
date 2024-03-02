@@ -13,13 +13,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
-import site.termterm.api.domain.quiz.entity.Quiz;
+import site.termterm.api.domain.point.entity.PointPaidType;
+import site.termterm.api.domain.point.repository.PointHistoryRepository;
+import site.termterm.api.domain.quiz.entity.*;
 import site.termterm.api.domain.quiz.repository.QuizRepository;
+import site.termterm.api.domain.quiz.repository.QuizTermRepository;
+import site.termterm.api.domain.quiz.vo.QuizVO;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.dummy.DummyObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +30,7 @@ import java.util.stream.Collectors;
 
 import static site.termterm.api.domain.category.CategoryEnum.*;
 import static site.termterm.api.domain.quiz.dto.QuizResponseDto.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static site.termterm.api.domain.quiz.dto.QuizRequestDto.QuizSubmitRequestDto.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,10 @@ class QuizServiceTest extends DummyObject {
     private TermRepository termRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private QuizTermRepository quizTermRepository;
+    @Mock
+    private PointHistoryRepository pointHistoryRepository;
 
     @DisplayName("데일리 퀴즈 생성에 성공한다.")
     @Test
@@ -104,7 +110,353 @@ class QuizServiceTest extends DummyObject {
         List<Long> distinctTermIds = responseDtoList.stream().map(DailyQuizEachDto::getTermId).distinct().toList();
         assertThat(distinctTermIds.size()).isEqualTo(responseDtoList.size());
 
+    }
+
+    @DisplayName("1~4번째 문제에서 정답 제출에 성공한다.")
+    @Test
+    public void submit_quiz_result_success1_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L);
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+
+        //when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizDaily(eachRequestDto, null, 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isTrue();
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.USER_ANSWER_ACCEPTED);
+        assertThat(responseDto.getStatusCode()).isEqualTo(2202);
 
     }
+
+    @DisplayName("1~4번째 문제에서 오답 제출에 성공한다.")
+    @Test
+    public void submit_quiz_result_success2_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(2L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L);
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+
+        //when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizDaily(eachRequestDto, null, 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.X);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isFalse();
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.USER_ANSWER_ACCEPTED);
+        assertThat(responseDto.getStatusCode()).isEqualTo(2202);
+        assertThat(quizTerm.getWrongChoiceTerms().contains(2L)).isTrue();
+    }
+
+    @DisplayName("마지막 문제를 제출하고, 퀴즈를 전부 다 맞혔다")
+    @Test
+    public void submit_quiz_result_success3_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L);
+
+        Integer beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.O, QuizTermStatus.O, QuizTermStatus.O, QuizTermStatus.O, QuizTermStatus.O));
+        when(memberRepository.getPointById(any())).thenReturn(beforeMemberPoint);
+
+        //when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizDaily(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isTrue();
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.DAILY_QUIZ_PERFECT);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.COMPLETED);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint + PointPaidType.DAILY_QUIZ_PERFECT.getPoint());
+    }
+
+    @DisplayName("마지막 문제를 제출하고, 퀴즈 중 틀린게 있다.")
+    @Test
+    public void submit_quiz_result_success4_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L);
+
+        Integer beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.O, QuizTermStatus.X, QuizTermStatus.O, QuizTermStatus.O, QuizTermStatus.O));
+        when(memberRepository.getPointById(any())).thenReturn(beforeMemberPoint);
+
+        //when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizDaily(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isTrue();
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.DAILY_QUIZ_WRONG);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.IN_PROGRESS);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint + PointPaidType.DAILY_QUIZ_WRONG.getPoint());
+
+    }
+
+    @DisplayName("리뷰퀴즈에서 정답 (마지막 x)")
+    @Test
+    public void submit_review_quiz1_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "false", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isTrue();
+
+    }
+
+    @DisplayName("리뷰퀴즈에서 오답 (마지막 x)")
+    @Test
+    public void submit_review_quiz11_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(2L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "false", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.X);
+        assertThat(responseDto.getTermId()).isEqualTo(1L);
+        assertThat(responseDto.getIsAnswerRight()).isFalse();
+        assertThat(quizTerm.getWrongChoiceTerms().contains(2L)).isTrue();
+    }
+
+    @DisplayName("첫 번쨰 리뷰퀴즈에서 모두 정답 (마지막)")
+    @Test
+    public void submit_review_quiz13_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);    // ReviewStatus 는 기본적으로 X 이다. 첫 번째 시도라는 뜻
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        int beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.O, QuizTermStatus.O));
+        when(memberRepository.getPointById(any())).thenReturn(beforeMemberPoint);
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.COMPLETED);
+        assertThat(quiz.getReviewStatus()).isEqualTo(ReviewStatus.O);
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.REVIEW_QUIZ_FIRST_TRY_PERFECT);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint + PointPaidType.REVIEW_QUIZ_PERFECT.getPoint());
+
+    }
+
+    @DisplayName("첫 번째 리뷰퀴즈에서 여전히 오답 존재 (마지막)")
+    @Test
+    public void submit_review_quiz2_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "").setQuizStatus(QuizStatus.IN_PROGRESS);
+        Quiz quiz = newMockQuiz(1L, member);    // ReviewStatus 는 기본적으로 X 이다. 첫 번째 시도라는 뜻
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        int beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.X, QuizTermStatus.O));
+        when(memberRepository.getPointById(any())).thenReturn(beforeMemberPoint);
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.IN_PROGRESS);
+        assertThat(quiz.getReviewStatus()).isEqualTo(ReviewStatus.O);
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.REVIEW_QUIZ_FIRST_TRY_WRONG);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint + PointPaidType.REVIEW_QUIZ_WRONG.getPoint());
+
+    }
+    @DisplayName("n 번째 리뷰퀴즈에서 전부 정답 (마지막)")
+    @Test
+    public void submit_review_quiz3_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "").setQuizStatus(QuizStatus.IN_PROGRESS);
+        Quiz quiz = newMockQuiz(1L, member).setReviewStatus(ReviewStatus.O);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        int beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.O, QuizTermStatus.O));
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.COMPLETED);
+        assertThat(quiz.getReviewStatus()).isEqualTo(ReviewStatus.O);
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.REVIEW_QUIZ_MANY_TRY_PERFECT);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint);
+
+    }
+    @DisplayName("n 번째 리뷰퀴즈에서 여전히 오답 존재 (마지막)")
+    @Test
+    public void submit_review_quiz4_test() throws Exception{
+        //given
+        QuizSubmitEachRequestDto eachRequestDto = new QuizSubmitEachRequestDto();
+        eachRequestDto.setProblemTermId(1L);
+        eachRequestDto.setMemberSelectedTermId(1L);
+
+        Term term = newMockTerm(1L, "", "", List.of());
+        Member member = newMockMember(1L, "", "").setQuizStatus(QuizStatus.IN_PROGRESS);
+        Quiz quiz = newMockQuiz(1L, member).setReviewStatus(ReviewStatus.O);
+
+        QuizTerm quizTerm = newMockQuizTerm(1L, quiz, 1L).setStatus(QuizTermStatus.X);
+
+        int beforeMemberPoint = member.getPoint();
+
+        //stub
+        when(termRepository.findById(any())).thenReturn(Optional.of(term));
+        when(memberRepository.getReferenceById(any())).thenReturn(member);
+        when(quizRepository.findByMember(any())).thenReturn(Optional.of(quiz));
+        when(quizTermRepository.findByQuizAndTermId(any(), any())).thenReturn(Optional.of(quizTerm));
+        when(quizTermRepository.getQuizTermStatusByQuiz(any())).thenReturn(List.of(QuizTermStatus.X, QuizTermStatus.O));
+
+        // when
+        QuizSubmitResultResponseDto responseDto = quizService.submitQuizReview(eachRequestDto, "true", 1L);
+        System.out.println(responseDto);
+
+        //then
+        assertThat(quizTerm.getStatus()).isEqualTo(QuizTermStatus.O);
+        assertThat(member.getQuizStatus()).isEqualTo(QuizStatus.IN_PROGRESS   );
+        assertThat(quiz.getReviewStatus()).isEqualTo(ReviewStatus.O);
+        assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.REVIEW_QUIZ_MANY_TRY_WRONG);
+        assertThat(member.getPoint()).isEqualTo(beforeMemberPoint);
+    }
+
 
 }

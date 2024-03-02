@@ -79,7 +79,7 @@
 - [ ] GET /v1/quiz/final-quiz-review
 - [ ] GET /v1/quiz/review
 - [x] GET /v1/quiz/status
-- [ ] POST /v1/quiz/result
+- [x] POST /v1/quiz/result
 
 
 ### Term

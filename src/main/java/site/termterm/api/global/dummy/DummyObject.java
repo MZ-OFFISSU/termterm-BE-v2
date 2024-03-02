@@ -21,7 +21,6 @@ import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
 import site.termterm.api.domain.quiz.entity.Quiz;
 import site.termterm.api.domain.quiz.entity.QuizTerm;
-import site.termterm.api.domain.quiz.entity.WrongChoice;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.time.LocalDateTime;
@@ -200,13 +199,6 @@ public class DummyObject {
         return PointHistory.of(type, member, beforePoint);
     }
 
-    protected WrongChoice newWrongChoice(QuizTerm quizTerm, List<Long> termIds){
-        return WrongChoice.builder().quizTerm(quizTerm).termIds(termIds).build();
-    }
-
-    protected WrongChoice newMockWrongChoice(Long id, QuizTerm quizTerm, List<Long> termIds){
-        return WrongChoice.builder().id(id).quizTerm(quizTerm).termIds(termIds).build();
-    }
 
     protected QuizTerm newQuizTerm(Quiz quiz, Long termId){
         return QuizTerm.builder().quiz(quiz).termId(termId).build();

@@ -1,18 +1,20 @@
 package site.termterm.api.domain.quiz.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import site.termterm.api.domain.quiz.entity.QuizType;
 import site.termterm.api.domain.quiz.service.QuizService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
 
 import java.util.List;
 import static site.termterm.api.domain.quiz.dto.QuizResponseDto.*;
+import static site.termterm.api.domain.quiz.dto.QuizRequestDto.*;
 
 @RequestMapping("/v2")
 @RequiredArgsConstructor
@@ -41,5 +43,32 @@ public class QuizController {
         DailyQuizStatusDto responseDto = quizService.getDailyQuizStatus(loginMember.getMember().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "퀴즈 상태 조회 성공", responseDto), HttpStatus.OK);
+    }
+
+    /**
+     * 데일리 / 복습 퀴즈 결과 제출
+     * 응시 후 사용자가 선택한 선지를 저장
+     * quizType : DAILY / REVIEW
+     * 한 문제씩 제출하고, 문제 세트의 마지막 문제일 경우 API 경로에 "final" Query 를 붙여 요청한다.
+     */
+    @PostMapping("/s/quiz/result")
+    public ResponseEntity<ResponseDto<QuizSubmitResultResponseDto>> submitQuiz(
+            @RequestBody @Valid QuizSubmitRequestDto requestDto,
+            BindingResult bindingResult,
+            @RequestParam(value = "final", required = false) String isFinal,
+            @AuthenticationPrincipal LoginMember loginMember
+    ){
+        QuizSubmitResultResponseDto responseDto = null;
+
+        if(requestDto.getQuizType().equals(QuizType.DAILY)){
+            responseDto = quizService.submitQuizDaily(requestDto.getResult(), isFinal, loginMember.getMember().getId());
+
+            return new ResponseEntity<>(new ResponseDto<>(1, "퀴즈 결과 제출 성공", responseDto), HttpStatus.OK);
+        }else if(requestDto.getQuizType().equals(QuizType.REVIEW)){
+            responseDto = quizService.submitQuizReview(requestDto.getResult(), isFinal, loginMember.getMember().getId());
+        }
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "퀴즈 결과 제출 성공", responseDto), HttpStatus.OK);
+
     }
 }

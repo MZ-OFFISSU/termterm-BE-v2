@@ -169,6 +169,11 @@ public class Member {
         return this;
     }
 
+    public Member addPoint(Integer point){
+        this.point += point;
+        return this;
+    }
+
     public Member setFolderLimit(Integer limit){
         if (limit > SystemVO.SYSTEM_FOLDER_LIMIT){
             throw new RuntimeException();

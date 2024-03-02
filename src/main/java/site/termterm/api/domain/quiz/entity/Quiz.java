@@ -33,7 +33,6 @@ public class Quiz {
     private List<QuizTerm> quizTerms = new ArrayList<>();
 
     @Builder.Default
-    @Setter
     @Enumerated(EnumType.STRING)
     private ReviewStatus reviewStatus = ReviewStatus.X;
 
@@ -43,6 +42,11 @@ public class Quiz {
 
     public Quiz addQuizTerm(QuizTerm quizTerm){
         this.quizTerms.add(quizTerm);
+        return this;
+    }
+
+    public Quiz setReviewStatus(ReviewStatus status){
+        this.reviewStatus = status;
         return this;
     }
 }

@@ -2,6 +2,7 @@ package site.termterm.api.domain.quiz.dto;
 
 import lombok.*;
 import site.termterm.api.domain.quiz.entity.QuizStatus;
+import site.termterm.api.domain.quiz.vo.QuizVO;
 import site.termterm.api.domain.term.entity.Term;
 
 import java.util.List;
@@ -65,4 +66,31 @@ public class QuizResponseDto {
             return new DailyQuizStatusDto(status);
         }
     }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class QuizSubmitResultResponseDto {
+        private Long termId;
+        private String termName;
+        private String termDescription;
+        private String memberSelectedTermName;
+        private Boolean isAnswerRight;
+
+        @Setter
+        @Builder.Default
+        private Integer statusCode = QuizVO.USER_ANSWER_ACCEPTED;
+
+        public static QuizSubmitResultResponseDto of(Term problemTerm, Term memberSelectedTerm, Boolean isAnswerRight){
+            return QuizSubmitResultResponseDto.builder()
+                    .termId(problemTerm.getId())
+                    .termName(problemTerm.getName())
+                    .termDescription(problemTerm.getDescription())
+                    .memberSelectedTermName(memberSelectedTerm.getName())
+                    .isAnswerRight(isAnswerRight)
+                    .build();
+        }
+    }
+
 }
