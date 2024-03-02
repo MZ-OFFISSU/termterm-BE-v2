@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.entity.Member;
+import site.termterm.api.domain.quiz.entity.QuizStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,4 +37,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.nickname FROM Member m WHERE m.id = :memberId")
     String getNicknameById(@Param("memberId") Long memberId);
+
+    @Query("SELECT m.quizStatus FROM Member m WHERE m.id = :memberId")
+    QuizStatus getQuizStatusById(@Param("memberId") Long memberId);
 }

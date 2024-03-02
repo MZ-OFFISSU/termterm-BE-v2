@@ -52,4 +52,10 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
             "WHERE t.id IN :termIdList")
     List<TermSimpleDto> getTermsByIdList(@Param("termIdList") List<Long> termIdList, @Param("memberId") Long memberId);
 
+    @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT 5")
+    List<Term> getTermsRandom5();
+
+    @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT 3")
+    List<Term> getTermsRandom3();
+
 }
