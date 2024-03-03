@@ -77,7 +77,7 @@
 ### Quiz
 - [x] GET /v1/quiz/daily
 - [ ] GET /v1/quiz/final-quiz-review
-- [ ] GET /v1/quiz/review
+- [x] GET /v1/quiz/review
 - [x] GET /v1/quiz/status
 - [x] POST /v1/quiz/result
 

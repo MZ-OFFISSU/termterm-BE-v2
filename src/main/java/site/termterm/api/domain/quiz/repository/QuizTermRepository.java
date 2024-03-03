@@ -15,6 +15,12 @@ public interface QuizTermRepository extends JpaRepository<QuizTerm, Long> {
 
     List<QuizTerm> findByQuiz(Quiz quiz);
 
+    @Query("SELECT qt FROM QuizTerm qt " +
+            "INNER JOIN Quiz q " +
+            "ON qt.quiz.id = q.id " +
+            "WHERE q.member.id = :memberId ")
+    List<QuizTerm> findByMemberId(@Param("memberId") Long memberId);
+
     @Query("SELECT qt.status FROM QuizTerm qt WHERE qt.quiz = :quiz")
     List<QuizTermStatus> getQuizTermStatusByQuiz(@Param("quiz") Quiz quiz);
 }

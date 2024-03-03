@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,11 +23,12 @@ import site.termterm.api.domain.quiz.vo.QuizVO;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.dummy.DummyObject;
+import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static site.termterm.api.domain.category.CategoryEnum.*;
 import static site.termterm.api.domain.quiz.dto.QuizResponseDto.*;
@@ -97,9 +99,8 @@ class QuizServiceTest extends DummyObject {
 
             assertThat(optionList.size()).isEqualTo(3);
 
-            optionList.stream().map(
-                    option -> assertThat(option.getIsAnswer()).isEqualTo(option.getTermId().equals(problemTermId)))
-                    .collect(Collectors.toList());
+            optionList.forEach(
+                    option -> assertThat(option.getIsAnswer()).isEqualTo(option.getTermId().equals(problemTermId)));
 
             List<DailyQuizEachDto.DailyQuizOptionDto> answerInOptions = optionList.stream().filter(op -> op.getIsAnswer().equals(true)).toList();
             assertThat(answerInOptions.size()).isEqualTo(1);
@@ -457,6 +458,25 @@ class QuizServiceTest extends DummyObject {
         assertThat(responseDto.getStatusCode()).isEqualTo(QuizVO.REVIEW_QUIZ_MANY_TRY_WRONG);
         assertThat(member.getPoint()).isEqualTo(beforeMemberPoint);
     }
+    
+    @DisplayName("리뷰 퀴즈 조회에서, 모두 맞혔거나, Daily Quiz 를 앞서 응시하지 않았다면, 리뷰 퀴즈를 생성할 수 없으므로 예외가 발생한다.")
+    @Test
+    public void review_quiz_fail1_test() throws Exception{
+        //given
+        List<QuizTerm> quizTermList = new ArrayList<>();
+        quizTermList.add(newMockQuizTerm(1L, newMockQuiz(1L, newMockMember(1L, "", "")), 1L));
+        quizTermList.add(newMockQuizTerm(2L, newMockQuiz(1L, newMockMember(1L, "", "")), 2L));
+        quizTermList.add(newMockQuizTerm(3L, newMockQuiz(1L, newMockMember(1L, "", "")), 3L));
+        quizTermList.add(newMockQuizTerm(4L, newMockQuiz(1L, newMockMember(1L, "", "")), 4L));
+        quizTermList.add(newMockQuizTerm(5L, newMockQuiz(1L, newMockMember(1L, "", "")), 5L));
 
+        // stub
+        when(quizTermRepository.findByMemberId(any())).thenReturn(quizTermList);
+
+        //when ,  then
+        Assertions.assertThrows(CustomApiException.class, () -> quizService.getReviewQuiz(1L));
+        
+    }
+    
 
 }

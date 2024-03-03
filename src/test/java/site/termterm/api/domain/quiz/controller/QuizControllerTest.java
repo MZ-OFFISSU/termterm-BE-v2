@@ -34,6 +34,7 @@ import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -743,5 +744,52 @@ class QuizControllerTest extends DummyObject {
         assertThat(quizTermRepository.findByQuiz(quiz).stream().anyMatch(qt -> qt.getStatus().equals(QuizTermStatus.X))).isTrue();
         assertThat(quizTerm.getWrongChoiceTerms().size()).isEqualTo(2);
     }
+
+    @DisplayName("리뷰 퀴즈 조회에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_review_quiz_success_test() throws Exception{
+        //given
+        // member2 은 퀴즈가 Term 1,3,5,7,9 가 할당되어 있다. 문제를 풀었고, 두 문제를 틀렸다. (5L을 틀렸으며, 골랐던 선지는 10L 이다. 또, 7L 을 틀렸으며, 골랐던 선지는 8L 이다.)
+        ArrayDeque<Integer> incorrectTermIdDeque = new ArrayDeque<>(List.of(5, 7));
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/review"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+
+        for (int i=0; i<2; i++) {
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].termId", i)).value(incorrectTermIdDeque.poll()));
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].options.length()", i)).value(3));
+        }
+
+    }
+
+    @DisplayName("데일리 퀴즈를 응시하지 않아서 리뷰 퀴즈 조회에 실패한다.")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_review_quiz_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/review"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-1));
+    }
+
 
 }

@@ -1,11 +1,47 @@
 # termterm back-end server v2
 
 ---
+### 21. 2024/03/03
+
+###### Today I Did 🥳
+- Review Quiz 생성 API 구현
+- 전체 테스트 코드 실행 시 문제가 생겨, 스케쥴링 테스트인 `QuizUtilTest.java` 는 비활성화했다.
+
+###### Memo 🤔
+- synchronized 키워드 관련해서 나중에 실습 한 번 해보면 좋겠다.
+- @Transactional 의 원리에 대해서 더 깊게 공부해보도록 하자. 
+  - 예를 들어, 왜 private 에서는 안되는가?
+  - @Transactional 이 아닌 메서드에서 @Transactional 메서드를 호출한다면??
+- 얼른 Redis, RabbitMQ 등을 사용해보고 싶다
+
+
+###### TODAY ISSUE 🙉
+- Review Quiz 문제 구성 후 응답하는 서비스 로직이 매우 복잡했다. 
+  - Member 와 Quiz 는 1대1 연관관계가 있다. 
+  - Quiz 를 불러올 때, Lazy Fetch 처리를 해주지 않아 SELECT Member 쿼리가 불필요하게 발생했다.
+  - QuizTerm 리스트를 불러올 때, Quiz 호출 후, 알아낸 Quiz_id 로 QuizTerm 리스트를 조회했다. 
+  - 근데, 나는 이미 memberId 를 알고 있는데, 굳이 SELECT Quiz 쿼리가 필요할까?
+  - __`QuizTermRepository.findByMemberId()` 메서드를 생성하여, Quiz 를 조인하여 memberId 와 일치하는 QuizTerm 데이터들만 추출되도록 하였더니, 쿼리를 1회 줄일 수 있었다.__
+
+
+- 전체 테스트를 실행하는데, @Scheduled 테스트에서, await 하는 동안 다른 transaction 이 DB 상태를 변경하여 원치않는 테스트 결과가 발생했다. 
+  - 성공했다 하더라도, 이 @Scheduled 에 의해 DB 상태가 중간에 바뀌어 테스트 코드가 정상 작동하지 않는 경우도 발생
+  - 스케쥴링이 DB 를 건들어서 그렇다. 스케쥴은 공식 라이브러리이므로, 굳이 테스트할 필요가 없다고 판단하여 전체 테스트 실행 시 실행하지 않도록 하겠다.
+
+###### TODO 📝
+- 다른 서비스 메서드들도, 불필요한 SELECT Quiz 쿼리가 발생하지 않는지 확인하고, `QuizTermRepository.findByMemberId()` 메서드를 활용하도록 바꾼다.
+- `A.equals(B)` 를 `Objects.equals(A, B)` 로 바꾸어 `NullPointerException` 을 방지한다.
+- Test 코드에서, 실패하는 경우 status 를 `isBadRequest()` 로 기대했다면, 응답 바디의 status 값이 -2 가 아니라 -1 인지 확인한다.
+  - 내가 던진 `CustomApiException` 이 발생한건지, 혹은 `RuntimeException` 인지 구분을 해야한다.
+
+
+---
 ### 20. 2024/03/02
 
 ###### Today I Did 🥳
 - Quiz 결과 제출 Service Test, Controller Test 코드 작성
 - 매일 자정 Cron 으로 퀴즈 데이터 삭제
+- @Scheduled Cron 테스트 코드 작성
 
 ###### TODAY ISSUE 🙉
 - 매일 0시 정각에 Quiz 관련 데이터를 초기화하는 로직을 `@Scheduled` 어노테이션으로 구현하였다. 

@@ -23,7 +23,7 @@ public class Quiz {
     @Column(name = "QUIZ_ID")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 

@@ -19,7 +19,7 @@ public class QuizUtil {
      * 매일 0시 퀴즈 데이터 삭제
      */
     @Transactional
-    @Scheduled(cron = "${scheduled.cron.quiz.initialize}") // 매일 0시
+    @Scheduled(cron = "${scheduled.cron.quiz.initialize}")
     public void deleteQuizData(){
         quizRepository.deleteAll();
         memberRepository.findAll().forEach(member -> member.setQuizStatus(QuizStatus.NOT_STARTED));
