@@ -52,7 +52,7 @@ public class CurationResponseDto {
                     .description((String) objects[2])
                     .cnt((Integer) objects[3])
                     .thumbnail((String) objects[4])
-                    .bookmarked(objects[5] == BookmarkStatus.YES.getStatus() ? BookmarkStatus.YES : BookmarkStatus.NO)
+                    .bookmarked(Objects.equals(objects[5], BookmarkStatus.YES.getStatus()) ? BookmarkStatus.YES : BookmarkStatus.NO)
                     .build();
         }
     }
