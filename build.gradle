@@ -68,3 +68,7 @@ tasks.named('test') {
 springBoot {
 	buildInfo()
 }
+
+jar {
+	enabled = false
+}
