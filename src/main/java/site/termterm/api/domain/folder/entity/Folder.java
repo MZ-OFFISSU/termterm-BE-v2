@@ -33,6 +33,7 @@ public class Folder {
 
     @Convert(converter = LongListConverter.class)
     @Builder.Default
+    @Setter
     private List<Long> termIds = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

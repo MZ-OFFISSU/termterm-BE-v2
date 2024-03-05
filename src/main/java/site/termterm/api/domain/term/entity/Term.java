@@ -27,6 +27,7 @@ public class Term {
     private String description;
 
     @Convert(converter = CategoryListConverter.class)
+    @Setter
     private List<CategoryEnum> categories;
 
     @Override
