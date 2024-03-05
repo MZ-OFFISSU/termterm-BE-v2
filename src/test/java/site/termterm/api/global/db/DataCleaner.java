@@ -14,16 +14,9 @@ import java.util.List;
 @Profile("test")
 public class DataCleaner {
 
-    /*
-     * MySQL DBMS 에서 테스트를 수행할 것이라면 아래의 코드 사
-     * 용
-     * private static final String FOREIGN_KEY_CHECK_FORMAT = "SET FOREIGN_KEY_CHECKS %d";
-     * private static final String TRUNCATE_FORMAT = "TRUNCATE TABLE %s";
-     */
-
-    private static final String FOREIGN_KEY_CHECK_FORMAT = "SET REFERENTIAL_INTEGRITY %s";
+    private static final String FOREIGN_KEY_CHECK_FORMAT = "SET @@FOREIGN_KEY_CHECKS = %s";
     private static final String TRUNCATE_FORMAT = "TRUNCATE TABLE %s";
-    private static final String COLUMN_ID_RESTART_FORMAT = "ALTER TABLE %s ALTER COLUMN %S_ID RESTART WITH 1";
+    private static final String COLUMN_ID_RESTART_FORMAT = "ALTER TABLE %s AUTO_INCREMENT 1";
 
     private final List<String> tableNames = new ArrayList<>();
 
@@ -36,11 +29,8 @@ public class DataCleaner {
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void findDatabaseTableNames() {
-        List<Object[]> tableInfos = entityManager.createNativeQuery("SHOW TABLES").getResultList();
-        for (Object[] tableInfo : tableInfos) {
-            String tableName = (String) tableInfo[0];
-            tableNames.add(tableName);
-        }
+        List<String> tableNames = entityManager.createNativeQuery("SHOW TABLES").getResultList();
+        this.tableNames.addAll(tableNames);
     }
 
     @Transactional
@@ -50,7 +40,7 @@ public class DataCleaner {
     }
 
     private void truncate() {
-        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, "FALSE")).executeUpdate();
+        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, 0)).executeUpdate();
         for (String tableName : tableNames) {
             entityManager.createNativeQuery(String.format(TRUNCATE_FORMAT, tableName)).executeUpdate();
 
@@ -65,9 +55,9 @@ public class DataCleaner {
             else if(tableName.equals("HOME_SUBTITLE")){
             }
             else {
-                entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName, tableName)).executeUpdate();
+                entityManager.createNativeQuery(String.format(COLUMN_ID_RESTART_FORMAT, tableName)).executeUpdate();
             }
         }
-        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, "TRUE")).executeUpdate();
+        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, 1)).executeUpdate();
     }
 }

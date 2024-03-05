@@ -2,15 +2,12 @@ package site.termterm.api.domain.curation.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.global.converter.CategoryListConverter;
 import site.termterm.api.global.converter.LongListConverter;
 import site.termterm.api.global.converter.StringListConverter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,14 +48,6 @@ public class Curation {
 
     @Convert(converter = CategoryListConverter.class)
     private List<CategoryEnum> categories;
-
-    @CreatedDate        // Insert
-    @Column(nullable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate   // Insert, Update
-    @Column(nullable = false)
-    private LocalDateTime modifiedDate;
 
     public Curation syncCnt(){
         this.cnt = this.termIds.size();
