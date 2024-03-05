@@ -69,6 +69,27 @@ public class QuizController {
         }
 
         return new ResponseEntity<>(new ResponseDto<>(1, "퀴즈 결과 제출 성공", responseDto), HttpStatus.OK);
+    }
 
+    /**
+     * 용어 복습 퀴즈
+     * Daily Quiz 에서 사용자가 틀린 문제들만 모아 복습 퀴즈를 구성한다.
+     */
+    @GetMapping("/s/quiz/review")
+    public ResponseEntity<ResponseDto<List<DailyQuizEachDto>>> getReviewQuiz(@AuthenticationPrincipal LoginMember loginMember){
+        List<DailyQuizEachDto> responseDtoList = quizService.getReviewQuiz(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "리뷰 퀴즈 응답 성공", responseDtoList), HttpStatus.OK);
+    }
+
+    /**
+     * 용어 퀴즈 리뷰
+     * Daily Quiz 5문제 각각의 O/X, 틀린 문제는 사용자가 선택한 오답까지 응답한다.
+     */
+    @GetMapping("/s/quiz/final-quiz-review")
+    public ResponseEntity<ResponseDto<?>> getFinalQuizReview(@AuthenticationPrincipal LoginMember loginMember){
+        List<FinalQuizReviewEachDto> responseDtoList = quizService.getFinalQuizReview(loginMember.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "용어 퀴즈 리뷰 응답", responseDtoList), HttpStatus.OK);
     }
 }

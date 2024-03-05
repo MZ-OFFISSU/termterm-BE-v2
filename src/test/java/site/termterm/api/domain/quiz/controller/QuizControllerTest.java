@@ -19,6 +19,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.bookmark.repository.TermBookmarkRepository;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
@@ -34,6 +35,7 @@ import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -64,12 +66,15 @@ class QuizControllerTest extends DummyObject {
     private TermRepository termRepository;
     @Autowired
     private QuizTermRepository quizTermRepository;
+    @Autowired
+    private TermBookmarkRepository termBookmarkRepository;
 
     @BeforeEach
     public void setUp() {
         Member member1 = memberRepository.save(newMember("1111", "sinner@gmail.com"));
         Member member2 = memberRepository.save(newMember("2222", "sinner@gmail.com").setQuizStatus(QuizStatus.IN_PROGRESS));
         Member member3 = memberRepository.save(newMember("3333", "sinner@gmail.com").setQuizStatus(QuizStatus.IN_PROGRESS));
+        Member member4 = memberRepository.save(newMember("4444", "sinner@gmail.com").setQuizStatus(QuizStatus.COMPLETED));
 
         Term term1 = termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
         Term term2 = termRepository.save(newTerm("용어2", "용어2 설명", List.of(CategoryEnum.IT)));
@@ -110,9 +115,21 @@ class QuizControllerTest extends DummyObject {
                 .setReviewStatus(ReviewStatus.O);
         quizRepository.save(quiz3);
 
+        Quiz quiz4 = newQuiz(member4);
+        quiz4.addQuizTerm(newQuizTerm(quiz4, 7L).setStatus(QuizTermStatus.O))
+                .addQuizTerm(newQuizTerm(quiz4, 8L).setStatus(QuizTermStatus.O))
+                .addQuizTerm(newQuizTerm(quiz4, 9L).setStatus(QuizTermStatus.O))
+                .addQuizTerm(newQuizTerm(quiz4, 10L).setStatus(QuizTermStatus.O).addWrongChoice(8L).addWrongChoice(9L))
+                .addQuizTerm(newQuizTerm(quiz4, 11L).setStatus(QuizTermStatus.O))
+                .setReviewStatus(ReviewStatus.O);
+        quizRepository.save(quiz4);
+
         // member1 은 퀴즈가 Term 1,2,3,4,5 가 할당되어 있다. 아직 풀지는 않았다.
         // member2 은 퀴즈가 Term 1,3,5,7,9 가 할당되어 있다. 문제를 풀었고, 두 문제를 틀렸다. (5L을 틀렸으며, 골랐던 선지는 10L 이다. 또, 7L 을 틀렸으며, 골랐던 선지는 8L 이다.)
         // member3 은 퀴즈가 Term 7,8,9,10,11 가 할당되어 있다. 문제를 풀었고, 리뷰퀴즈도 1회 응시하여 또 틀린 상태다. (10L 을 틀렸으며, 골랐던 선지는 8L, 9L 이다.)
+        // member4 은 퀴즈가 Term 7,8,9,10,11 가 할당되어 있다. 문제를 풀었고, 리뷰퀴즈까지 응시완료하였다 (10L 을 틀렸으며, 골랐던 선지는 8L, 9L 이다.)
+        termBookmarkRepository.save(newTermBookmark(term7, member4, 1));
+        termBookmarkRepository.save(newTermBookmark(term8, member4, 1));
 
         em.clear();
     }
@@ -743,5 +760,87 @@ class QuizControllerTest extends DummyObject {
         assertThat(quizTermRepository.findByQuiz(quiz).stream().anyMatch(qt -> qt.getStatus().equals(QuizTermStatus.X))).isTrue();
         assertThat(quizTerm.getWrongChoiceTerms().size()).isEqualTo(2);
     }
+
+    @DisplayName("리뷰 퀴즈 조회에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_review_quiz_success_test() throws Exception{
+        //given
+        // member2 은 퀴즈가 Term 1,3,5,7,9 가 할당되어 있다. 문제를 풀었고, 두 문제를 틀렸다. (5L을 틀렸으며, 골랐던 선지는 10L 이다. 또, 7L 을 틀렸으며, 골랐던 선지는 8L 이다.)
+        ArrayDeque<Integer> incorrectTermIdDeque = new ArrayDeque<>(List.of(5, 7));
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/review"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(2));
+
+        for (int i=0; i<2; i++) {
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].termId", i)).value(incorrectTermIdDeque.poll()));
+            resultActions.andExpect(jsonPath(String.format("$.data[%s].options.length()", i)).value(3));
+        }
+
+    }
+
+    @DisplayName("데일리 퀴즈를 응시하지 않아서 리뷰 퀴즈 조회에 실패한다.")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_review_quiz_fail_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/review"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-1));
+    }
+
+    @DisplayName("용어 퀴즈리뷰 API 요청에 성공한다.")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_final_quiz_review_test() throws Exception{
+        //given
+        // member4 은 퀴즈가 Term 7,8,9,10,11 가 할당되어 있다. 문제를 풀었고, 리뷰퀴즈까지 응시완료하였다 (10L 을 틀렸으며, 골랐던 선지는 8L, 9L 이다.)
+        // member4 은 퀴즈가 Term 7,8 을 북마크 했다.
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/s/quiz/final-quiz-review"));
+        System.out.println("<<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+
+        for (int i=0; i<5; i++){
+            if (i < 2)
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].bookmarked", i)).value("YES"));
+            else
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].bookmarked", i)).value("NO"));
+
+            if (i == 3) {
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].isAnswerRight", i)).value("false"));
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].wrongChoices", i), hasSize(2)));
+            }
+            else {
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].isAnswerRight", i)).value("true"));
+                resultActions.andExpect(jsonPath(String.format("$.data[%s].wrongChoices", i), hasSize(0)));
+            }
+        }
+    }
+
 
 }
