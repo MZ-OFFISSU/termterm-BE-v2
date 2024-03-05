@@ -1,7 +1,11 @@
 package site.termterm.api.domain.quiz.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
+import site.termterm.api.domain.bookmark.entity.TermBookmark;
 import site.termterm.api.domain.quiz.entity.QuizStatus;
+import site.termterm.api.domain.quiz.entity.QuizTerm;
 import site.termterm.api.domain.quiz.vo.QuizVO;
 import site.termterm.api.domain.term.entity.Term;
 
@@ -93,4 +97,29 @@ public class QuizResponseDto {
         }
     }
 
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @Builder
+    @ToString
+    public static class FinalQuizReviewEachDto {
+        @JsonIgnore
+        private QuizTerm quizTerm;
+        private Boolean isAnswerRight;
+        private Long termId;
+        private String termName;
+        private String termDescription;
+        private List<String> wrongChoices;
+        private BookmarkStatus bookmarked;
+
+        public FinalQuizReviewEachDto(Term term, QuizTerm quizTerm, TermBookmark termBookmark) {
+            this.quizTerm = quizTerm;
+            this.isAnswerRight = quizTerm.getWrongChoiceTerms().isEmpty();
+            this.termId = term.getId();
+            this.termName = term.getName();
+            this.termDescription = term.getDescription();
+            this.bookmarked = termBookmark != null ? BookmarkStatus.YES : BookmarkStatus.NO;
+        }
+    }
 }

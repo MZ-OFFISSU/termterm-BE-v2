@@ -2,6 +2,7 @@ package site.termterm.api.domain.quiz.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.point.entity.PointPaidType;
@@ -477,6 +479,74 @@ class QuizServiceTest extends DummyObject {
         Assertions.assertThrows(CustomApiException.class, () -> quizService.getReviewQuiz(1L));
         
     }
-    
+
+    @DisplayName("용어 퀴즈 리뷰 구성에 성공한다.")
+    @Test
+    public void get_final_quiz_review_test() throws Exception{
+        //given
+        List<FinalQuizReviewEachDto> responseDtoList = new ArrayList<>();
+
+        Member member = newMockMember(1L, "", "");
+        Quiz quiz = newMockQuiz(1L, member);
+
+        Term term1 = newMockTerm(1L, "111", "1111", List.of());
+        QuizTerm quizTerm1 = newMockQuizTerm(1L, quiz, 1L);
+        responseDtoList.add(new FinalQuizReviewEachDto(term1, quizTerm1, newTermBookmark(term1, member, 0)));
+
+        Term term2 = newMockTerm(2L, "222", "2222", List.of());
+        QuizTerm quizTerm2 = newMockQuizTerm(2L, quiz, 2L);
+        responseDtoList.add(new FinalQuizReviewEachDto(term2, quizTerm2, newTermBookmark(term2, member, 0)));
+
+        Term term3 = newMockTerm(3L, "333", "3333", List.of());
+        QuizTerm quizTerm3 = newMockQuizTerm(3L, quiz, 3L);
+        responseDtoList.add(new FinalQuizReviewEachDto(term3, quizTerm3, null));
+
+        Term term4 = newMockTerm(4L, "444", "4444", List.of());
+        QuizTerm quizTerm4 = newMockQuizTerm(4L, quiz, 4L).addWrongChoice(1L).addWrongChoice(2L);
+        responseDtoList.add(new FinalQuizReviewEachDto(term4, quizTerm4, null));
+
+        Term term5 = newMockTerm(5L, "555", "5555", List.of());
+        QuizTerm quizTerm5 = newMockQuizTerm(5L, quiz, 5L).addWrongChoice(1L);
+        responseDtoList.add(new FinalQuizReviewEachDto(term5, quizTerm5, null));
+
+        // term4, term5 를 틀렸고, 각각 wrong choice 들은 (1, 2), (1) 이다.
+        // 북마크는 1, 2, 3 만 되어 있다.
+
+        List<Term> wrongChoiceTermList = List.of(term1, term2);
+
+        //stub
+        when(quizTermRepository.getFinalQuizReviewEachDtoByMemberId(any())).thenReturn(responseDtoList);
+        when(termRepository.getTermsByIdListExceptBookmarkStatus(anyList())).thenReturn(wrongChoiceTermList);
+
+        //when
+        List<FinalQuizReviewEachDto> response = quizService.getFinalQuizReview(1L);
+        System.out.println(response);
+
+        //then
+        assertThat(response.size()).isEqualTo(5);
+
+        for (int i=0; i<5; i++){
+            if(i < 2){
+                assertThat(response.get(i).getBookmarked()).isEqualTo(BookmarkStatus.YES);
+            }else{
+                assertThat(response.get(i).getBookmarked()).isEqualTo(BookmarkStatus.NO);
+            }
+
+            if(i < 3){
+                assertThat(response.get(i).getIsAnswerRight()).isTrue();
+            }else{
+                assertThat(response.get(i).getIsAnswerRight()).isFalse();
+
+                if (i == 3){
+                    assertThat(response.get(i).getWrongChoices().size()).isEqualTo(2);
+                    Assertions.assertArrayEquals(response.get(i).getWrongChoices().toArray(), List.of(term1.getName(), term2.getName()).toArray());
+                }else{
+                    assertThat(response.get(i).getWrongChoices().size()).isEqualTo(1);
+                    Assertions.assertArrayEquals(response.get(i).getWrongChoices().toArray(), List.of(term1.getName()).toArray());
+                }
+            }
+        }
+    }
+
 
 }

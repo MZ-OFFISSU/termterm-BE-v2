@@ -276,4 +276,39 @@ public class QuizService {
 
         return responseDtoList;
     }
+
+    /**
+     * 용어 퀴즈 리뷰
+     * Daily Quiz 5문제 각각의 O/X, 틀린 문제는 사용자가 선택한 오답까지 응답한다.
+     */
+    @Transactional
+    public List<FinalQuizReviewEachDto> getFinalQuizReview(Long memberId) {
+        List<FinalQuizReviewEachDto> responseDtoList = quizTermRepository.getFinalQuizReviewEachDtoByMemberId(memberId);
+
+        /*
+         * QuizTerm 의 WrongChoice Term Id 들을 가지고 Term Name 들을 불러와야 하는데,
+         * 1. 각각의 단어마다 5번의 SELECT Term 쿼리를 발생시킬 것이냐
+         * 2. 취합하혀 1번의 SELECT Term 으로 가져온 후 서비스 단에서 필터링하여 구성할 것이냐?
+         */
+        // 2
+        // responseDtoList 로부터, 각각의 QuizTerm 의 WrongChoice Term ID 들을 하나의 List 로 취합한다.
+        List<Long> totalWrongChoiceTermIdList = new ArrayList<>();
+        responseDtoList.forEach(rd -> totalWrongChoiceTermIdList.addAll(rd.getQuizTerm().getWrongChoiceTerms()));
+
+        // List Term ID 에 해당하는 Term Name 들을 1회의 SELECT 쿼리로 가져온다.
+        List<Term> wrongChoiceTermList = termRepository.getTermsByIdListExceptBookmarkStatus(totalWrongChoiceTermIdList);
+
+        // 취합된 Term Name 들을 각각의 ResponseDto 에 배정한다.
+        responseDtoList.forEach(rd -> {
+            List<Long> wrongChoiceTermIdList = rd.getQuizTerm().getWrongChoiceTerms();
+            List<String> extractedWrongChoiceTermNameList = wrongChoiceTermList.stream()
+                    .filter(t -> wrongChoiceTermIdList.contains(t.getId()))
+                    .map(Term::getName)
+                    .collect(Collectors.toList());
+
+            rd.setWrongChoices(extractedWrongChoiceTermNameList);
+        });
+
+        return responseDtoList;
+    }
 }
