@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.dto.MemberRequestDto;
 import site.termterm.api.domain.member.entity.Member;
@@ -164,6 +165,9 @@ class MemberServiceTest extends DummyObject {
     @Test
     public void sync_member_profile_image_test() throws Exception{
         //given
+        ReflectionTestUtils.setField(memberService, "S3_BUCKET_BASE_URL", "https://termterm-bucket-v2.s3.ap-northeast-2.amazonaws.com");
+        ReflectionTestUtils.setField(memberService, "DEFAULT_IMAGE_NAME", "default-profile-image/profile_default.png");
+
         // stub 1
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
         when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
