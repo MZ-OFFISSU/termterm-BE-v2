@@ -151,10 +151,11 @@ public class MigrationRequestDto {
         private Long memberId;
         private Long termId;
 
-        public TermBookmark toEntity(Member member){
+        public TermBookmark toEntity(Member member, Integer folderCnt){
             return TermBookmark.builder()
                     .member(member)
                     .termId(termId)
+                    .folderCnt(folderCnt)
                     .build();
         }
     }

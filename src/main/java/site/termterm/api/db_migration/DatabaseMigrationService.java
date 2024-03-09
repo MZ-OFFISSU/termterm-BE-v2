@@ -59,8 +59,21 @@ public class DatabaseMigrationService {
             Long memberId = termBookmarkDto.getMemberId();
             Member member = memberRepository.getReferenceById(memberId);
 
-            termBookmarkRepository.save(termBookmarkDto.toEntity(member));  // TODO : FolderCount
+            int folderCnt = 0;
+
+            List<Folder> folders = memberRepository.findFoldersById(memberId);
+
+            for (Folder folder: folders){
+                List<Long> termIds = folder.getTermIds();
+                if (termIds.contains(termBookmarkDto.getTermId())){
+                    folderCnt += 1;
+                }
+            }
+
+            termBookmarkRepository.save(termBookmarkDto.toEntity(member, folderCnt));
         });
+
+
     }
 
     public void migrateFolder(List<FolderDto> folderDtoList) {
