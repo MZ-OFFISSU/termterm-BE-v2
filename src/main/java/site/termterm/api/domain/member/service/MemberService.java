@@ -1,6 +1,7 @@
 package site.termterm.api.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.category.CategoryEnum;
@@ -32,8 +33,11 @@ public class MemberService {
     private final AmazonS3Util amazonS3Util;
     private final PointHistoryRepository pointHistoryRepository;
 
-    private static final String S3_BUCKET_BASE_URL = "https://termterm-bucket-dev.s3.ap-northeast-2.amazonaws.com";
-    private static final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
+    @Value("${cloud.aws.S3.bucket-url}")
+    private String S3_BUCKET_BASE_URL;
+
+    @Value("${cloud.aws.S3.default-image-path}")
+    private String DEFAULT_IMAGE_NAME;
 
     /**
      * 카카오, 구글 서버로부터 사용자 정보를 받아오고, 우리 서비스의 사용자를 리턴합니다.
