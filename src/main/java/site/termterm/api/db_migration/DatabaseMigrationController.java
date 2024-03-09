@@ -1,5 +1,6 @@
 package site.termterm.api.db_migration;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import static site.termterm.api.db_migration.MigrationRequestDto.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v2/admin/v1-to-v2-db-migration")
+@Hidden
 public class DatabaseMigrationController {
     private final DatabaseMigrationService migrationService;
 
