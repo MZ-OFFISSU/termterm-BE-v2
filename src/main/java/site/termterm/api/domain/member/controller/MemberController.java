@@ -14,6 +14,7 @@ import site.termterm.api.global.exception.ResponseDto;
 
 import static site.termterm.api.domain.member.dto.MemberRequestDto.*;
 import static site.termterm.api.domain.member.dto.MemberResponseDto.*;
+import static site.termterm.api.domain.member.dto.AppleDto.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -46,10 +47,15 @@ public class MemberController {
         return new ResponseEntity<>(new ResponseDto<>(1, "토큰 재발급 성공", responseDto), HttpStatus.CREATED);
     }
 
-    // TODO : 애플 로그인
+    /**
+     * Apple 로그인
+     */
     @PostMapping("/apple-callback")
-    public ResponseEntity<?> appleLogin(){
-        return new ResponseEntity<>(new ResponseDto<>(1, "토큰 발급 성공", null), HttpStatus.CREATED);
+    public ResponseEntity<ResponseDto<MemberTokenResponseDto>> appleLogin(AppleIdTokenResponseDto idTokenDto){
+        Member memberPS = memberService.appleLogin(idTokenDto);
+        MemberTokenResponseDto responseDto = memberService.provideToken(memberPS);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "토큰 발급 성공", responseDto), HttpStatus.CREATED);
     }
 
     /**

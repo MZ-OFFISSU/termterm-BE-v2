@@ -2,6 +2,7 @@ package site.termterm.api.domain.member.dto;
 
 import lombok.*;
 import org.json.simple.JSONObject;
+import site.termterm.api.domain.member.entity.AppleRefreshToken;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
 import site.termterm.api.domain.member.entity.SocialLoginType;
@@ -25,6 +26,10 @@ public class MemberInfoDto {
         public String appleRefreshToken;
 
         public Member toEntity() {
+            return null;
+        }
+
+        public AppleRefreshToken toAppleRefreshTokenEntity(Long memberId){
             return null;
         }
 
@@ -81,6 +86,37 @@ public class MemberInfoDto {
                     .role(MemberEnum.CUSTOMER)
                     .socialType(SocialLoginType.GOOGLE)
                     .build();
+        }
+    }
+
+    @Getter
+    @ToString
+    public static class AppleMemberInfoDto extends BaseMemberInfoDto{
+
+        public AppleMemberInfoDto(AppleDto.ApplePayload payload){
+            this.socialId = payload.getSub();
+            this.email = payload.getEmail();
+            this.name = UUID.randomUUID().toString();
+            this.nickname = UUID.randomUUID().toString();
+            this.profileImg = "";
+        }
+
+        @Override
+        public Member toEntity(){
+            return Member.builder()
+                    .socialId(socialId)
+                    .name(name)
+                    .email(email)
+                    .nickname(nickname)
+                    .profileImg(profileImg)
+                    .role(MemberEnum.CUSTOMER)
+                    .socialType(SocialLoginType.APPLE)
+                    .build();
+        }
+
+        @Override
+        public AppleRefreshToken toAppleRefreshTokenEntity(Long memberId) {
+            return new AppleRefreshToken(memberId, socialId);
         }
     }
 }
