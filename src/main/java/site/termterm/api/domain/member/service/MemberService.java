@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.member.entity.AppleRefreshToken;
 import site.termterm.api.domain.member.entity.Member;
+import site.termterm.api.domain.member.repository.AppleRefreshTokenRepository;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.member.utils.AppleLoginUtil;
 import site.termterm.api.domain.member.utils.SocialLoginUtil;
 import site.termterm.api.domain.point.entity.PointHistory;
 import site.termterm.api.domain.point.entity.PointPaidType;
@@ -21,6 +24,7 @@ import java.util.UUID;
 import static site.termterm.api.domain.member.dto.MemberInfoDto.*;
 import static site.termterm.api.domain.member.dto.MemberRequestDto.*;
 import static site.termterm.api.domain.member.dto.MemberResponseDto.*;
+import static site.termterm.api.domain.member.dto.AppleDto.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +35,9 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final SocialLoginUtil socialLoginUtil;
     private final AmazonS3Util amazonS3Util;
+    private final AppleLoginUtil appleLoginUtil;
     private final PointHistoryRepository pointHistoryRepository;
+    private final AppleRefreshTokenRepository appleRefreshTokenRepository;
 
     @Value("${cloud.aws.S3.bucket-url}")
     private String S3_BUCKET_BASE_URL;
@@ -196,5 +202,35 @@ public class MemberService {
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
         return memberPS.withdraw();
+    }
+
+    /**
+     * 애플 로그인을 진행합니다.
+     */
+    @Transactional
+    public Member appleLogin(AppleIdTokenResponseDto idTokenDto){
+        ApplePayload payload = appleLoginUtil.getPayload(idTokenDto.getId_token());
+        String clientSecret = appleLoginUtil.getAppleClientSecret(idTokenDto.getId_token());
+        AppleTokenResponse appleTokenResponse = appleLoginUtil.validateAuthorizationGrantCode(clientSecret, idTokenDto.getCode());
+        String refreshToken = appleTokenResponse.getRefresh_token();
+
+        BaseMemberInfoDto memberInfoDto = appleLoginUtil.getMemberInfo(payload);
+        if(!appleLoginUtil.validateAnExistingRefreshToken(clientSecret, refreshToken).getAccess_token().isEmpty()){
+            memberInfoDto.setAppleRefreshToken(appleTokenResponse.getRefresh_token());
+        }
+
+        Member member = memberRepository.findBySocialIdAndEmail(memberInfoDto.getSocialId(), memberInfoDto.getEmail())
+                .orElseGet(() -> {
+                    Member newMember = memberRepository.save(memberInfoDto.toEntity());
+
+                    AppleRefreshToken appleRefreshToken = memberInfoDto.toAppleRefreshTokenEntity(newMember.getId());
+                    appleRefreshTokenRepository.save(appleRefreshToken);
+
+                    // 기본 포인트 지급 내역 Point History 에 저장
+                    pointHistoryRepository.save(PointHistory.of(PointPaidType.SIGNUP_DEFAULT, newMember, 0));
+                    return newMember;
+                });
+
+        return member;
     }
 }
