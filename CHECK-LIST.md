@@ -14,7 +14,7 @@
 - [x] PUT /v1/comment/reject/{id}            (ADMIN)
 - [x] POST /v1/comment/report
 - [ ] PUT /v1/comment/report/completed/{id}  (ADMIN)
-- [ ] GET /v1/comment/report/list            (ADMIN)
+- [x] GET /v1/comment/report/list            (ADMIN)
 - [x] PUT /v1/comment/reported/{id}          (ADMIN)
 - [x] PUT /v1/comment/wait/{id}              (ADMIN)
 

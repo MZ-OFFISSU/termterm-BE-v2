@@ -16,6 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.category.CategoryEnum;
+import site.termterm.api.domain.comment.domain.report.entity.ReportStatus;
+import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.entity.CommentStatus;
@@ -88,6 +90,10 @@ class CommentControllerTest extends DummyObject {
 
         CommentLike commentLike1 = commentLikeRepository.save(newMockCommentLike(comment1, sinner, CommentLikeStatus.YES));
         CommentLike commentLike2 = commentLikeRepository.save(newMockCommentLike(comment2, sinner, CommentLikeStatus.NO));
+
+        reportRepository.save(newReport("신고내용1", ReportType.ABUSE, ReportStatus.WAITING, comment1, federer));
+        reportRepository.save(newReport("신고내용2", ReportType.COPYRIGHT, ReportStatus.WAITING, comment2, federer));
+        reportRepository.save(newReport("신고내용3", ReportType.IRRELEVANT_CONTENT, ReportStatus.COMPLETED, comment1, djokovic));
 
         em.clear();
     }
@@ -429,6 +435,24 @@ class CommentControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("나만의 용어 설명 신고된 리스트 조회에 성공한다. (ADMIN)")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_reported_comments_test() throws Exception{
+        //given
 
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/admin/comment/report/list"));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(3));
+
+    }
 
 }

@@ -12,14 +12,19 @@ import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 
 import site.termterm.api.domain.comment.service.CommentService;
+import site.termterm.api.domain.comment.service.ReportService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
+
+import static site.termterm.api.domain.comment.dto.ReportResponseDto.*;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v2")
 public class CommentController {
     private final CommentService commentService;
+    private final ReportService reportService;
 
     /**
      * 나만의 용어 설명을 등록합니다.
@@ -115,5 +120,15 @@ public class CommentController {
         commentService.reportStatusComment(commentId);
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고 상태 처리 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 신고처리된 리스트
+     */
+    @GetMapping("/admin/comment/report/list")
+    public ResponseEntity<ResponseDto<List<ReportInfoForAdminDto>>> getReportedCommentList(@AuthenticationPrincipal LoginMember loginMember){
+        List<ReportInfoForAdminDto> responseDtoList = reportService.getReportedCommentList();
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고처리된 리스트 조회 성공", responseDtoList), HttpStatus.OK);
     }
 }
