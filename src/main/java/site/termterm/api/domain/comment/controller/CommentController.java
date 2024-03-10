@@ -11,15 +11,21 @@ import org.springframework.web.bind.annotation.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 
+import site.termterm.api.domain.comment.dto.CommentResponseDto;
 import site.termterm.api.domain.comment.service.CommentService;
+import site.termterm.api.domain.comment.service.ReportService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
+
+import static site.termterm.api.domain.comment.dto.ReportResponseDto.*;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v2")
 public class CommentController {
     private final CommentService commentService;
+    private final ReportService reportService;
 
     /**
      * 나만의 용어 설명을 등록합니다.
@@ -69,4 +75,81 @@ public class CommentController {
         return new ResponseEntity<>(new ResponseDto<>(1, "신고 처리 완료", null), HttpStatus.OK);
     }
 
+    /**
+     * 나만의 용어 설명 승인 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/accept/{id}")
+    public ResponseEntity<ResponseDto<?>> acceptComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.acceptComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 승인 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 거절 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/reject/{id}")
+    public ResponseEntity<ResponseDto<?>> rejectComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.rejectComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 거절 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 대기 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/wait/{id}")
+    public ResponseEntity<ResponseDto<?>> waitComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.waitComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 대기 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 신고 상태 처리 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/reported/{id}")
+    public ResponseEntity<ResponseDto<?>> reportComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.reportStatusComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고 상태 처리 성공", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 신고처리된 리스트 (ADMIN)
+     */
+    @GetMapping("/admin/comment/report/list")
+    public ResponseEntity<ResponseDto<List<ReportInfoForAdminDto>>> getReportedCommentList(@AuthenticationPrincipal LoginMember loginMember){
+        List<ReportInfoForAdminDto> responseDtoList = reportService.getReportedCommentList();
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고처리된 리스트 조회 성공", responseDtoList), HttpStatus.OK);
+    }
+
+    /**
+     * 신고 내역 처리 완료 (ADMIN)
+     */
+    @PutMapping("/admin/comment/report/completed/{id}")
+    public ResponseEntity<ResponseDto<?>> completeReport(@PathVariable("id") Long reportId, @AuthenticationPrincipal LoginMember loginMember){
+        reportService.completeReport(reportId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "신고 내용 처리 완료", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 전체 리스트
+     */
+    @GetMapping("/admin/comment/list")
+    public ResponseEntity<ResponseDto<List<CommentResponseDto.CommentInfoForAdminDto>>> getCommentList(@AuthenticationPrincipal LoginMember loginMember){
+        List<CommentResponseDto.CommentInfoForAdminDto> responseDtoList = commentService.getCommentList();
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 전체 리스트", responseDtoList), HttpStatus.OK);
+    }
 }

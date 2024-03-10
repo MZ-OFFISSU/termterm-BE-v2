@@ -4,7 +4,14 @@
 
 ###### Today I Did 🥳
 - 애플 로그인 구현
- 
+- 나만의 용어 설명 승인 API (for ADMIN)
+- 나만의 용어 설명 거절 API (for ADMIN)
+- 나만의 용어 설명 대기 API (for ADMIN)
+- 나만의 용어 설명 신고 상태 처리 API (for ADMIN)
+- 나만의 용어 설명 신고된 리스트 API (for ADMIN)
+- 신고 내역 처리 완료 API (for ADMIN)
+- 전체 나만의 용어 설명 조회 API (for ADMIN)
+
 ---
 ### 23. 2024/03/09
 

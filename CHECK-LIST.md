@@ -7,16 +7,16 @@
 
 ### Comment
 - [x] POST /v1/comment
-- [ ] PUT /v1/comment/accept/{id}            (ADMIN)
+- [X] PUT /v1/comment/accept/{id}            (ADMIN)
 - [x] PUT /v1/comment/dislike/{id}
 - [x] PUT /v1/comment/like/{id}
-- [ ] GET /v1/comment/list                   (ADMIN)
-- [ ] PUT /v1/comment/reject/{id}            (ADMIN)
+- [x] GET /v1/comment/list                   (ADMIN)
+- [x] PUT /v1/comment/reject/{id}            (ADMIN)
 - [x] POST /v1/comment/report
-- [ ] PUT /v1/comment/report/completed/{id}  (ADMIN)
-- [ ] GET /v1/comment/report/list            (ADMIN)
-- [ ] PUT /v1/comment/reported/{id}          (ADMIN)
-- [ ] PUT /v1/comment/wait/{id}              (ADMIN)
+- [x] PUT /v1/comment/report/completed/{id}  (ADMIN)
+- [x] GET /v1/comment/report/list            (ADMIN)
+- [x] PUT /v1/comment/reported/{id}          (ADMIN)
+- [x] PUT /v1/comment/wait/{id}              (ADMIN)
 
 
 ### Curation
