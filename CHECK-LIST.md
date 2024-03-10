@@ -1,5 +1,5 @@
 ### Auth
-- [ ] POST /v1/apple-callback
+- [x] POST /v1/apple-callback
 - [x] POST /v1/auth/{socialType}
 - [x] POST /v1/auth/token/refresh
 - [x] GET /v1/social-auth
