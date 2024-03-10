@@ -64,4 +64,14 @@ public class InquiryController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "전체 문의사항 리스트 조회 성공", responseDtoList), HttpStatus.OK);
     }
+
+    /**
+     * 문의사항 개별 조회
+     */
+    @GetMapping("/admin/inquiry/{id}")
+    public ResponseEntity<ResponseDto<InquiryInfoDto>> getInquiryInfo(@PathVariable("id") Long inquiryId, @AuthenticationPrincipal LoginMember loginMember){
+        InquiryInfoDto responseDto = inquiryService.getInquiryInfo(inquiryId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "문의사항 개별 조회 성공", responseDto), HttpStatus.OK);
+    }
 }

@@ -182,4 +182,26 @@ class InquiryControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("문의사항 개별 조회에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_inquiry_info_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/admin/inquiry/{id}", 3));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.id").value(3));
+        resultActions.andExpect(jsonPath("$.data.type").value("SUGGESTION"));
+        resultActions.andExpect(jsonPath("$.data.status").value("COMPLETED"));
+        resultActions.andExpect(jsonPath("$.data.email").value("ghi@email.com"));
+
+    }
+
 }

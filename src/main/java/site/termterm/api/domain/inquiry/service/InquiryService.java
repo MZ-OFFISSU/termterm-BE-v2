@@ -60,4 +60,14 @@ public class InquiryService {
 
         return all.stream().map(InquiryInfoDto::from).collect(Collectors.toList());
     }
+
+    /**
+     * 문의사항 개별 조회
+     */
+    public InquiryInfoDto getInquiryInfo(Long inquiryId) {
+        Inquiry inquiryPS = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new CustomApiException("Inquiry 가 존재하지 않습니다."));
+
+        return InquiryInfoDto.from(inquiryPS);
+    }
 }
