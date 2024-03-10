@@ -473,5 +473,24 @@ class CommentControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("전체 나만의 용어 설명 리스트를 불러온다. (ADMIN)")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_all_comments_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/admin/comment/list"));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(3));
+
+
+    }
 
 }

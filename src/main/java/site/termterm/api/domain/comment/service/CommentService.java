@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.comment.domain.report.entity.Report;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
+import site.termterm.api.domain.comment.dto.CommentResponseDto;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
@@ -16,6 +17,7 @@ import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
@@ -161,5 +163,12 @@ public class CommentService {
                 .orElseThrow(() -> new CustomApiException(String.format("Comment (id: %s) 가 존재하지 않습니다.", commentId)));
 
         comment.setReported();
+    }
+
+    /**
+     * 나만의 용어 설명 전체 리스트
+     */
+    public List<CommentResponseDto.CommentInfoForAdminDto> getCommentList() {
+        return commentRepository.getCommentListForAdmin();
     }
 }

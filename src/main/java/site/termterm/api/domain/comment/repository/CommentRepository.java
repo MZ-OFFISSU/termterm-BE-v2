@@ -3,6 +3,7 @@ package site.termterm.api.domain.comment.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import site.termterm.api.domain.comment.dto.CommentResponseDto;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.entity.CommentStatus;
 import site.termterm.api.domain.folder.dto.FolderResponseDto;
@@ -31,5 +32,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("status1") CommentStatus status1, @Param("status2") CommentStatus status2);
 
     Long countByTermId(Long id);
+
+    @Query("SELECT new site.termterm.api.domain.comment.dto.CommentResponseDto$CommentInfoForAdminDto(c, t, m) " +
+            "FROM Comment c " +
+            "JOIN FETCH c.member m " +
+            "INNER JOIN Term t " +
+            "ON t.id = c.termId")
+    List<CommentResponseDto.CommentInfoForAdminDto> getCommentListForAdmin();
 
 }

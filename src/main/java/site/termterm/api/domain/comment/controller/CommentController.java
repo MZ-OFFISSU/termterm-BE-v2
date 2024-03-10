@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 
+import site.termterm.api.domain.comment.dto.CommentResponseDto;
 import site.termterm.api.domain.comment.service.CommentService;
 import site.termterm.api.domain.comment.service.ReportService;
 import site.termterm.api.global.config.auth.LoginMember;
@@ -140,5 +141,15 @@ public class CommentController {
         reportService.completeReport(reportId);
 
         return new ResponseEntity<>(new ResponseDto<>(1, "신고 내용 처리 완료", null), HttpStatus.OK);
+    }
+
+    /**
+     * 나만의 용어 설명 전체 리스트
+     */
+    @GetMapping("/admin/comment/list")
+    public ResponseEntity<ResponseDto<List<CommentResponseDto.CommentInfoForAdminDto>>> getCommentList(@AuthenticationPrincipal LoginMember loginMember){
+        List<CommentResponseDto.CommentInfoForAdminDto> responseDtoList = commentService.getCommentList();
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 전체 리스트", responseDtoList), HttpStatus.OK);
     }
 }
