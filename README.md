@@ -7,6 +7,7 @@
 - 나만의 용어 설명 승인 API (for ADMIN)
 - 나만의 용어 설명 거절 API (for ADMIN)
 - 나만의 용어 설명 대기 API (for ADMIN)
+- 나만의 용어 설명 신고 상태 처리 API (for ADMIN)
 
 ---
 ### 23. 2024/03/09

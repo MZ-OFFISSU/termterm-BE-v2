@@ -104,4 +104,16 @@ public class CommentController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 대기 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 나만의 용어 설명 신고 상태 처리 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/reported/{id}")
+    public ResponseEntity<ResponseDto<?>> reportComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.reportStatusComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고 상태 처리 성공", null), HttpStatus.OK);
+    }
 }
