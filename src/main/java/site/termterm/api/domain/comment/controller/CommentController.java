@@ -69,4 +69,15 @@ public class CommentController {
         return new ResponseEntity<>(new ResponseDto<>(1, "신고 처리 완료", null), HttpStatus.OK);
     }
 
+    /**
+     * 나만의 용어 설명 승인 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/accept/{id}")
+    public ResponseEntity<ResponseDto<?>> acceptComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.acceptComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 승인 성공", null), HttpStatus.OK);
+    }
 }

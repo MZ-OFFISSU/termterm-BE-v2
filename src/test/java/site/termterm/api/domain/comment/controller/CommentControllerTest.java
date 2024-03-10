@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.entity.CommentStatus;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
@@ -76,6 +77,7 @@ class CommentControllerTest extends DummyObject {
         Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
         Member djokovic = memberRepository.save(newMember("2222", "djokovic@gmail.com"));
         Member federer = memberRepository.save(newMember("2222", "djokovic@gmail.com"));
+        Member admin = memberRepository.save(newAdmin());
 
         Term term1 = termRepository.save(newTerm("용어1", "용어1 설명", List.of(CategoryEnum.IT)));
         Term term2 = termRepository.save(newTerm("용어2", "용어2 설명", List.of(CategoryEnum.IT)));
@@ -349,9 +351,27 @@ class CommentControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isBadRequest());
         assertThat(reportRepository.findAll().size()).isEqualTo(beforeReportCount);
+    }
 
+    @DisplayName("나만의 용어 설명 승인에 성공한다. (ADMIN)")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void accept_comment_success_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/admin/comment/accept/{id}", 1L));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(commentRepository.findById(1L).get().getStatus()).isEqualTo(CommentStatus.ACCEPTED);
 
     }
+
 
 
 }

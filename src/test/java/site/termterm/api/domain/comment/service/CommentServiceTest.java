@@ -12,6 +12,7 @@ import site.termterm.api.domain.comment.domain.report.entity.Report;
 import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
+import site.termterm.api.domain.comment.entity.CommentStatus;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
 import site.termterm.api.domain.comment_like.entity.CommentLikeRepository;
@@ -34,7 +35,6 @@ import static org.mockito.Mockito.when;
 
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
-import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -217,6 +217,25 @@ class CommentServiceTest extends DummyObject {
         //then
         assertThat(report.getType()).isEqualTo(ReportType.ABUSE);
         assertThat(comment.getReportCnt()).isEqualTo(1);
+
+    }
+
+    @DisplayName("나만의 용어 설명 승인에 성공한다. (ADMIN)")
+    @Test
+    public void accept_comment_success_test() throws Exception{
+        //given
+        Member djokovic = newMockMember(2L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, djokovic);
+
+        //stub
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+
+        //when
+        commentService.acceptComment(comment.getId());
+
+        //then
+        assertThat(comment.getStatus()).isEqualTo(CommentStatus.ACCEPTED);
 
     }
 

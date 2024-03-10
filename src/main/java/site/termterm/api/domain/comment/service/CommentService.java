@@ -118,4 +118,16 @@ public class CommentService {
         return reportPS;
 
     }
+
+    /**
+     * 나만의 용어 설명 승인 (for ADMIN)
+     */
+    @Transactional
+    public void acceptComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomApiException(String.format("Comment (id: %s) 가 존재하지 않습니다.", commentId)));
+
+        comment.setAccepted();
+    }
+
 }
