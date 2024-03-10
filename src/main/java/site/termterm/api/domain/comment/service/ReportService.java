@@ -35,4 +35,15 @@ public class ReportService {
         }).collect(Collectors.toList());
 
     }
+
+    /**
+     * 신고 내역 처리 완료 (ADMIN)
+     */
+    @Transactional
+    public void completeReport(Long reportId) {
+        Report reportPS = reportRepository.findById(reportId)
+                .orElseThrow(() -> new CustomApiException("신고 내용이 존재하지 않습니다."));
+
+        reportPS.completeReport();
+    }
 }

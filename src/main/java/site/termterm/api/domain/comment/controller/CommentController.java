@@ -123,12 +123,22 @@ public class CommentController {
     }
 
     /**
-     * 나만의 용어 설명 신고처리된 리스트
+     * 나만의 용어 설명 신고처리된 리스트 (ADMIN)
      */
     @GetMapping("/admin/comment/report/list")
     public ResponseEntity<ResponseDto<List<ReportInfoForAdminDto>>> getReportedCommentList(@AuthenticationPrincipal LoginMember loginMember){
         List<ReportInfoForAdminDto> responseDtoList = reportService.getReportedCommentList();
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 신고처리된 리스트 조회 성공", responseDtoList), HttpStatus.OK);
+    }
+
+    /**
+     * 신고 내역 처리 완료 (ADMIN)
+     */
+    @PutMapping("/admin/comment/report/completed/{id}")
+    public ResponseEntity<ResponseDto<?>> completeReport(@PathVariable("id") Long reportId, @AuthenticationPrincipal LoginMember loginMember){
+        reportService.completeReport(reportId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "신고 내용 처리 완료", null), HttpStatus.OK);
     }
 }

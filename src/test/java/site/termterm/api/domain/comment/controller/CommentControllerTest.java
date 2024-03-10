@@ -441,7 +441,6 @@ class CommentControllerTest extends DummyObject {
     public void get_reported_comments_test() throws Exception{
         //given
 
-
         //when
         System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
         ResultActions resultActions = mvc.perform(
@@ -454,5 +453,25 @@ class CommentControllerTest extends DummyObject {
         resultActions.andExpect(jsonPath("$.data.length()").value(3));
 
     }
+
+    @DisplayName("신고내역 처리를 완료한다. (ADMIN)")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void complete_report_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/admin/comment/report/completed/{id}", 1L));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(reportRepository.findById(1L).get().getStatus()).isEqualTo(ReportStatus.COMPLETED);
+
+    }
+
 
 }

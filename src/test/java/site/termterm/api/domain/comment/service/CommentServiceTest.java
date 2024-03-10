@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.comment.domain.report.entity.Report;
+import site.termterm.api.domain.comment.domain.report.entity.ReportStatus;
 import site.termterm.api.domain.comment.domain.report.entity.ReportType;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
 import site.termterm.api.domain.comment.entity.Comment;
@@ -42,6 +43,8 @@ class CommentServiceTest extends DummyObject {
 
     @InjectMocks
     CommentService commentService;
+    @InjectMocks
+    ReportService reportService;
 
     @Mock
     private MemberRepository memberRepository;
@@ -295,5 +298,23 @@ class CommentServiceTest extends DummyObject {
         assertThat(comment.getStatus()).isEqualTo(CommentStatus.REPORTED);
 
     }
+
+    @DisplayName("신고 내역 처리 완료 (ADMIN)")
+    @Test
+    public void completeReport_test() throws Exception{
+        //given
+        Report report = newMockReport(1L, "", ReportType.ABUSE, ReportStatus.WAITING, null, null);
+
+        //stub
+        when(reportRepository.findById(any())).thenReturn(Optional.of(report));
+
+        //when
+        reportService.completeReport(1L);
+
+        //then
+        assertThat(report.getStatus()).isEqualTo(ReportStatus.COMPLETED);
+
+    }
+
 
 }
