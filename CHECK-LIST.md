@@ -16,7 +16,7 @@
 - [ ] PUT /v1/comment/report/completed/{id}  (ADMIN)
 - [ ] GET /v1/comment/report/list            (ADMIN)
 - [ ] PUT /v1/comment/reported/{id}          (ADMIN)
-- [ ] PUT /v1/comment/wait/{id}              (ADMIN)
+- [x] PUT /v1/comment/wait/{id}              (ADMIN)
 
 
 ### Curation

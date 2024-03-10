@@ -140,4 +140,14 @@ public class CommentService {
 
         comment.setRejected();
     }
+
+    /**
+     * 나만의 용어 설명 대기 (for ADMIN)
+     */
+    public void waitComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomApiException(String.format("Comment (id: %s) 가 존재하지 않습니다.", commentId)));
+
+        comment.setWaiting();
+    }
 }

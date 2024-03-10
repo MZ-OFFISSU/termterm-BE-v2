@@ -92,4 +92,16 @@ public class CommentController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 거절 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 나만의 용어 설명 대기 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/wait/{id}")
+    public ResponseEntity<ResponseDto<?>> waitComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.waitComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 대기 성공", null), HttpStatus.OK);
+    }
 }
