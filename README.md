@@ -4,7 +4,8 @@
 
 ###### Today I Did 🥳
 - 애플 로그인 구현
-나만의 용어 설명 승인 (for ADMIN)
+- 나만의 용어 설명 승인 API (for ADMIN)
+- 나만의 용어 설명 거절 API (for ADMIN)
 
 ---
 ### 23. 2024/03/09

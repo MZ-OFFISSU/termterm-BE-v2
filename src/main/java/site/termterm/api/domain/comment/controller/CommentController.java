@@ -80,4 +80,16 @@ public class CommentController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 승인 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 나만의 용어 설명 거절 (for ADMIN)
+     */
+    @PutMapping("/admin/comment/reject/{id}")
+    public ResponseEntity<ResponseDto<?>> rejectComment(
+            @PathVariable("id") Long commentId, @AuthenticationPrincipal LoginMember loginMember
+    ){
+        commentService.rejectComment(commentId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "나만의 용어 설명 거절 성공", null), HttpStatus.OK);
+    }
 }

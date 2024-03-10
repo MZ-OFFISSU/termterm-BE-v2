@@ -239,6 +239,23 @@ class CommentServiceTest extends DummyObject {
 
     }
 
+    @DisplayName("나만의 용어 설명 거절에 성공한다. (ADMIN)")
+    @Test
+    public void reject_comment_success_test() throws Exception{
+        //given
+        Member djokovic = newMockMember(2L, "1111", "ema@i.l");
+        Term term = newMockTerm(1L, "용어1", "용어설명1", List.of(CategoryEnum.IT));
+        Comment comment = newMockComment(1L, "용어 설명", "내 머리", term, djokovic);
 
+        //stub
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+
+        //when
+        commentService.rejectComment(comment.getId());
+
+        //then
+        assertThat(comment.getStatus()).isEqualTo(CommentStatus.REJECTED);
+
+    }
 
 }

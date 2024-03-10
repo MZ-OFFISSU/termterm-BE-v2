@@ -372,6 +372,25 @@ class CommentControllerTest extends DummyObject {
 
     }
 
+    @DisplayName("나만의 용어 설명 거절에 성공한다. (ADMIN)")
+    @WithUserDetails(value = "4", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void reject_comment_success_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>>>>>>>>요청 쿼리 시작<<<<<<<<<<<<<<<<<<<");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/admin/comment/reject/{id}", 1L));
+        System.out.println("<<<<<<<<<<<<<<<<<<<요청 쿼리 종료>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(commentRepository.findById(1L).get().getStatus()).isEqualTo(CommentStatus.REJECTED);
+
+    }
+
 
 
 }
