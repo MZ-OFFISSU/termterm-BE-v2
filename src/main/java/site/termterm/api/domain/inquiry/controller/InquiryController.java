@@ -41,4 +41,14 @@ public class InquiryController {
 
         return new ResponseEntity<>(new ResponseDto<>(1, "문의사항 답변 완료 처리 성공", null), HttpStatus.OK);
     }
+
+    /**
+     * 문의사항 상태 대기중 변환
+     */
+    @PutMapping("/admin/inquiry/to-waiting/{id}")
+    public ResponseEntity<ResponseDto<?>> waitInquiry(@PathVariable("id") Long inquiryId, @AuthenticationPrincipal LoginMember loginMember){
+        inquiryService.waitInquiry(inquiryId);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "문의사항 상태 대기중 변환 ", null), HttpStatus.OK);
+    }
 }

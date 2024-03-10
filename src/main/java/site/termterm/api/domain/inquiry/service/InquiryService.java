@@ -36,4 +36,15 @@ public class InquiryService {
 
         inquiryPS.setStatus(InquiryStatus.COMPLETED);
     }
+
+    /**
+     * 문의사항 상태 대기중 변환
+     */
+    @Transactional
+    public void waitInquiry(Long inquiryId) {
+        Inquiry inquiryPS = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new CustomApiException("Inquiry 가 존재하지 않습니다."));
+
+        inquiryPS.setStatus(InquiryStatus.WAITING);
+    }
 }

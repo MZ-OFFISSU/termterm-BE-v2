@@ -52,7 +52,7 @@
 - [ ] GET /v1/inquiry/{id}                     (ADMIN)
 - [ ] GET /v1/inquiry/list                     (ADMIN)
 - [x] PUT /v1/inquiry/to-completed/{id}        (ADMIN)
-- [ ] PUT /v1/inquiry/to-waiting/{id}          (ADMIN)
+- [x] PUT /v1/inquiry/to-waiting/{id}          (ADMIN)
 
 
 ### Member

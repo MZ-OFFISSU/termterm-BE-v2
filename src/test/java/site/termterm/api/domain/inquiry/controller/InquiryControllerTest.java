@@ -145,7 +145,23 @@ class InquiryControllerTest extends DummyObject {
         assertThat(inquiryRepository.findById(1L).get().getStatus()).isEqualTo(InquiryStatus.COMPLETED);
     }
 
+    @DisplayName("문의사항 상태를 대기중으로 설정에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void wait_inquiry_test() throws Exception{
+        //given
 
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/admin/inquiry/to-waiting/{id}", 3));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(inquiryRepository.findById(3L).get().getStatus()).isEqualTo(InquiryStatus.WAITING);
+    }
 
 
 }

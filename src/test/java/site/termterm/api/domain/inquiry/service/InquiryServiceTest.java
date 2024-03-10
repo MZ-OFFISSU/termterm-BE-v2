@@ -47,4 +47,20 @@ class InquiryServiceTest extends DummyObject {
         assertThat(inquiry.getStatus()).isEqualTo(InquiryStatus.COMPLETED);
     }
 
+    @DisplayName("문의사항 상태를 대기중으로 설정에 성공한다.")
+    @Test
+    public void wait_inquiry_test() throws Exception{
+        //given
+        Inquiry inquiry = newMockInquiry(1L, "", "", InquiryType.REPORT).setStatus(InquiryStatus.COMPLETED);
+
+        //stub
+        when(inquiryRepository.findById(any())).thenReturn(Optional.of(inquiry));
+
+        //when
+        inquiryService.waitInquiry(1L);
+
+        //then
+        assertThat(inquiry.getStatus()).isEqualTo(InquiryStatus.WAITING);
+    }
+
 }
