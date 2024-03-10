@@ -15,6 +15,7 @@
 - 문의사항 상태를 대기중으로 설정 API (for ADMIN)
 - 전체 문의사항 리스트 조회 API (for ADMIN)
 - 문의사항 개별 조회 API (for ADMIN)
+- 문의사항 접수 시 메일 전송 - ASYNC 처리까ㅁㅊ
 
 ---
 ### 23. 2024/03/09
@@ -25,6 +26,19 @@
 - s3 버킷 주소 환경변수 분리
 - swagger 요청 url 에서 https 가능케 변경
 - 1차 배포 완료
+
+###### Memo 🤔
+- AsyncConfig 의 초기 코드 :
+  ```
+  public class AsyncConfig extends AsyncConfigurerSupport { ... }
+  ``` 
+  - 그러나 `AsyncConfigurerSupport` 가 Deprecated 되었다고 경고가 떴다. 
+  - 직접 코드를 들어가보니, `AsyncConfigurerSupport` 는 `AsyncConfigurer` 인터페이스의 구현체였고, 공식 문서에서 그냥 직접적으로 `AsyncConfigurer` 를 implements 해달라고 써져 있었다.
+
+  ```
+  public class AsyncConfig implements AsyncConfigurer { ... }
+  ```
+  - 위 코드로 수정을 해 주었더니 deprecated 경고가 발생하지 않았다.
 
 ---
 ### 22. 2024/03/05

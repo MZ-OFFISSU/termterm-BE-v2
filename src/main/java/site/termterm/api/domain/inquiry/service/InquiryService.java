@@ -24,10 +24,10 @@ public class InquiryService {
      * 문의사항 등록
      */
     @Transactional
-    public void registerInquiry(InquiryRegisterRequestDto requestDto) {
+    public Inquiry registerInquiry(InquiryRegisterRequestDto requestDto) {
         Inquiry inquiry = requestDto.toEntity();
 
-        inquiryRepository.save(inquiry);
+        return inquiryRepository.save(inquiry);
     }
 
     /**
