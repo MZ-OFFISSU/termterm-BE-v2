@@ -11,7 +11,10 @@ import site.termterm.api.domain.inquiry.service.InquiryService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
 
+import java.util.List;
+
 import static site.termterm.api.domain.inquiry.dto.InquiryRequestDto.*;
+import static site.termterm.api.domain.inquiry.dto.InquiryResponseDto.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,5 +53,15 @@ public class InquiryController {
         inquiryService.waitInquiry(inquiryId);
 
         return new ResponseEntity<>(new ResponseDto<>(1, "문의사항 상태 대기중 변환 ", null), HttpStatus.OK);
+    }
+
+    /**
+     * 전체 문의사항 리스트 조회
+     */
+    @GetMapping("/admin/inquiry/list")
+    public ResponseEntity<ResponseDto<List<InquiryInfoDto>>> getEntireInquiryList(@AuthenticationPrincipal LoginMember loginMember){
+        List<InquiryInfoDto> responseDtoList = inquiryService.getEntireInquiryList();
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "전체 문의사항 리스트 조회 성공", responseDtoList), HttpStatus.OK);
     }
 }

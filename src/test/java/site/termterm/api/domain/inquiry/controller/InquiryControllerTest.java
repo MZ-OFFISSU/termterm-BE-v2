@@ -163,5 +163,23 @@ class InquiryControllerTest extends DummyObject {
         assertThat(inquiryRepository.findById(3L).get().getStatus()).isEqualTo(InquiryStatus.WAITING);
     }
 
+    @DisplayName("전체 문의사항 리스트 조회에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void get_inquiry_list_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                get("/v2/admin/inquiry/list"));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(3));
+
+    }
 
 }

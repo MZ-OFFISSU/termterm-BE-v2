@@ -8,7 +8,11 @@ import site.termterm.api.domain.inquiry.entity.InquiryStatus;
 import site.termterm.api.domain.inquiry.repository.InquiryRepository;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static site.termterm.api.domain.inquiry.dto.InquiryRequestDto.*;
+import static site.termterm.api.domain.inquiry.dto.InquiryResponseDto.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,5 +50,14 @@ public class InquiryService {
                 .orElseThrow(() -> new CustomApiException("Inquiry 가 존재하지 않습니다."));
 
         inquiryPS.setStatus(InquiryStatus.WAITING);
+    }
+
+    /**
+     * 전체 문의사항 리스트 조회
+     */
+    public List<InquiryInfoDto> getEntireInquiryList() {
+        List<Inquiry> all = inquiryRepository.findAll();
+
+        return all.stream().map(InquiryInfoDto::from).collect(Collectors.toList());
     }
 }
