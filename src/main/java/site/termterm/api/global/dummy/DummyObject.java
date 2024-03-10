@@ -13,6 +13,9 @@ import site.termterm.api.domain.curation.domain.curation_paid.entity.CurationPai
 import site.termterm.api.domain.curation.entity.Curation;
 import site.termterm.api.domain.daily_term.entity.DailyTerm;
 import site.termterm.api.domain.folder.entity.Folder;
+import site.termterm.api.domain.inquiry.entity.Inquiry;
+import site.termterm.api.domain.inquiry.entity.InquiryStatus;
+import site.termterm.api.domain.inquiry.entity.InquiryType;
 import site.termterm.api.domain.member.dto.MemberInfoDto;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.entity.MemberEnum;
@@ -217,4 +220,23 @@ public class DummyObject {
         return Quiz.builder().id(id).member(member).createdDate(LocalDateTime.now()).build();
     }
 
+    protected Inquiry newInquiry(String email, String content, InquiryType inquiryType){
+        return Inquiry.builder()
+                .email(email)
+                .content(content)
+                .type(inquiryType)
+                .build();
+    }
+
+    protected Inquiry newMockInquiry(Long id, String email, String content, InquiryType inquiryType){
+        return Inquiry.builder()
+                .id(id)
+                .email(email)
+                .content(content)
+                .type(inquiryType)
+                .status(InquiryStatus.WAITING)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
+    }
 }
