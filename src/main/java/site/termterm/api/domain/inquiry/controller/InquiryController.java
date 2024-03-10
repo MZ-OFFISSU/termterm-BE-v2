@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import site.termterm.api.domain.inquiry.entity.Inquiry;
 import site.termterm.api.domain.inquiry.service.InquiryService;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.exception.ResponseDto;
@@ -26,13 +27,13 @@ public class InquiryController {
      * 문의사항 접수
      */
     @PostMapping("/inquiry")
-    public ResponseEntity<ResponseDto<?>> registerInquiry(
+    public ResponseEntity<ResponseDto<Inquiry>> registerInquiry(
             @RequestBody @Valid InquiryRegisterRequestDto requestDto,
             BindingResult bindingResult
     ){
-        inquiryService.registerInquiry(requestDto);
+        Inquiry newInquiry = inquiryService.registerInquiry(requestDto);
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "문의 사항 등록 완료", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "문의 사항 등록 완료", newInquiry), HttpStatus.OK);
     }
 
     /**

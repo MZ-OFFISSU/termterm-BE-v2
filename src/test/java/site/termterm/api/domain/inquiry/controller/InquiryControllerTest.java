@@ -91,6 +91,7 @@ class InquiryControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.email").value(email));
 
         List<Inquiry> inquiryPSList = inquiryRepository.findByEmail(email);
         assertThat(inquiryPSList.size()).isEqualTo(1);
