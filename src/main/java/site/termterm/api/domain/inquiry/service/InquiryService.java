@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.inquiry.entity.Inquiry;
+import site.termterm.api.domain.inquiry.entity.InquiryStatus;
 import site.termterm.api.domain.inquiry.repository.InquiryRepository;
+import site.termterm.api.global.handler.exceptions.CustomApiException;
 
 import static site.termterm.api.domain.inquiry.dto.InquiryRequestDto.*;
 
@@ -22,5 +24,16 @@ public class InquiryService {
         Inquiry inquiry = requestDto.toEntity();
 
         inquiryRepository.save(inquiry);
+    }
+
+    /**
+     * 문의사항 답변 완료 처리
+     */
+    @Transactional
+    public void completeInquiry(Long inquiryId) {
+        Inquiry inquiryPS = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new CustomApiException("Inquiry 가 존재하지 않습니다."));
+
+        inquiryPS.setStatus(InquiryStatus.COMPLETED);
     }
 }

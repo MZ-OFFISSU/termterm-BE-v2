@@ -16,16 +16,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import site.termterm.api.domain.inquiry.entity.Inquiry;
+import site.termterm.api.domain.inquiry.entity.InquiryStatus;
 import site.termterm.api.domain.inquiry.entity.InquiryType;
 import site.termterm.api.domain.inquiry.repository.InquiryRepository;
-import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,7 +54,14 @@ class InquiryControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
-        Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        memberRepository.save(newMember("1111", "sinner@gmail.com"));
+        memberRepository.save(newAdmin());
+
+        inquiryRepository.save(newInquiry("abc@email.com", "문의사항1입니다.", InquiryType.USE));
+        inquiryRepository.save(newInquiry("def@email.com", "문의사항2입니다.", InquiryType.AUTH));
+        inquiryRepository.save(newInquiry("ghi@email.com", "문의사항3입니다.", InquiryType.SUGGESTION).setStatus(InquiryStatus.COMPLETED));
+
+        em.clear();
     }
 
     @DisplayName("문의사항 등록 API")
@@ -116,9 +122,29 @@ class InquiryControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.status").value(-1));
         resultActions.andExpect(jsonPath("$.data.length()").value(3));
 
     }
+
+    @DisplayName("문의사항 처리 완료에 성공한다.")
+    @WithUserDetails(value = "2", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void complete_inquiry_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>요청 쿼리 시작");
+        ResultActions resultActions = mvc.perform(
+                put("/v2/admin/inquiry/to-completed/{id}", 1));
+        System.out.println("<<<<<<<요청 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        assertThat(inquiryRepository.findById(1L).get().getStatus()).isEqualTo(InquiryStatus.COMPLETED);
+    }
+
 
 
 

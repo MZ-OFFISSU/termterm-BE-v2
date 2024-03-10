@@ -11,6 +11,7 @@
 - 나만의 용어 설명 신고된 리스트 API (for ADMIN)
 - 신고 내역 처리 완료 API (for ADMIN)
 - 전체 나만의 용어 설명 조회 API (for ADMIN)
+- 문의사항 처리 완료 API (for ADMIN)
 
 ---
 ### 23. 2024/03/09
