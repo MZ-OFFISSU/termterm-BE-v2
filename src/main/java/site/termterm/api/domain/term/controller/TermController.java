@@ -42,7 +42,7 @@ public class TermController {
     @GetMapping("/s/term/detail/{id}")
     public ResponseEntity<ResponseDto<TermDetailDto>> getTermDetail(@PathVariable(value = "id") Long termId, @AuthenticationPrincipal LoginMember loginMember){
         TermDetailDto responseDto = termService.getTermDetail(termId, loginMember.getMember().getId());
-        System.out.println(responseDto);
+
         return new ResponseEntity<>(new ResponseDto<>(1, "용어 상세 조회 완료", responseDto), HttpStatus.OK);
     }
 
