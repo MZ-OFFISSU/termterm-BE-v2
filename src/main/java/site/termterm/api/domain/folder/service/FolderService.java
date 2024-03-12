@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.bookmark.entity.TermBookmark;
@@ -216,9 +217,8 @@ public class FolderService {
      */
     public List<FolderMinimumInfoDto> getMyFolderList(Long memberId) {
         List<Folder> memberFolderList = memberRepository.findFoldersById(memberId);
-        List<FolderMinimumInfoDto> responseDtoList = memberFolderList.stream().map(FolderMinimumInfoDto::of).toList();
 
-        return responseDtoList;
+        return  memberFolderList.stream().map(FolderMinimumInfoDto::of).toList();
     }
 
     /**
@@ -236,11 +236,9 @@ public class FolderService {
      * 아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 리턴
      */
     public List<TermIdAndNameAndDescriptionDto> getArchivedTermsRandom10(Long memberId) {
-        List<TermIdAndNameAndDescriptionDtoInterface> random10TermsDtoInterfaceList = termBookmarkRepository.findTermIdAndNameAndDescriptionByMemberId(memberId);
 
-        return random10TermsDtoInterfaceList.stream()
-                .map(TermIdAndNameAndDescriptionDto::of)
-                .collect(Collectors.toList());
+        return termBookmarkRepository.findTermIdAndNameAndDescriptionByMemberId(memberId, PageRequest.of(0, 10));
+
     }
 
     /**

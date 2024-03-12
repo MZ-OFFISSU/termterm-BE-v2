@@ -10,7 +10,6 @@ import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.term.entity.Term;
 
-import java.sql.Clob;
 import java.util.List;
 import java.util.Objects;
 
@@ -89,20 +88,10 @@ public class FolderResponseDto {
     @AllArgsConstructor
     @ToString
     public static class TermIdAndNameAndDescriptionDto {
-        private String termId;
+        private Long termId;
         private String name;
         private String description;
 
-        public static TermIdAndNameAndDescriptionDto of(TermIdAndNameAndDescriptionDtoInterface resultInterface){
-            return new TermIdAndNameAndDescriptionDto(resultInterface.getTermId(), resultInterface.getName(), resultInterface.getDescription().toString());
-        }
-    }
-
-
-    public interface TermIdAndNameAndDescriptionDtoInterface {
-        String getTermId();
-        String getName();
-        Clob getDescription();
     }
 
     @Getter
