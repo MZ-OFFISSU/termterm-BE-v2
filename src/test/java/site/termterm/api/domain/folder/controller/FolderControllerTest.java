@@ -488,13 +488,16 @@ class FolderControllerTest extends DummyObject {
         //when
         System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
         ResultActions resultActions = mvc.perform(
-                get("/v2/s/folder/detail/sum/{folderId}", folderId));   //
+                get("/v2/s/folder/detail/sum/{folderId}", folderId));
         System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
 
         //then
         resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.terms[0].termId").value(3));
+        resultActions.andExpect(jsonPath("$.data.terms[1].termId").value(5));
+        resultActions.andExpect(jsonPath("$.data.terms[2].termId").value(1));
 
     }
 

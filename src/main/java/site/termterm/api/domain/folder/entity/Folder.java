@@ -48,4 +48,10 @@ public class Folder {
         return this;
     }
 
+    public Folder addTermId(Long termId){
+        this.termIds.add(termId);
+
+        return this;
+    }
+
 }
