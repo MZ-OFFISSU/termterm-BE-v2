@@ -1,5 +1,25 @@
 # termterm back-end server v2
 
+---
+### 25. 2024/03/12
+
+###### Today I Did 🥳
+- '폴더 상세 페이지 _ 모아서 보기 API'(/s/folder/detail/sum/{id}) 성능 개선
+
+###### TODAY ISSUE 🙉
+- /folder/detail/sum/{id} API 가 성능이 v1에 비해 오히려 떨어졌다.
+  - 문제 상황 : 얻어온 TermIds 에서, 요소 하나하하나 SELECT Term 쿼리를 발생시키고 있었다.
+  - 폴더 내에 용어가 50개 있을 경우, 쿼리가 50번 발생하게 될수도 있는, 아주 비효율적인 코드였다. 
+  - term 정보들을 `IN` SQL 절을 사용하여 한번에 불러와 응답 body 를 구성하도록 한다. 
+  - 그러나, 응답 body 에는 폴더에 담은 순서대로 구성되어야 하는데, IN 절은 자동으로 오름차순으로 정렬하여 리턴되었다.
+  - MySQL 의 `ORDER BY FIELD (~~, ~~, ~~)` 를 사용하면 된다고 한다.
+  - 그러나 문법상 `FIELD` 는 사용하기 어렵고, 나는 `FIND_IN_SET` 함수를 선택했다. 둘의 차이는 여기에 쓰지는 않겠다.
+  - 잠깐 검색해보니 QueryDSL 에서도 어떻게 가능한 것 같은데, 차차 공부해보면서 적용시켜보자. 
+
+###### TODO 📝
+- `ORDER BY RAND` 를 쓰려고 native Query 썼던 것들을 `FUNCTION` 을 이용하여 jpql 로 다시 바꾸자.
+
+---
 ### 24. 2024/03/10
 
 ###### Today I Did 🥳

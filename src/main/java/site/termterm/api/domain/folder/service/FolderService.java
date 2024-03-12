@@ -21,7 +21,6 @@ import site.termterm.api.global.handler.exceptions.CustomApiException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static site.termterm.api.domain.term.dto.TermResponseDto.*;
 import static site.termterm.api.domain.folder.dto.FolderRequestDto.*;
 import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
 
@@ -195,18 +194,16 @@ public class FolderService {
         }
 
         FolderDetailResponseDto responseDto = FolderDetailResponseDto.of(folderPS);
-        List<FolderDetailResponseDto.TermIdAndNameDto> termIdAndNameDtoList = folderPS.getTermIds().stream().map(termId -> {
-            Optional<TermIdAndNameResponseDto> termIdAndNameResponseDtoOptional = termRepository.findIdAndNameById(termId);
 
-            if (termIdAndNameResponseDtoOptional.isEmpty()) {
-                log.error("{}에서 불러온 {}가 DB 에 존재하지 않습니다.", folderId, termId);
-                return null;
-            }
+        List<Long> termIdList = folderPS.getTermIds();
+        Collections.reverse(termIdList);        // 넣은 순서대로 응답하기 위해 역순 정렬
 
-            return new FolderDetailResponseDto.TermIdAndNameDto(termId, termIdAndNameResponseDtoOptional.get().getName());
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        String termIdListString = termIdList.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
 
-        Collections.reverse(termIdAndNameDtoList);
+        List<FolderDetailResponseDto.TermIdAndNameDto> termIdAndNameDtoList = termRepository.getTermsByIdListOrderByFindInSet(termIdList, termIdListString);
+
         responseDto.setTerms(termIdAndNameDtoList);
 
         return responseDto;

@@ -17,7 +17,6 @@ import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.folder.repository.FolderRepository;
 import site.termterm.api.domain.member.entity.Member;
 import site.termterm.api.domain.member.repository.MemberRepository;
-import site.termterm.api.domain.term.dto.TermResponseDto;
 import site.termterm.api.domain.term.entity.Term;
 import site.termterm.api.domain.term.repository.TermRepository;
 import site.termterm.api.global.dummy.DummyObject;
@@ -356,14 +355,15 @@ class FolderServiceTest extends DummyObject {
         Long memberId = 1L;
 
         Member sinner = newMockMember(1L, "1111", "ema@i.l");
-        Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner);
-        folder.getTermIds().add(1L);
+        Folder folder = newMockFolder(1L, "폴더", "폴더 설명", sinner).addTermId(1L);
+
+        FolderDetailResponseDto.TermIdAndNameDto dto = new FolderDetailResponseDto.TermIdAndNameDto(1L, "용어1");
 
         //stub1
         when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
 
         //stub2
-        when(termRepository.findIdAndNameById(any())).thenReturn(Optional.of(new TermResponseDto.TermIdAndNameResponseDto(1L, "용어")));
+        when(termRepository.getTermsByIdListOrderByFindInSet(any(), any())).thenReturn(List.of(dto));
 
         //when
         FolderDetailResponseDto responseDto = folderService.getFolderDetailSum(folderId, memberId);

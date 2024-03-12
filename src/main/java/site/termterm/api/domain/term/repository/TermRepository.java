@@ -57,6 +57,10 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
     @Query("SELECT t FROM Term t WHERE t.id IN :termIdList")
     List<Term> getTermsByIdListExceptBookmarkStatus(@Param("termIdList") List<Long> termIdList);
 
+    @Query("SELECT new site.termterm.api.domain.folder.dto.FolderResponseDto$FolderDetailResponseDto$TermIdAndNameDto(t.id, t.name) " +
+            "FROM Term t WHERE t.id IN :termIdList ORDER BY FUNCTION('FIND_IN_SET', t.id, :termIdListString)")
+    List<FolderResponseDto.FolderDetailResponseDto.TermIdAndNameDto> getTermsByIdListOrderByFindInSet(@Param("termIdList") List<Long> termIdList, @Param("termIdListString") String termIdListString);
+
     @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT 5")
     List<Term> getTermsRandom5();
 
