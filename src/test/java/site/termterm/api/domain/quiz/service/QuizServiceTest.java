@@ -82,10 +82,9 @@ class QuizServiceTest extends DummyObject {
         //stub
         when(memberRepository.getReferenceById(any())).thenReturn(member);
         when(quizRepository.findByMember(any())).thenReturn(Optional.empty());
-        when(termRepository.getTermsRandom5()).thenReturn(random5Terms);
+        when(termRepository.getNRandomTerms(any())).thenReturn(random5Terms);
         when(quizRepository.save(any())).thenReturn(newQuiz);
         when(termRepository.getReferenceById(any())).thenReturn(term2, term3, term5, term6, term8);
-        when(termRepository.getTermsRandom3()).thenReturn(random3Terms);
 
         //when
         List<DailyQuizEachDto> responseDtoList = quizService.getDailyQuiz(1L);
