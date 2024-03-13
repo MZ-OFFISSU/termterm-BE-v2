@@ -1,5 +1,6 @@
 package site.termterm.api.domain.term.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -61,14 +62,8 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
             "FROM Term t WHERE t.id IN :termIdList ORDER BY FUNCTION('FIND_IN_SET', t.id, :termIdListString)")
     List<FolderResponseDto.FolderDetailResponseDto.TermIdAndNameDto> getTermsByIdListOrderByFindInSet(@Param("termIdList") List<Long> termIdList, @Param("termIdListString") String termIdListString);
 
-    @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT 5")
-    List<Term> getTermsRandom5();
-
-    @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT 3")
-    List<Term> getTermsRandom3();
-
-    @Query(nativeQuery = true, value = "select * from term t order by RAND() LIMIT :num")
-    List<Term> getTermsRandomOf(@Param("num") int num);
+    @Query("SELECT t FROM Term t ORDER BY FUNCTION('RAND') ")
+    List<Term> getNRandomTerms(Pageable pageable);
 
     @Modifying
     @Query(value = "INSERT INTO term(term_id, name, description, categories) " +

@@ -77,8 +77,8 @@ class FolderControllerTest extends DummyObject {
     @BeforeEach
     public void setUp(){
         // folder1 : {1, 2} , folder2 : {1, 5, 3}
-        Member sinner =memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
-        Member djokovic =memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
+        Member sinner = memberRepository.save(newMember("1111", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
+        Member djokovic = memberRepository.save(newMember("2222", "sinner@gmail.com").addFolderLimit());   // 폴더 생성 가능 횟수 : 4
 
         Folder folder1 = newFolder("새 폴더1", "새 폴더 설명1", sinner);
         Folder folder2 = newFolder("새 폴더2", "새 폴더 설명2", sinner);
@@ -88,12 +88,12 @@ class FolderControllerTest extends DummyObject {
         Term term4 = termRepository.save(newTerm("용어4", "용어4 설명", List.of(CategoryEnum.IT)));
         Term term5 = termRepository.save(newTerm("용어5", "용어5 설명", List.of(CategoryEnum.IT)));
 
-        folder1.getTermIds().add(term1.getId());
-        folder1.getTermIds().add(term2.getId());
+        folder1.addTermId(term1.getId());
+        folder1.addTermId(term2.getId());
 
-        folder2.getTermIds().add(term1.getId());
-        folder2.getTermIds().add(term5.getId());
-        folder2.getTermIds().add(term3.getId());
+        folder2.addTermId(term1.getId());
+        folder2.addTermId(term5.getId());
+        folder2.addTermId(term3.getId());
 
         folderRepository.save(folder1);
         folderRepository.save(folder2);
@@ -123,7 +123,7 @@ class FolderControllerTest extends DummyObject {
 
         List<Term> terms = List.of(term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16);
         for (int i=6; i<6+terms.size(); i++){
-            folder3.getTermIds().add((long) i);
+            folder3.addTermId((long) i);
             termBookmarkRepository.save(newTermBookmark(terms.get(i-6), sinner, 1));
         }
         folderRepository.save(folder3);
@@ -174,6 +174,11 @@ class FolderControllerTest extends DummyObject {
         commentLikeRepository.save(newMockCommentLike(comment1, member3, CommentLikeStatus.YES));
         commentLikeRepository.save(newMockCommentLike(comment2, member1, CommentLikeStatus.YES));
         commentLikeRepository.save(newMockCommentLike(comment3, member1, CommentLikeStatus.NO));
+
+        Member gael = memberRepository.save(newMember("6666", "gael@monfils.com"));
+        termBookmarkRepository.save(newTermBookmark(term1, gael, 1));
+        termBookmarkRepository.save(newTermBookmark(term2, gael, 1));
+        termBookmarkRepository.save(newTermBookmark(term3, gael, 1));
 
         em.clear();
     }
@@ -552,6 +557,23 @@ class FolderControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.length()").value(10));
+    }
+
+    @DisplayName("아카이빙한 용어들 중 최대 10개를 랜덤으로 뽑아 줄 API 요청 - 아카이빙한 용어가 10개 미만이어도 예외가 발생하지 않는다.")
+    @WithUserDetails(value = "6", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void random_10_archived_terms2_test() throws Exception{
+        //given
+
+        //when
+        System.out.println(">>>>>>>>>>>>>> 쿼리 시작");
+        ResultActions resultActions = mvc.perform(get("/v2/s/folder/term/random-10"));
+        System.out.println("<<<<<<<<<<<<<< 쿼리 종료");
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+
+        //then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.length()").value(3));
     }
 
     @DisplayName("폴더에 특정 단어 포함 여부 API 요청 - 성공")

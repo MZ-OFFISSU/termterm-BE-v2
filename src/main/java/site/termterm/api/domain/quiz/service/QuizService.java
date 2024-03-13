@@ -1,6 +1,7 @@
 package site.termterm.api.domain.quiz.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.member.entity.Member;
@@ -43,7 +44,7 @@ public class QuizService {
         Quiz quiz = quizRepository.findByMember(memberPS)
                 .orElseGet(() -> {      // 퀴즈 테이블에 데일리 퀴즈 데이터가 저장되지 않았음. 퀴즈 정보를 새로 발급한다.
                     Quiz newQuiz = Quiz.builder().member(memberPS).build();
-                    List<Term> termsRandom5 = termRepository.getTermsRandom5();     // 5문제를 랜덤으로 추출한다.
+                    List<Term> termsRandom5 = termRepository.getNRandomTerms(PageRequest.of(0, 5));     // 5문제를 랜덤으로 추출한다.
 
                     List<QuizTerm> quizTermList = termsRandom5.stream().map(term -> QuizTerm.of(newQuiz, term.getId())).toList();
                     newQuiz.setQuizTerms(quizTermList);     // insert quiz_term 쿼리 5번 발생
@@ -58,7 +59,7 @@ public class QuizService {
 
             // TODO : 아예 15개를 한꺼번에 가져와서 처리할 수도 있지 않을까?
             // Term 3개 랜덤 추출 -> 문제와 같은 것이 있을 수도 있으므로 필터링 -> limit 2 -> 문제 추가
-            List<Term> options = termRepository.getTermsRandom3().stream()
+            List<Term> options = termRepository.getNRandomTerms(PageRequest.of(0, 3)).stream()
                     .filter(option -> !option.equals(problem))
                     .limit(2).collect(Collectors.toList());
             options.add(problem);
@@ -250,7 +251,7 @@ public class QuizService {
         List<Term> problemTermList = termRepository.getTermsByIdListExceptBookmarkStatus(problemTermIdList);
 
         // 최악의 경우, 문제 단어와 일치하는 것이 모두 담겨올 수 도 있으므로 (2+1) * n 개를 추출한다.
-        ArrayDeque<Term> randomChosenTermsDeque = new ArrayDeque<>(termRepository.getTermsRandomOf(incorrectNum * 3));
+        ArrayDeque<Term> randomChosenTermsDeque = new ArrayDeque<>(termRepository.getNRandomTerms(PageRequest.of(0, incorrectNum * 3)));
 
         List<DailyQuizEachDto> responseDtoList = problemTermList.stream()
                 .map(problem -> {

@@ -5,6 +5,7 @@
 
 ###### Today I Did 🥳
 - '폴더 상세 페이지 _ 모아서 보기 API'(/s/folder/detail/sum/{id}) 성능 개선
+- `ORDER BY RAND() LIMIT N` 부분 Native Query 에서 JPQL 로 코드 변경
 
 ###### TODAY ISSUE 🙉
 - /folder/detail/sum/{id} API 가 성능이 v1에 비해 오히려 떨어졌다.
