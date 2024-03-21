@@ -44,7 +44,7 @@ jobs:
 
       - name: insert files
         uses: actions/checkout@v4
-      - run: |
+        run: |
           sudo touch ./src/main/resources/application.yml
           sudo mkdir -p ./src/main/resources/key
           sudo touch ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
