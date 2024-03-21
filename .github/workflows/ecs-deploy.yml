@@ -10,11 +10,11 @@ permissions:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}           # set this to your Amazon ECR repository name
-  ECS_SERVICE: ${{ secrets.ECR_SERVICE }}                 # set this to your Amazon ECS service name
-  ECS_CLUSTER: ${{ secrets.ECR_CLUSTER }}                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .aws/task-definition.json # set this to the path to your Amazon ECS task definition
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}           # set this to the name of the container in the
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_TASK_DEFINITION: .aws/task-definition.json
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
   APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
   APPLE_P8_FILE_NAME: ${{ secrets.APPLE_P8_FILE_NAME }}
   APPLE_P8_KEY: ${{ secrets.APPLE_P8_KEY }}
