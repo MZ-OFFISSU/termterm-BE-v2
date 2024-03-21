@@ -15,7 +15,7 @@ env:
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_TASK_DEFINITION: .aws/task-definition.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-  APPLICATION_YML: "${{ secrets.APPLICATION_YML }}"
+  APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
   APPLE_P8_FILE_NAME: ${{ secrets.APPLE_P8_FILE_NAME }}
   APPLE_P8_KEY: ${{ secrets.APPLE_P8_KEY }}
 
