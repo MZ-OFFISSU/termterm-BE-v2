@@ -43,13 +43,13 @@ jobs:
           distribution: 'temurin'
 
       - name: insert files
-        uses: actions/checkout@v4
-        run: |
-          sudo touch ./src/main/resources/application.yml
-          sudo mkdir -p ./src/main/resources/key
-          sudo touch ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
-          sudo echo "${{env.APPLICATION_YML}}" > ./src/main/resources/application.yml
-          sudo echo "${{env.APPLE_P8_KEY}}" > ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
+      - uses: actions/checkout@v4
+      - run: sudo touch ./src/main/resources/application.yml
+      - run: sudo mkdir -p ./src/main/resources/key
+      - run: sudo touch ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
+      - run: sudo echo "${{env.APPLICATION_YML}}" > ./src/main/resources/application.yml
+      - run: sudo echo "${{env.APPLE_P8_KEY}}" > ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
+
 
       - name: Grant execute permission for gradlew
         run: sudo chmod +x ./gradlew
