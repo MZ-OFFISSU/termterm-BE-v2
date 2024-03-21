@@ -42,7 +42,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: insert files
+      # 설정파일, 키 파일 삽입
       - uses: actions/checkout@v4
       - run: sudo touch ./src/main/resources/application.yml
       - run: sudo mkdir -p ./src/main/resources/key
