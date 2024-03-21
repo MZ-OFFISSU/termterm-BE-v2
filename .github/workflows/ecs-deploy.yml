@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}           # set this to your Amazon ECR repository name
@@ -44,18 +47,18 @@ jobs:
 
       # 설정파일, 키 파일 삽입
       - uses: actions/checkout@v4
-      - run: sudo touch ./src/main/resources/application.yml
-      - run: sudo mkdir -p ./src/main/resources/key
-      - run: sudo touch ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
-      - run: sudo echo "${{env.APPLICATION_YML}}" > ./src/main/resources/application.yml
-      - run: sudo echo "${{env.APPLE_P8_KEY}}" > ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
+      - run: touch ./src/main/resources/application.yml
+      - run: mkdir -p ./src/main/resources/key
+      - run: touch ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
+      - run: echo "${{env.APPLICATION_YML}}" > ./src/main/resources/application.yml
+      - run: echo "${{env.APPLE_P8_KEY}}" > ./src/main/resources/key/${{env.APPLE_P8_FILE_NAME}}
 
 
       - name: Grant execute permission for gradlew
-        run: sudo chmod +x ./gradlew
+        run: chmod +x ./gradlew
 
       - name: Build Gradle
-        run: sudo ./gradlew clean build -x test
+        run: ./gradlew clean build -x test
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -66,9 +69,9 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          sudo docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          sudo docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          sudo echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
