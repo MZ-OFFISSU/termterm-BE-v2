@@ -36,5 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-*.yml
+application.yml
+application-*.yml
 *.p8
