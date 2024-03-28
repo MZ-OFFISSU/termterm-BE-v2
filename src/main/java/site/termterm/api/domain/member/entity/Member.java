@@ -90,10 +90,6 @@ public class Member {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    @Builder.Default
-    @Setter
-    private String refreshToken = UUID.randomUUID().toString();
-
     @Convert(converter = CategoryListConverter.class)
     private List<CategoryEnum> categories;
 

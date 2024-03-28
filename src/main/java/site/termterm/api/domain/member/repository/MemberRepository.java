@@ -14,7 +14,6 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findBySocialIdAndEmail(@Param("socialId") String socialId, @Param("email") String email);
-    Optional<Member> findByRefreshToken(@Param("refreshToken") String refreshToken);
     Boolean existsByNicknameIgnoreCase(@Param("nickname") String nickname);
 
     @Query("SELECT m.folders FROM Member m WHERE m.id = :memberId")
