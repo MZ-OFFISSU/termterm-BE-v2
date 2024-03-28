@@ -1,6 +1,28 @@
 # termterm back-end server v2
 
 ---
+### 27. 2024/03/28
+
+###### Today I Did 🥳
+- Redis 서버를 사용하여 Refresh Token 저장 및 관리
+
+###### Memo 🤔
+- 몇달 전에 새로 출시한 Amazon ElastiCache for Redis 의 Serverless 버전을 사용했는데, 레퍼런스가 많지 않아 맞게 했는지 의문
+- Amazon ElastiCache 는 Local 에서의 접근을 허용하지 않는다
+
+
+---
+### 26. ~~~~
+
+###### Today I Did 🥳
+- ECS + Github Actions 를 이용하여 CI/CD 구축
+
+###### TODAY ISSUE 🙉
+- 프리티어인 t2.micro 인스턴스를 이용하여 도커 이미지를 배포하고 있는 상황
+  - 그러나 한정적인 RAM 사이즈로, 메모리 초과 이슈가 발생하여 배포에 실패하는 경우가 자주 발생
+  - Swap 메모리를 사용하여 해결하도록 하였다. 자세한 내용은 블로그 참고
+
+---
 ### 25. 2024/03/12
 
 ###### Today I Did 🥳
