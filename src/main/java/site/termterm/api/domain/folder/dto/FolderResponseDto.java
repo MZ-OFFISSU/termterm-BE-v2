@@ -27,6 +27,7 @@ public class FolderResponseDto {
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @ToString
     public static class FolderDetailResponseDto {
@@ -39,6 +40,7 @@ public class FolderResponseDto {
         private List<TermIdAndNameDto> terms;
 
         @AllArgsConstructor
+        @NoArgsConstructor
         @ToString
         @Getter
         public static class TermIdAndNameDto{

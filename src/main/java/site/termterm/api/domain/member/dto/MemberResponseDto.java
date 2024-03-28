@@ -1,6 +1,7 @@
 package site.termterm.api.domain.member.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.Member;
@@ -21,6 +22,7 @@ public class MemberResponseDto {
     }
 
     @Getter
+    @NoArgsConstructor
     public static class MemberInfoResponseDto {
         private Long memberId;
         private String name;
