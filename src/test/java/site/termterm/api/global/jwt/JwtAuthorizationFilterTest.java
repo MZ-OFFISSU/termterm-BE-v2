@@ -88,5 +88,21 @@ class JwtAuthorizationFilterTest {
 
     }
 
+    @DisplayName("토큰이 만료되어 검증에 실패한다.")
+    @Test
+    public void 토큰만료_test() throws Exception{
+        //given
+        Member member = Member.builder().id(1L).role(MemberEnum.CUSTOMER).build();
+        String jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoaS10ZXJtdGVybSIsInJvbGUiOiJDVVNUT01FUiIsImlkIjoxLCJleHAiOjE3MTE1OTMzMTd9.rzWgmAc35mjf9HcTJ42IxcddmYzbp0Plpuw-LvusXXVb62B6iWbGIq6OQHFR7qT4YAUmMiaPRZej5_ToAJGTYQ";
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/v2/s/authentication-test").header(jwtVO.getHeader(), jwtVO.getTokenPrefix() + jwtToken));
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+
+    }
+
+
 
 }

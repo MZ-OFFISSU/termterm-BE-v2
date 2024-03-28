@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.AppleRefreshToken;
 import site.termterm.api.domain.member.entity.Member;
+import site.termterm.api.domain.member.entity.RefreshToken;
 import site.termterm.api.domain.member.repository.AppleRefreshTokenRepository;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.member.repository.RefreshTokenRepository;
 import site.termterm.api.domain.member.utils.AppleLoginUtil;
 import site.termterm.api.domain.member.utils.SocialLoginUtil;
 import site.termterm.api.domain.point.entity.PointHistory;
@@ -38,6 +40,7 @@ public class MemberService {
     private final AppleLoginUtil appleLoginUtil;
     private final PointHistoryRepository pointHistoryRepository;
     private final AppleRefreshTokenRepository appleRefreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${cloud.aws.S3.bucket-url}")
     private String S3_BUCKET_BASE_URL;
@@ -77,25 +80,37 @@ public class MemberService {
      */
     public MemberTokenResponseDto provideToken(Member member) {
 
-        // 토큰 dto 생성
+        // Access Token 생성
         String accessToken = jwtProcess.create(member);
 
-        return new MemberTokenResponseDto(accessToken, member.getRefreshToken());
+        // Refresh Token 생성
+        RefreshToken refreshToken = RefreshToken.builder().id(""+member.getId()).accessToken(accessToken).refreshToken(UUID.randomUUID().toString()).build();
+        refreshTokenRepository.save(refreshToken);
+
+        return new MemberTokenResponseDto(accessToken, refreshToken.getRefreshToken());
     }
 
+    /**
+     * refresh token 을 기반으로 토큰을 재발급 합니다.
+     * redis 서버에 저장된 기존 토큰을 지우고, 새로운 access token 과 refresh token 을 발급하여 저장합니다.
+     */
     @Transactional
     public MemberTokenResponseDto provideReissuedToken(MemberTokenReissueRequestDto requestDto){
         String oldRefreshToken = requestDto.getRefresh_token();
-        Member memberPS = memberRepository.findByRefreshToken(oldRefreshToken)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByRefreshToken(oldRefreshToken)
+                .orElseThrow(() -> new CustomApiException("만료 혹은 존재하지 않는 Refresh Token 입니다."));
+
+        Member memberPS = memberRepository.findById(Long.parseLong(refreshTokenEntity.getId()))
+                .orElseThrow(() -> new CustomApiException("존재하지 않는 사용자입니다."));
 
         String accessToken = jwtProcess.create(memberPS);
-        String refreshToken = UUID.randomUUID().toString();
-        memberPS.setRefreshToken(refreshToken);     // Dirty checking
+        RefreshToken newRefreshToken = RefreshToken.builder().id("" + refreshTokenEntity.getId()).accessToken(accessToken).refreshToken(UUID.randomUUID().toString()).build();
 
-        return new MemberTokenResponseDto(accessToken, refreshToken);
+        refreshTokenRepository.delete(refreshTokenEntity);
+        refreshTokenRepository.save(newRefreshToken);
 
+        return new MemberTokenResponseDto(accessToken, newRefreshToken.getRefreshToken());
     }
 
     /**

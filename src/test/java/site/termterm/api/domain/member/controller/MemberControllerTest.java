@@ -20,7 +20,9 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.member.entity.RefreshToken;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.member.repository.RefreshTokenRepository;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
@@ -51,6 +53,9 @@ class MemberControllerTest extends DummyObject {
     private MemberRepository memberRepository;
 
     @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
@@ -76,10 +81,12 @@ class MemberControllerTest extends DummyObject {
         Authentication authentication = context.getAuthentication();
         LoginMember principal = (LoginMember) authentication.getPrincipal();
         System.out.println(principal.getMember().getEmail());
-        String oldRefreshToken = principal.getMember().getRefreshToken();
+
+        refreshTokenRepository.save(RefreshToken.builder().id("1").accessToken("at").refreshToken("rt").build());
+        RefreshToken refreshToken = refreshTokenRepository.findById("" + principal.getMember().getId()).get();
 
         MemberTokenReissueRequestDto requestDto = new MemberTokenReissueRequestDto();
-        requestDto.setRefresh_token(oldRefreshToken);
+        requestDto.setRefresh_token(refreshToken.getRefreshToken());
 
         String requestBody = om.writeValueAsString(requestDto);
 
@@ -94,6 +101,10 @@ class MemberControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isCreated());
+
+        RefreshToken newRefreshToken = refreshTokenRepository.findById("1").get();
+        resultActions.andExpect(jsonPath("$.data.access_token").value(newRefreshToken.getAccessToken()));
+        resultActions.andExpect(jsonPath("$.data.refresh_token").value(newRefreshToken.getRefreshToken()));
 
     }
 
