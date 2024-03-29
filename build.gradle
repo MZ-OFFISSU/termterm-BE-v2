@@ -64,6 +64,12 @@ dependencies {
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 	implementation 'com.nimbusds:nimbus-jose-jwt:3.10'	// apple login
+
+	// Slack bot
+	implementation 'com.slack.api:bolt:1.36.1'
+	implementation 'com.slack.api:bolt-servlet:1.36.1'
+	implementation 'com.slack.api:bolt-jetty:1.36.1'
+	implementation 'org.slf4j:slf4j-simple:1.7.36'
 }
 
 tasks.named('test') {
