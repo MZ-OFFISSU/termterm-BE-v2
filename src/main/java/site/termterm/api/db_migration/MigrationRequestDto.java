@@ -102,7 +102,6 @@ public class MigrationRequestDto {
                     .domain(domain)
                     .socialType(SocialLoginType.valueOf(socialType))
                     .identifier(identifier)
-                    .refreshToken(refreshToken)
                     .quizStatus(QuizStatus.valueOf(quizStatus))
                     .point(point)
                     .folderLimit(folderLimit)
