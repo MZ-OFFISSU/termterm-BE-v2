@@ -63,7 +63,6 @@ public class FolderService {
      * 폴더 정보를 수정합니다.
      */
     @Transactional
-    @CachePut(value = "folderId", key = "#p0.getFolderId()", cacheManager = "folderIdCacheManager")
     public Folder modifyFolderInfo(FolderModifyRequestDto requestDto, Long memberId) {
         Folder folderPS = folderRepository.findById(requestDto.getFolderId())
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
@@ -79,7 +78,6 @@ public class FolderService {
      * 폴더를 삭제합니다.
      */
     @Transactional
-    @CacheEvict(value = "folderId", key = "#p0")
     public void deleteFolder(Long folderId, Long memberId) {
         Folder folderPS = folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
@@ -113,7 +111,6 @@ public class FolderService {
      * 그러나 폴더에 이미 해당 용어가 담겨 있을 경우, 이미 담은 폴더명들을 리스트로 반환합니다.
      */
     @Transactional
-    @CacheEvict(value = "folderId", key = "#p0")
     public TermBookmark archiveTerm(ArchiveTermRequestDto requestDto, Long memberId) {
         List<String> alreadyArchivedFolderNames = new ArrayList<>();
 
@@ -163,7 +160,6 @@ public class FolderService {
      * 폴더에서 용어를 삭제합니다.
      */
     @Transactional
-    @CacheEvict(value = "folderId", key = "#p0")
     public Folder unArchiveTerm(UnArchiveTermRequestDto requestDto, Long memberId) {
         Folder folderPS = folderRepository.findById(requestDto.getFolderId())
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
@@ -193,7 +189,6 @@ public class FolderService {
     /**
      * 폴더 내에 담긴 용어들을 폴더 정보와 함께 리턴합니다.
      */
-    @Cacheable(value = "folderId", key = "#p0", cacheManager = "folderIdCacheManager")
     public FolderDetailResponseDto getFolderDetailSum(Long folderId, Long memberId) {
         Folder folderPS = folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomApiException("폴더가 존재하지 않습니다."));
