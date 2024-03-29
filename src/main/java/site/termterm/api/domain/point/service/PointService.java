@@ -77,7 +77,7 @@ public class PointService {
      * 큐레이션 구매
      */
     @Transactional
-    public void payForCuration(Long curationId, Long memberId) {
+    public Curation payForCuration(Long curationId, Long memberId) {
         // 큐레이션을 구매할 만큼 포인트가 충분히 있는지 확인
         Member memberPS = memberRepository.findById(memberId).orElseThrow(() -> new CustomApiException("사용자가 존재하지 않습니다."));
 
@@ -109,6 +109,8 @@ public class PointService {
         // 자동 북마크 처리
         Curation curationPS = curationRepository.getReferenceById(curationId);
         curationBookmarkRepository.save(CurationBookmark.of(curationPS, memberPS));
+
+        return curationPS;
     }
 
     /**

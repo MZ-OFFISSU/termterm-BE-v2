@@ -3,6 +3,7 @@ package site.termterm.api.domain.inquiry.aop;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import site.termterm.api.domain.inquiry.entity.Inquiry;
@@ -13,6 +14,7 @@ import java.util.Objects;
 @Aspect
 @Component
 @RequiredArgsConstructor
+@Profile("default")
 public class MailAspect {
     private final MailSendUtil mailSendUtil;
 

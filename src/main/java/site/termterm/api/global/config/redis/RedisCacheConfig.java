@@ -43,7 +43,7 @@ public class RedisCacheConfig {
                 .build();
     }
 
- 
+
     private RedisCacheConfiguration generateCacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(
