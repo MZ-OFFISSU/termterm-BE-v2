@@ -2,9 +2,6 @@ package site.termterm.api.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.category.CategoryEnum;
@@ -22,6 +19,8 @@ import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.aws.AmazonS3Util;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 import site.termterm.api.global.jwt.JwtProcess;
+import site.termterm.api.global.slack.SlackChannels;
+import site.termterm.api.global.slack.SlackUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +43,8 @@ public class MemberService {
     private final PointHistoryRepository pointHistoryRepository;
     private final AppleRefreshTokenRepository appleRefreshTokenRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final SlackUtil slackUtil;
+    private final SlackChannels slackChannels;
 
     @Value("${cloud.aws.S3.bucket-url}")
     private String S3_BUCKET_BASE_URL;
@@ -69,6 +70,8 @@ public class MemberService {
         Member memberPS = memberRepository.findBySocialIdAndEmail(memberInfo.getSocialId(), memberInfo.getEmail())
                 .orElseGet(() -> {
                     Member newMember = memberRepository.save(memberInfo.toEntity());
+
+                    slackUtil.sendSignUpSlackMessage(newMember.getId());
 
                     // 기본 포인트 지급 내역 Point History 에 저장
                     pointHistoryRepository.save(PointHistory.of(PointPaidType.SIGNUP_DEFAULT, newMember, 0));
@@ -119,7 +122,6 @@ public class MemberService {
     /**
      * 사용자의 정보를 리턴합니다.
      */
-    @Cacheable(value = "memberId", key = "#p0", cacheManager = "memberIdCacheManager")
     public MemberInfoResponseDto getMemberInfo(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -131,7 +133,6 @@ public class MemberService {
      * 사용자 정보를 수정합니다.
      */
     @Transactional
-    @CachePut(value = "memberId", key = "#p1", cacheManager = "memberIdCacheManager")
     public Member updateMemberInfo(MemberInfoUpdateRequestDto requestDto, Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -144,7 +145,6 @@ public class MemberService {
      * 사용자 관심사 카테고리를 수정합니다.
      */
     @Transactional
-    @CachePut(value = "memberId", key = "#p1", cacheManager = "memberIdCacheManager")
     public Member updateMemberCategoriesInfo(MemberCategoriesUpdateRequestDto requestDto, Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -158,7 +158,6 @@ public class MemberService {
     /**
      * 사용자의 프로필 사진 주소를 리턴합니다.
      */
-    @Cacheable(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
     public String getMemberProfileImage(Long memberId) {
         return memberRepository.getProfileImgById(memberId);
 
@@ -168,7 +167,6 @@ public class MemberService {
      * 사용자의 프로필 사진을 디폴트 사진으로 변경합니다.
      */
     @Transactional
-    @CachePut(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
     public Member deleteMemberProfileImage(Long id){
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -193,7 +191,6 @@ public class MemberService {
      * DB 에 사용자의 프로필 이미지 주소를 동기화합니다.
      */
     @Transactional
-    @CachePut(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
     public Member syncProfileImageUrl(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -221,7 +218,6 @@ public class MemberService {
      * 회원 탈퇴 처리합니다.
      */
     @Transactional
-    @CacheEvict(value = "memberId", key = "#p0")
     public Member withdraw(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
@@ -247,6 +243,8 @@ public class MemberService {
         Member member = memberRepository.findBySocialIdAndEmail(memberInfoDto.getSocialId(), memberInfoDto.getEmail())
                 .orElseGet(() -> {
                     Member newMember = memberRepository.save(memberInfoDto.toEntity());
+
+                    slackUtil.sendSignUpSlackMessage(newMember.getId());
 
                     AppleRefreshToken appleRefreshToken = memberInfoDto.toAppleRefreshTokenEntity(newMember.getId());
                     appleRefreshTokenRepository.save(appleRefreshToken);
