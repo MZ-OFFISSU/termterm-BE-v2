@@ -41,7 +41,6 @@ public class MemberService {
     private final PointHistoryRepository pointHistoryRepository;
     private final AppleRefreshTokenRepository appleRefreshTokenRepository;
     private final SlackUtil slackUtil;
-    private final SlackChannels slackChannels;
 
     @Value("${cloud.aws.S3.bucket-url}")
     private String S3_BUCKET_BASE_URL;
@@ -86,7 +85,7 @@ public class MemberService {
         // Access Token 생성
         String accessToken = jwtProcess.create(member);
 
-        return new MemberTokenResponseDto(accessToken, UUID.randomUUID().toString());
+        return new MemberTokenResponseDto(accessToken, member.getRefreshToken());
     }
 
     /**
@@ -108,6 +107,20 @@ public class MemberService {
 //
 //        return new MemberTokenResponseDto(accessToken, newRefreshToken.getRefreshToken());
 //    }
+
+    @Transactional
+    public MemberTokenResponseDto provideReissuedToken(MemberTokenReissueRequestDto requestDto){
+        String oldRefreshToken = requestDto.getRefresh_token();
+        Member memberPS = memberRepository.findByRefreshToken(oldRefreshToken)
+                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+
+        String accessToken = jwtProcess.create(memberPS);
+        String refreshToken = UUID.randomUUID().toString();
+        memberPS.setRefreshToken(refreshToken);     // Dirty checking
+
+        return new MemberTokenResponseDto(accessToken, refreshToken);
+
+    }
 
     /**
      * 사용자의 정보를 리턴합니다.

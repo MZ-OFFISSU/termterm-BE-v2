@@ -100,6 +100,10 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<TermBookmark> termBookmarks;
 
+    @Builder.Default
+    @Setter
+    private String refreshToken = UUID.randomUUID().toString();
+
     @Builder
     public Member(Long id, String socialId, String name, String email, String profileImg, String nickname,List<CategoryEnum> categories,  MemberEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
