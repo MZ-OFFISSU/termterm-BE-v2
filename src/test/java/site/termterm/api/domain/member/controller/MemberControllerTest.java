@@ -20,7 +20,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import site.termterm.api.domain.member.entity.RefreshToken;
 import site.termterm.api.domain.member.repository.MemberRepository;
 import site.termterm.api.domain.member.repository.RefreshTokenRepository;
 import site.termterm.api.global.config.auth.LoginMember;
