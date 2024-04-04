@@ -69,7 +69,7 @@ class InquiryControllerTest extends DummyObject {
     @Test
     public void register_inquiry_test() throws Exception{
         //given
-        String email = "register_inquiry@test.com";
+        String email = "thisis.joos@gmail.com";
         String content = "문의 드려요";
 
         InquiryRegisterRequestDto requestDto = new InquiryRegisterRequestDto();
