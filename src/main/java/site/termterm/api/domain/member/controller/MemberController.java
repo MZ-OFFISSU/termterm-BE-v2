@@ -38,6 +38,17 @@ public class MemberController {
     /**
      * refresh token 을 가지고 새로운 토큰을 발급해 줍니다.
      */
+//    @PostMapping("/auth/token/refresh")
+//    public ResponseEntity<ResponseDto<MemberTokenResponseDto>> provideReissuedToken(
+//            @RequestBody @Valid MemberTokenReissueRequestDto requestDto,
+//            BindingResult bindingResult
+//    ){
+//        MemberTokenResponseDto responseDto = memberService.provideReissuedToken(requestDto);
+//        return new ResponseEntity<>(new ResponseDto<>(1, "토큰 재발급 성공", responseDto), HttpStatus.CREATED);
+//    }
+    /**
+     * refresh token 을 가지고 새로운 토큰을 발급해 줍니다.
+     */
     @PostMapping("/auth/token/refresh")
     public ResponseEntity<ResponseDto<MemberTokenResponseDto>> provideReissuedToken(
             @RequestBody @Valid MemberTokenReissueRequestDto requestDto,
