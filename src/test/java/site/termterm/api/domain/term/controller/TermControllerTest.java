@@ -2,6 +2,7 @@ package site.termterm.api.domain.term.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -81,7 +82,7 @@ class TermControllerTest extends DummyObject {
     @Autowired
     private CommentService commentService;
 
-    @Autowired
+    @PersistenceContext
     private EntityManager em;
 
     @BeforeEach

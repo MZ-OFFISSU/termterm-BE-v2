@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.comment.domain.report.entity.Report;
 import site.termterm.api.domain.comment.domain.report.repository.ReportRepository;
-import site.termterm.api.domain.comment.dto.CommentResponseDto;
 import site.termterm.api.domain.comment.entity.Comment;
 import site.termterm.api.domain.comment.repository.CommentRepository;
 import site.termterm.api.domain.comment_like.entity.CommentLike;
@@ -22,6 +21,7 @@ import java.util.Optional;
 
 import static site.termterm.api.domain.comment.domain.report.dto.ReportRequestDto.*;
 import static site.termterm.api.domain.comment.dto.CommentRequestDto.*;
+import static site.termterm.api.domain.comment.dto.CommentResponseDto.*;
 
 @RequiredArgsConstructor
 @Service
@@ -168,7 +168,7 @@ public class CommentService {
     /**
      * 나만의 용어 설명 전체 리스트
      */
-    public List<CommentResponseDto.CommentInfoForAdminDto> getCommentList() {
+    public List<CommentInfoForAdminDto> getCommentList() {
         return commentRepository.getCommentListForAdmin();
     }
 }
