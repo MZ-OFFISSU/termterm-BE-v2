@@ -17,7 +17,6 @@ import site.termterm.api.domain.point.repository.PointHistoryRepository;
 import site.termterm.api.global.aws.AmazonS3Util;
 import site.termterm.api.global.handler.exceptions.CustomApiException;
 import site.termterm.api.global.jwt.JwtProcess;
-import site.termterm.api.global.slack.SlackChannels;
 import site.termterm.api.global.slack.SlackUtil;
 
 import java.util.List;
@@ -67,7 +66,9 @@ public class MemberService {
                 .orElseGet(() -> {
                     Member newMember = memberRepository.save(memberInfo.toEntity());
 
-                    slackUtil.sendSignUpSlackMessage(newMember.getId());
+                    if (slackUtil != null) {        // 테스트환경에서는 slackUtil 이 null 이다. slack 에 의존성을 갖고 있는 것이 문제. TODO
+                        slackUtil.sendSignUpSlackMessage(newMember.getId());
+                    }
 
                     // 기본 포인트 지급 내역 Point History 에 저장
                     pointHistoryRepository.save(PointHistory.of(PointPaidType.SIGNUP_DEFAULT, newMember, 0));

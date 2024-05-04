@@ -386,7 +386,7 @@ class FolderServiceTest extends DummyObject {
 
 
         //stub
-        when(memberRepository.findFoldersById(any())).thenReturn(sinner.getFolders());
+        when(memberRepository.findFoldersByMemberId(any())).thenReturn(sinner.getFolders());
 
         //when
         List<FolderMinimumInfoDto> myFolderList = folderService.getMyFolderList(1L);

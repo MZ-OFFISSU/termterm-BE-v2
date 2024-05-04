@@ -20,7 +20,6 @@ import site.termterm.api.global.handler.exceptions.CustomApiException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,7 +58,7 @@ public class TermService {
      */
     public Page<TermSimpleDto> getRecommendedTerms(Pageable pageable, Long memberId) {
         // 사용자의 관심사를 불러온다.
-        List<ArrayList<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
+        List<List<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
 
         if (categoryEnumListOfList.isEmpty()){
             throw new CustomApiException("Member Category 가 존재하지 않습니다.");
@@ -113,7 +112,7 @@ public class TermService {
         }
         else{   // 2. 테이블에 존재하지 않거나, 존재해도 날짜가 오늘이 아닐 경우, 사용자의 관심사를 기반으로 용어 4개를 무작위로 선별하여 저장하고 리턴한다.
             // 사용자의 관심사를 불러온다.
-            List<ArrayList<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
+            List<List<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
 
             if (categoryEnumListOfList.isEmpty()){
                 throw new CustomApiException("Member Category 가 존재하지 않습니다.");

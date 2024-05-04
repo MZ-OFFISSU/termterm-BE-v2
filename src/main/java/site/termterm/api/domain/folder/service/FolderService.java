@@ -29,7 +29,6 @@ import static site.termterm.api.domain.folder.dto.FolderResponseDto.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FolderService {
-    private final Logger log = LoggerFactory.getLogger(getClass());
     private final FolderRepository folderRepository;
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
@@ -216,7 +215,7 @@ public class FolderService {
      * 내 폴더 리스트 리턴
      */
     public List<FolderMinimumInfoDto> getMyFolderList(Long memberId) {
-        List<Folder> memberFolderList = memberRepository.findFoldersById(memberId);
+        List<Folder> memberFolderList = memberRepository.findFoldersByMemberId(memberId);
 
         return  memberFolderList.stream().map(FolderMinimumInfoDto::of).toList();
     }

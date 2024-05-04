@@ -68,7 +68,7 @@ class TermServiceTest extends DummyObject {
         //given
         ArrayList<CategoryEnum> arrayList = new ArrayList<>();
         arrayList.add(CategoryEnum.IT);
-        List<ArrayList<CategoryEnum>> categories = List.of(arrayList);
+        List<List<CategoryEnum>> categories = List.of(arrayList);
         List<Object[]> queryResults = List.of(new Object[] {1L, "", "", 1}, new Object[] {2L, "", "", null}, new Object[] {3L, "", "", null}, new Object[] {4L, "", "", null});
 
         //stub
@@ -101,7 +101,7 @@ class TermServiceTest extends DummyObject {
 
         ArrayList<CategoryEnum> arrayList = new ArrayList<>();
         arrayList.add(CategoryEnum.IT);
-        List<ArrayList<CategoryEnum>> categories = List.of(arrayList);
+        List<List<CategoryEnum>> categories = List.of(arrayList);
         List<Object[]> queryResults = List.of(new Object[] {1L, "", "", 1}, new Object[] {2L, "", "", null}, new Object[] {3L, "", "", null}, new Object[] {4L, "", "", null});
 
 

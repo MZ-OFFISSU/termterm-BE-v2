@@ -128,7 +128,7 @@ public class CurationService {
      * (1/2) 카테고리별 큐레이션 리스트를 조회할 때, 쿼리로 category 가 넘어오지 않을 경우 사용자의 관심사를 바탕으로 추천 큐레이션을 리턴합니다.
      */
     public List<CurationSimpleResponseDto> getRecommendedCuration(Long memberId) {
-        List<ArrayList<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
+        List<List<CategoryEnum>> categoryEnumListOfList = memberRepository.getCategoriesById(memberId);
 
         if (categoryEnumListOfList.isEmpty()){
             throw new CustomApiException("Member Category 가 존재하지 않습니다.");
