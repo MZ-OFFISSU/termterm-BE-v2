@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
     Optional<Member> findBySocialIdAndEmail(@Param("socialId") String socialId, @Param("email") String email);
     Optional<Member> findByRefreshToken(@Param("refreshToken") String refreshToken);
     Boolean existsByNicknameIgnoreCase(@Param("nickname") String nickname);
@@ -25,9 +25,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.categories FROM Member m WHERE m.id = :memberId")
     List<ArrayList<CategoryEnum>> getCategoriesById(@Param("memberId") Long memberId);
-
-    @Query("SELECT m.profileImg FROM Member m WHERE m.id = :memberId")
-    String getProfileImgById(@Param("memberId") Long memberId);
 
     @Query("SELECT m.identifier FROM Member m WHERE m.id = :memberId")
     String getIdentifierById(@Param("memberId") Long memberId);

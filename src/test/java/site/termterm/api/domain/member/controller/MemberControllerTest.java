@@ -2,6 +2,7 @@ package site.termterm.api.domain.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ class MemberControllerTest extends DummyObject {
 //    @Autowired
 //    private RefreshTokenRepository refreshTokenRepository;
 
-    @Autowired
+    @PersistenceContext
     private EntityManager em;
 
     @BeforeEach
@@ -274,6 +275,7 @@ class MemberControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data").value(memberRepository.findById(1L).get().getProfileImg()));
 
     }
 
