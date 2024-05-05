@@ -3,12 +3,10 @@ package site.termterm.api.domain.term.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import static site.termterm.api.domain.term.dto.TermResponseDto.*;
 
-import site.termterm.api.db_migration.MigrationRequestDto;
 import site.termterm.api.domain.curation.dto.CurationResponseDto;
 import site.termterm.api.domain.folder.dto.FolderResponseDto;
 import site.termterm.api.domain.term.entity.Term;
@@ -64,10 +62,5 @@ public interface TermRepository extends JpaRepository<Term, Long>, Dao {
 
     @Query("SELECT t FROM Term t ORDER BY FUNCTION('RAND') ")
     List<Term> getNRandomTerms(Pageable pageable);
-
-    @Modifying
-    @Query(value = "INSERT INTO term(term_id, name, description, categories) " +
-            "VALUES (:#{#termDto.id}, :#{#termDto.name}, :#{#termDto.description}, '[]')", nativeQuery = true)
-    void saveWithId(@Param("termDto") MigrationRequestDto.TermDto termDto);
 
 }
