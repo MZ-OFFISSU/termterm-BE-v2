@@ -288,7 +288,7 @@ class MemberControllerTest extends DummyObject {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/v2/s/member/info/profile-image/presigned-url"));
+                put("/v2/s/member/info/profile-image/presigned-url"));
         System.out.println(resultActions.andReturn().getResponse().getContentAsString());
 
         //then
