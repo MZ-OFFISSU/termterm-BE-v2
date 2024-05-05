@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -30,6 +31,12 @@ import java.util.UUID;
 @DynamicUpdate
 @DynamicInsert
 public class Member {
+    @Value("${cloud.aws.S3.bucket-url}")
+    private String S3_BUCKET_BASE_URL;
+
+    @Value("${cloud.aws.S3.default-image-path}")
+    private String DEFAULT_IMAGE_NAME;
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MEMBER_ID")
     private Long id;
@@ -43,7 +50,8 @@ public class Member {
     private String email;
 
     @Column(nullable = false)
-    private String profileImg;
+    @Builder.Default
+    private String profileImg = S3_BUCKET_BASE_URL + "/" + DEFAULT_IMAGE_NAME;
 
     @Column(nullable = false, unique = true, length = 36)
     private String nickname;
@@ -90,7 +98,8 @@ public class Member {
     private LocalDateTime modifiedDate;
 
     @Convert(converter = CategoryListConverter.class)
-    private List<CategoryEnum> categories;
+    @Builder.Default
+    private List<CategoryEnum> categories = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

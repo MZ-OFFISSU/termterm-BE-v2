@@ -108,7 +108,6 @@ public class MemberInfoDto {
                     .name(name)
                     .email(email)
                     .nickname(nickname)
-                    .profileImg(profileImg)
                     .role(MemberEnum.CUSTOMER)
                     .socialType(SocialLoginType.APPLE)
                     .build();
