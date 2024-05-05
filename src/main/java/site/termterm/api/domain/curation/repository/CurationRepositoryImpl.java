@@ -1,21 +1,63 @@
 package site.termterm.api.domain.curation.repository;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import site.termterm.api.domain.bookmark.entity.BookmarkStatus;
 import site.termterm.api.domain.category.CategoryEnum;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-interface Dao {
-    List<Object[]> getCurationDtoListByCategoriesExceptMainCuration(Long mainCurationId, List<CategoryEnum> categories, Long memberId);
-    List<Object[]> getCurationDtoListByCategoriesLimit6(List<CategoryEnum> categories, Long memberId);
-    List<Object[]> getCurationsByCategory(CategoryEnum category, Long memberId);
-}
+import static site.termterm.api.domain.bookmark.entity.QCurationBookmark.*;
+import static site.termterm.api.domain.curation.dto.CurationDatabaseDto.*;
+import static site.termterm.api.domain.curation.dto.CurationResponseDto.*;
+import static site.termterm.api.domain.curation.entity.QCuration.*;
 
 @RequiredArgsConstructor
-public class CurationRepositoryImpl implements Dao {
+public class CurationRepositoryImpl implements CurationRepositoryCustom {
     private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Optional<CurationInfoWithBookmarkDto> findByIdWithBookmarked(Long curationId, Long memberId) {
+        return Optional.ofNullable(
+                queryFactory
+                .select(Projections.constructor(CurationInfoWithBookmarkDto.class,
+                        curation.title, curation.cnt, curation.description, curation.thumbnail, curation.tags, curation.termIds, curation.categories, curationBookmark.status))
+                .from(curation)
+                .leftJoin(curationBookmark)
+                .on(curationBookmark.curation.id.eq(curation.id).and(curationBookmark.member.id.eq(memberId)))
+                .where(curation.id.eq(curationId))
+                .fetchOne()
+        );
+    }
+
+    @Override
+    public Set<CurationSimpleResponseDtoNamedStatus> getArchivedCurationsWithBookmarked(Long memberId, BookmarkStatus status) {
+        return new HashSet<>(
+                queryFactory
+                .select(Projections.constructor(CurationSimpleResponseDtoNamedStatus.class,
+                        curation.id, curation.title, curation.description, curation.cnt, curation.thumbnail, curationBookmark.status))
+                .from(curation)
+                .join(curationBookmark)
+                .on(curationBookmark.curation.id.eq(curation.id).and(curationBookmark.member.id.eq(memberId)))
+                .where(curationBookmark.status.eq(status))
+                .fetch()
+        );
+    }
+
+    @Override
+    public String getTitleById(Long curationId) {
+        return queryFactory
+                .select(curation.title)
+                .from(curation)
+                .where(curation.id.eq(curationId))
+                .fetchOne();
+    }
 
     @Override
     public List<Object[]> getCurationsByCategory(CategoryEnum category, Long memberId) {
@@ -26,12 +68,10 @@ public class CurationRepositoryImpl implements Dao {
                 "WHERE c.categories LIKE CONCAT('%\"', :category, '\"%') " +
                 "ORDER BY RAND()";
 
-        Query query = em.createNativeQuery(sql);
-
-        query.setParameter("memberId", memberId);
-        query.setParameter("category", category.getValue());
-
-        return query.getResultList();
+        return em.createNativeQuery(sql)
+                .setParameter("memberId", memberId)
+                .setParameter("category", category.getValue())
+                .getResultList();
     }
 
     @Override
@@ -52,11 +92,9 @@ public class CurationRepositoryImpl implements Dao {
 
         sql.append("ORDER BY RAND() LIMIT 6 ");
 
-        Query query = em.createNativeQuery(sql.toString());
-
-        query.setParameter("memberId", memberId);
-
-        return query.getResultList();
+        return em.createNativeQuery(sql.toString())
+                .setParameter("memberId", memberId)
+                .getResultList();
     }
 
     @Override
@@ -78,11 +116,9 @@ public class CurationRepositoryImpl implements Dao {
         sql.append(") AND c.curation_id != :mainCurationId ");
         sql.append("ORDER BY RAND() LIMIT 3 ");
 
-        Query query = em.createNativeQuery(sql.toString());
-
-        query.setParameter("memberId", memberId);
-        query.setParameter("mainCurationId", mainCurationId);
-
-        return query.getResultList();
+        return em.createNativeQuery(sql.toString())
+                .setParameter("memberId", memberId)
+                .setParameter("mainCurationId", mainCurationId)
+                .getResultList();
     }
 }
