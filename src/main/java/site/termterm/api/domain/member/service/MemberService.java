@@ -246,6 +246,7 @@ public class MemberService {
 
         Member member = memberRepository.findBySocialId(memberInfoDto.getSocialId())
                 .orElseGet(() -> {
+                    memberInfoDto.setProfileImg(S3_BUCKET_BASE_URL + "/" + DEFAULT_IMAGE_NAME);
                     Member newMember = memberRepository.save(memberInfoDto.toEntity());
 
                     slackUtil.sendSignUpSlackMessage(newMember.getId());

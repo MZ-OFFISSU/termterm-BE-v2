@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,11 +30,6 @@ import java.util.UUID;
 @DynamicUpdate
 @DynamicInsert
 public class Member {
-    @Value("${cloud.aws.S3.bucket-url}")
-    private String S3_BUCKET_BASE_URL;
-
-    @Value("${cloud.aws.S3.default-image-path}")
-    private String DEFAULT_IMAGE_NAME;
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MEMBER_ID")
@@ -50,8 +44,7 @@ public class Member {
     private String email;
 
     @Column(nullable = false)
-    @Builder.Default
-    private String profileImg = S3_BUCKET_BASE_URL + "/" + DEFAULT_IMAGE_NAME;
+    private String profileImg;
 
     @Column(nullable = false, unique = true, length = 36)
     private String nickname;

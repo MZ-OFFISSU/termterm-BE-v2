@@ -20,6 +20,7 @@ public class MemberInfoDto {
         public String name;
         public String email;
         public String nickname;
+        @Setter
         public String profileImg;
 
         @Setter
