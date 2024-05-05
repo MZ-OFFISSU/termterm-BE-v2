@@ -15,7 +15,6 @@ public class MemberRequestDto {
     @Getter
     @Setter
     public static class MemberTokenReissueRequestDto {
-        @NotBlank
         private String refresh_token;
     }
 
