@@ -43,7 +43,6 @@ public class Member {
 
     private String email;
 
-    @Column(nullable = false)
     private String profileImg;
 
     @Column(nullable = false, length = 36)
