@@ -46,7 +46,7 @@ public class Member {
     @Column(nullable = false)
     private String profileImg;
 
-    @Column(nullable = false, unique = true, length = 36)
+    @Column(nullable = false, length = 36)
     private String nickname;
 
     @Column(length = 100)
