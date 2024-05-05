@@ -244,7 +244,7 @@ public class MemberService {
             memberInfoDto.setAppleRefreshToken(appleTokenResponse.getRefresh_token());
         }
 
-        Member member = memberRepository.findBySocialIdAndEmail(memberInfoDto.getSocialId(), memberInfoDto.getEmail())
+        Member member = memberRepository.findBySocialId(memberInfoDto.getSocialId())
                 .orElseGet(() -> {
                     Member newMember = memberRepository.save(memberInfoDto.toEntity());
 
