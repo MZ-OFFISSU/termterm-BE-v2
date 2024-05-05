@@ -10,9 +10,4 @@ import java.util.Optional;
 
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
     Optional<CommentLike> findByCommentAndMember(Comment comment, Member member);
-
-    @Query("SELECT cl.status " +
-            "FROM CommentLike cl " +
-            "WHERE cl.comment = :comment AND cl.member = :member")
-    Optional<CommentLikeStatus> getStatusByCommentAndMember(@Param("comment") Comment comment, @Param("member") Member member);
 }
