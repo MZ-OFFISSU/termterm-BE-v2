@@ -1,8 +1,6 @@
 package site.termterm.api.domain.folder.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -215,7 +213,7 @@ public class FolderService {
      * 내 폴더 리스트 리턴
      */
     public List<FolderMinimumInfoDto> getMyFolderList(Long memberId) {
-        List<Folder> memberFolderList = memberRepository.findFoldersByMemberId(memberId);
+        List<Folder> memberFolderList = folderRepository.findFoldersByMemberId(memberId);
 
         return  memberFolderList.stream().map(FolderMinimumInfoDto::of).toList();
     }

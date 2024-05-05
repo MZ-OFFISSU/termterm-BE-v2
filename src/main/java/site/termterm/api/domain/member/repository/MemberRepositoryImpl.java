@@ -3,12 +3,10 @@ package site.termterm.api.domain.member.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import site.termterm.api.domain.category.CategoryEnum;
-import site.termterm.api.domain.folder.entity.Folder;
 import site.termterm.api.domain.quiz.entity.QuizStatus;
 
 import java.util.List;
 
-import static site.termterm.api.domain.folder.entity.QFolder.*;
 import static site.termterm.api.domain.member.entity.QMember.*;
 
 @RequiredArgsConstructor
@@ -22,15 +20,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .from(member)
                 .where(member.id.eq(memberId))
                 .fetchOne();
-    }
-
-    // TODO : FolderRepository 로 이전
-    @Override
-    public List<Folder> findFoldersByMemberId(Long memberId) {
-        return queryFactory
-                .selectFrom(folder)
-                .where(folder.member.id.eq(memberId))
-                .fetch();
     }
 
     @Override

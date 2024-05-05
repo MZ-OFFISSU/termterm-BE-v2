@@ -61,7 +61,7 @@ public class DatabaseMigrationService {
 
             int folderCnt = 0;
 
-            List<Folder> folders = memberRepository.findFoldersByMemberId(memberId);
+            List<Folder> folders = folderRepository.findFoldersByMemberId(memberId);
 
             for (Folder folder: folders){
                 List<Long> termIds = folder.getTermIds();
