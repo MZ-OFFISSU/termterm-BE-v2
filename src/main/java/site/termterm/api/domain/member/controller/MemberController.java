@@ -126,7 +126,7 @@ public class MemberController {
      * 프로필 사진을 버킷에 업로드할 수 있는 Pre-signed url 을 발급합니다. 클라이언트는 이 URL 에 직접 요청하여 사진을 업로드 할 수 있습니다.
      * 발급받은 url 에 사진과 함께 PUT 요청을 보내고 성공하였으면, 서버의 "/v2/s/member/info/profile-image/sync" 로 꼭 API 요청이 돌아와야 합니다.
      */
-    @GetMapping("/s/member/info/profile-image/presigned-url")
+    @PutMapping("/s/member/info/profile-image/presigned-url")
     public ResponseEntity<ResponseDto<String>> getPresignedUrl(@AuthenticationPrincipal LoginMember loginMember){
         String presignedUrl = memberService.getPresignedUrl(loginMember.getMember().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "pre-signed url 발급 성공", presignedUrl), HttpStatus.OK);
@@ -135,7 +135,7 @@ public class MemberController {
     /**
      * AWS S3 의 Pre-signed url 을 통해 이미지를 업로드 하였으면, 이 API 를 다시 호출하여 DB 에 사용자의 프로필 이미지 주소를 동기화합니다.
      */
-    @PutMapping("/s/member/info/profile-image/sync")
+    @GetMapping("/s/member/info/profile-image/sync")
     public ResponseEntity<ResponseDto<?>> syncProfileImage(@AuthenticationPrincipal LoginMember loginMember){
         memberService.syncProfileImageUrl(loginMember.getMember().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "프로필 사진 주소 DB 동기화 성공", null), HttpStatus.OK);
