@@ -1,8 +1,6 @@
 package site.termterm.api.domain.member.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.Member;
 
@@ -23,6 +21,8 @@ public class MemberResponseDto {
 
     @Getter
     @NoArgsConstructor
+    @Builder
+    @AllArgsConstructor
     public static class MemberInfoResponseDto {
         private Long memberId;
         private String name;
@@ -36,18 +36,20 @@ public class MemberResponseDto {
         private Integer yearCareer;
         private List<CategoryEnum> categories;
 
-        public MemberInfoResponseDto(Member member) {
-            this.domain = member.getDomain();
-            this.email = member.getEmail();
-            this.introduction = member.getIntroduction();
-            this.job = member.getJob();
-            this.memberId = member.getId();
-            this.name = member.getName();
-            this.nickname = member.getNickname();
-            this.point = member.getPoint();
-            this.profileImage = member.getProfileImg();
-            this.yearCareer = member.getYearCareer();
-            this.categories = member.getCategories();
+        public static MemberInfoResponseDto from(Member member){
+            return MemberInfoResponseDto.builder()
+                    .domain(member.getDomain())
+                    .email(member.getEmail())
+                    .introduction(member.getIntroduction())
+                    .job(member.getJob())
+                    .memberId(member.getId())
+                    .name(member.getName())
+                    .nickname(member.getNickname())
+                    .point(member.getPoint())
+                    .profileImage(member.getProfileImg())
+                    .yearCareer(member.getYearCareer())
+                    .categories(member.getCategories())
+                    .build();
         }
     }
 }

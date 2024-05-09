@@ -21,7 +21,9 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import site.termterm.api.domain.member.entity.RefreshToken;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.member.repository.RefreshTokenRepository;
 import site.termterm.api.global.config.auth.LoginMember;
 import site.termterm.api.global.db.DataClearExtension;
 import site.termterm.api.global.dummy.DummyObject;
@@ -51,8 +53,8 @@ class MemberControllerTest extends DummyObject {
     @Autowired
     private MemberRepository memberRepository;
 
-//    @Autowired
-//    private RefreshTokenRepository refreshTokenRepository;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -71,41 +73,41 @@ class MemberControllerTest extends DummyObject {
         }
     }
 
-//    @DisplayName("토큰 재발급 API 요청 - 성공")
-//    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-//    @Test
-//    public void reissue_token_success_test() throws Exception{
-//        //given
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        Authentication authentication = context.getAuthentication();
-//        LoginMember principal = (LoginMember) authentication.getPrincipal();
-//        System.out.println(principal.getMember().getEmail());
-//
-//        refreshTokenRepository.save(RefreshToken.builder().id("1").accessToken("at").refreshToken("rt").build());
-//        RefreshToken refreshToken = refreshTokenRepository.findById("" + principal.getMember().getId()).get();
-//
-//        MemberTokenReissueRequestDto requestDto = new MemberTokenReissueRequestDto();
-//        requestDto.setRefresh_token(refreshToken.getRefreshToken());
-//
-//        String requestBody = om.writeValueAsString(requestDto);
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(
-//                post("/v2/auth/token/refresh")
-//                        .content(requestBody)
-//                        .contentType(MediaType.APPLICATION_JSON));
-//
-//        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-//        System.out.println(responseBody);
-//
-//        //then
-//        resultActions.andExpect(status().isCreated());
-//
-//        RefreshToken newRefreshToken = refreshTokenRepository.findById("1").get();
-//        resultActions.andExpect(jsonPath("$.data.access_token").value(newRefreshToken.getAccessToken()));
-//        resultActions.andExpect(jsonPath("$.data.refresh_token").value(newRefreshToken.getRefreshToken()));
-//
-//    }
+    @DisplayName("토큰 재발급 API 요청 - 성공")
+    @WithUserDetails(value = "1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void reissue_token_success_test() throws Exception{
+        //given
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        LoginMember principal = (LoginMember) authentication.getPrincipal();
+        System.out.println(principal.getMember().getEmail());
+
+        refreshTokenRepository.save(RefreshToken.builder().id("1").accessToken("at").refreshToken("rt").build());
+        RefreshToken refreshToken = refreshTokenRepository.findById("" + principal.getMember().getId()).get();
+
+        MemberTokenReissueRequestDto requestDto = new MemberTokenReissueRequestDto();
+        requestDto.setRefresh_token(refreshToken.getRefreshToken());
+
+        String requestBody = om.writeValueAsString(requestDto);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/v2/auth/token/refresh")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        //then
+        resultActions.andExpect(status().isCreated());
+
+        RefreshToken newRefreshToken = refreshTokenRepository.findById("1").get();
+        resultActions.andExpect(jsonPath("$.data.access_token").value(newRefreshToken.getAccessToken()));
+        resultActions.andExpect(jsonPath("$.data.refresh_token").value(newRefreshToken.getRefreshToken()));
+
+    }
 
 
     @DisplayName("토큰 재발급 API 요청 - 유효성 검사")

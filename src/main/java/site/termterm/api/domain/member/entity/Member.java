@@ -1,5 +1,9 @@
 package site.termterm.api.domain.member.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -83,10 +87,14 @@ public class Member {
 
     @CreatedDate        // Insert
     @Column(nullable = false)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdDate;
 
     @LastModifiedDate   // Insert, Update
     @Column(nullable = false)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime modifiedDate;
 
     @Convert(converter = CategoryListConverter.class)
@@ -99,10 +107,6 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private List<TermBookmark> termBookmarks;
-
-    @Builder.Default
-    @Setter
-    private String refreshToken = UUID.randomUUID().toString();
 
     @Builder
     public Member(Long id, String socialId, String name, String email, String profileImg, String nickname,List<CategoryEnum> categories,  MemberEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {

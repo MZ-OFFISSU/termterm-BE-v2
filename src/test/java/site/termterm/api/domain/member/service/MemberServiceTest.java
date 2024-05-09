@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static site.termterm.api.domain.member.dto.MemberInfoDto.*;
+import static site.termterm.api.domain.member.dto.MemberResponseDto.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -124,15 +125,14 @@ class MemberServiceTest extends DummyObject {
         when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
 
         //when
-        Member memberUpdated = memberService.updateMemberInfo(memberInfoUpdateRequestDto, 1L);
-        System.out.println(memberUpdated);
+        MemberInfoResponseDto memberInfoResponseDto = memberService.updateMemberInfo(memberInfoUpdateRequestDto, 1L);
 
         //then
-        assertThat(memberUpdated.getNickname()).isEqualTo(nickname);
-        assertThat(memberUpdated.getDomain()).isEqualTo(domain);
-        assertThat(memberUpdated.getJob()).isEqualTo(job);
-        assertThat(memberUpdated.getYearCareer()).isEqualTo(yearCareer);
-        assertThat(memberUpdated.getIntroduction()).isEqualTo(introduction);
+        assertThat(memberInfoResponseDto.getNickname()).isEqualTo(nickname);
+        assertThat(memberInfoResponseDto.getDomain()).isEqualTo(domain);
+        assertThat(memberInfoResponseDto.getJob()).isEqualTo(job);
+        assertThat(memberInfoResponseDto.getYearCareer()).isEqualTo(yearCareer);
+        assertThat(memberInfoResponseDto.getIntroduction()).isEqualTo(introduction);
 
     }
 
@@ -148,17 +148,16 @@ class MemberServiceTest extends DummyObject {
         when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
 
         //when
-        Member memberUpdated = memberService.updateMemberCategoriesInfo(memberCategoriesUpdateRequestDto, 1L);
-        System.out.println(memberUpdated);
+        MemberInfoResponseDto memberInfoResponseDto = memberService.updateMemberCategoriesInfo(memberCategoriesUpdateRequestDto, 1L);
 
         //then
-        assertThat(memberUpdated.getCategories().size()).isEqualTo(3);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.IT)).isEqualTo(true);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.DESIGN)).isEqualTo(true);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.DEVELOPMENT)).isEqualTo(true);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.BUSINESS)).isEqualTo(false);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.PM)).isEqualTo(false);
-        assertThat(memberUpdated.getCategories().contains(CategoryEnum.MARKETING)).isEqualTo(false);
+        assertThat(memberInfoResponseDto.getCategories().size()).isEqualTo(3);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.IT)).isEqualTo(true);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.DESIGN)).isEqualTo(true);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.DEVELOPMENT)).isEqualTo(true);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.BUSINESS)).isEqualTo(false);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.PM)).isEqualTo(false);
+        assertThat(memberInfoResponseDto.getCategories().contains(CategoryEnum.MARKETING)).isEqualTo(false);
     }
 
     @DisplayName("사용자 프로필 이미지 주소 동기화 성공")
@@ -173,12 +172,11 @@ class MemberServiceTest extends DummyObject {
         when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
 
         //when
-        Member memberUpdated = memberService.syncProfileImageUrl(sinner.getId());
-        System.out.println(memberUpdated.getProfileImg());
+        String profileImageUrl = memberService.syncProfileImageUrl(sinner.getId());
 
         //then
-        assertThat(memberUpdated.getProfileImg()).startsWith("https://");
-        assertThat(memberUpdated.getProfileImg()).endsWith(memberUpdated.getIdentifier());
+        assertThat(profileImageUrl).startsWith("https://");
+        assertThat(profileImageUrl).endsWith(sinner.getIdentifier());
 
     }
 
@@ -212,11 +210,10 @@ class MemberServiceTest extends DummyObject {
         when(memberRepository.findById(any())).thenReturn(Optional.of(sinner));
 
         //when
-        Member updatedMember = memberService.withdraw(sinner.getId());
-        System.out.println(updatedMember);
+        MemberInfoResponseDto infoResponseDto = memberService.withdraw(sinner.getId());
 
         //then
-        assertThat(updatedMember.getName()).isEqualTo("withdrawn");
+        assertThat(infoResponseDto.getName()).isEqualTo("withdrawn");
 
     }
 

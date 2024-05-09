@@ -52,8 +52,6 @@ public class QMember extends EntityPathBase<Member> {
 
     public final EnumPath<site.termterm.api.domain.quiz.entity.QuizStatus> quizStatus = createEnum("quizStatus", site.termterm.api.domain.quiz.entity.QuizStatus.class);
 
-    public final StringPath refreshToken = createString("refreshToken");
-
     public final EnumPath<MemberEnum> role = createEnum("role", MemberEnum.class);
 
     public final StringPath socialId = createString("socialId");

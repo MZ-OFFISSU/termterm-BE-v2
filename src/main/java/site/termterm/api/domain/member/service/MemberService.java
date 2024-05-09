@@ -2,13 +2,18 @@ package site.termterm.api.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.termterm.api.domain.category.CategoryEnum;
 import site.termterm.api.domain.member.entity.AppleRefreshToken;
 import site.termterm.api.domain.member.entity.Member;
+import site.termterm.api.domain.member.entity.RefreshToken;
 import site.termterm.api.domain.member.repository.AppleRefreshTokenRepository;
 import site.termterm.api.domain.member.repository.MemberRepository;
+import site.termterm.api.domain.member.repository.RefreshTokenRepository;
 import site.termterm.api.domain.member.utils.AppleLoginUtil;
 import site.termterm.api.domain.member.utils.SocialLoginUtil;
 import site.termterm.api.domain.point.entity.PointHistory;
@@ -39,6 +44,7 @@ public class MemberService {
     private final AppleLoginUtil appleLoginUtil;
     private final PointHistoryRepository pointHistoryRepository;
     private final AppleRefreshTokenRepository appleRefreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final SlackUtil slackUtil;
 
     @Value("${cloud.aws.S3.bucket-url}")
@@ -86,62 +92,59 @@ public class MemberService {
         // Access Token 생성
         String accessToken = jwtProcess.create(member);
 
-        return new MemberTokenResponseDto(accessToken, member.getRefreshToken());
+        // Refresh Token 생성
+        RefreshToken refreshToken = RefreshToken.builder().id(""+member.getId()).accessToken(accessToken).refreshToken(UUID.randomUUID().toString()).build();
+        refreshTokenRepository.save(refreshToken);
+
+        return new MemberTokenResponseDto(accessToken, refreshToken.getRefreshToken());
     }
 
     /**
      * refresh token 을 기반으로 토큰을 재발급 합니다.
      * redis 서버에 저장된 기존 토큰을 지우고, 새로운 access token 과 refresh token 을 발급하여 저장합니다.
      */
-//    @Transactional
-//    public MemberTokenResponseDto provideReissuedToken(MemberTokenReissueRequestDto requestDto){
-//        String oldRefreshToken = requestDto.getRefresh_token();
-//
-//        Member memberPS = memberRepository.findById(Long.parseLong(refreshTokenEntity.getId()))
-//                .orElseThrow(() -> new CustomApiException("존재하지 않는 사용자입니다."));
-//
-//        String accessToken = jwtProcess.create(memberPS);
-//        RefreshToken newRefreshToken = RefreshToken.builder().id("" + refreshTokenEntity.getId()).accessToken(accessToken).refreshToken(UUID.randomUUID().toString()).build();
-//
-//        refreshTokenRepository.delete(refreshTokenEntity);
-//        refreshTokenRepository.save(newRefreshToken);
-//
-//        return new MemberTokenResponseDto(accessToken, newRefreshToken.getRefreshToken());
-//    }
-
     @Transactional
     public MemberTokenResponseDto provideReissuedToken(MemberTokenReissueRequestDto requestDto){
         String oldRefreshToken = requestDto.getRefresh_token();
-        Member memberPS = memberRepository.findByRefreshToken(oldRefreshToken)
-                .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
+
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByRefreshToken(oldRefreshToken)
+                .orElseThrow(() -> new CustomApiException("만료 혹은 존재하지 않는 Refresh Token 입니다."));
+
+        Member memberPS = memberRepository.findById(Long.parseLong(refreshTokenEntity.getId()))
+                .orElseThrow(() -> new CustomApiException("존재하지 않는 사용자입니다."));
 
         String accessToken = jwtProcess.create(memberPS);
-        String refreshToken = UUID.randomUUID().toString();
-        memberPS.setRefreshToken(refreshToken);     // Dirty checking
+        RefreshToken newRefreshToken = RefreshToken.builder().id("" + refreshTokenEntity.getId()).accessToken(accessToken).refreshToken(UUID.randomUUID().toString()).build();
 
-        return new MemberTokenResponseDto(accessToken, refreshToken);
+        refreshTokenRepository.delete(refreshTokenEntity);
+        refreshTokenRepository.save(newRefreshToken);
 
+        return new MemberTokenResponseDto(accessToken, newRefreshToken.getRefreshToken());
     }
 
     /**
      * 사용자의 정보를 리턴합니다.
      */
+    @Cacheable(value = "memberId", key = "#p0", cacheManager = "memberIdCacheManager")
     public MemberInfoResponseDto getMemberInfo(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
-        return new MemberInfoResponseDto(memberPS);
+        return MemberInfoResponseDto.from(memberPS);
     }
 
     /**
      * 사용자 정보를 수정합니다.
      */
     @Transactional
-    public Member updateMemberInfo(MemberInfoUpdateRequestDto requestDto, Long id) {
+    @CachePut(value = "memberId", key = "#p1", cacheManager = "memberIdCacheManager")
+    public MemberInfoResponseDto updateMemberInfo(MemberInfoUpdateRequestDto requestDto, Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
-        return memberPS.updateInfo(requestDto);
+        memberPS.updateInfo(requestDto);
+
+        return MemberInfoResponseDto.from(memberPS);
     }
 
 
@@ -149,19 +152,23 @@ public class MemberService {
      * 사용자 관심사 카테고리를 수정합니다.
      */
     @Transactional
-    public Member updateMemberCategoriesInfo(MemberCategoriesUpdateRequestDto requestDto, Long id) {
+    @CachePut(value = "memberId", key = "#p1", cacheManager = "memberIdCacheManager")
+    public MemberInfoResponseDto updateMemberCategoriesInfo(MemberCategoriesUpdateRequestDto requestDto, Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
         List<String> requestCategoryStrings = requestDto.getCategories();
         List<CategoryEnum> newCategories = requestCategoryStrings.stream().map(categoryString -> CategoryEnum.valueOf(categoryString.toUpperCase())).toList();
 
-        return memberPS.updateCategories(newCategories);
+        memberPS.updateCategories(newCategories);
+
+        return MemberInfoResponseDto.from(memberPS);
     }
 
     /**
      * 사용자의 프로필 사진 주소를 리턴합니다.
      */
+    @Cacheable(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
     public String getMemberProfileImage(Long memberId) {
         return memberRepository.getProfileImgById(memberId);
 
@@ -171,7 +178,8 @@ public class MemberService {
      * 사용자의 프로필 사진을 디폴트 사진으로 변경합니다.
      */
     @Transactional
-    public Member deleteMemberProfileImage(Long id){
+    @CachePut(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
+    public String deleteMemberProfileImage(Long id){
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
@@ -179,7 +187,9 @@ public class MemberService {
 
         String url = S3_BUCKET_BASE_URL + "/" + DEFAULT_IMAGE_NAME;
 
-        return memberPS.updateProfileImg(url);
+        memberPS.updateProfileImg(url);
+
+        return memberPS.getProfileImg();
     }
 
     /**
@@ -195,7 +205,8 @@ public class MemberService {
      * DB 에 사용자의 프로필 이미지 주소를 동기화합니다.
      */
     @Transactional
-    public Member syncProfileImageUrl(Long id) {
+    @CachePut(value = "memberProfileImage", key = "#p0", cacheManager = "memberIdCacheManager")
+    public String syncProfileImageUrl(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
@@ -203,7 +214,9 @@ public class MemberService {
                 + "profile-images" + "/"
                 + memberPS.getIdentifier();
 
-        return memberPS.updateProfileImg(url);
+        memberPS.updateProfileImg(url);
+
+        return memberPS.getProfileImg();
     }
 
     /**
@@ -222,11 +235,14 @@ public class MemberService {
      * 회원 탈퇴 처리합니다.
      */
     @Transactional
-    public Member withdraw(Long id) {
+    @CacheEvict(value = "memberId", key = "#p0")
+    public MemberInfoResponseDto withdraw(Long id) {
         Member memberPS = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("유저를 찾을 수 없습니다."));
 
-        return memberPS.withdraw();
+        memberPS.withdraw();
+
+        return MemberInfoResponseDto.from(memberPS);
     }
 
     /**

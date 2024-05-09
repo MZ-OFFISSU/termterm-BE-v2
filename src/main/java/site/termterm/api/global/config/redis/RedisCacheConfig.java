@@ -33,7 +33,7 @@ public class RedisCacheConfig {
 
     @Bean
     public CacheManager memberIdCacheManager(RedisConnectionFactory redisConnectionFactory) {
-        // Folder Id 기반 조회는 1시간으로 설정
+        //  Id 기반 조회는 1시간으로 설정
         RedisCacheConfiguration redisCacheConfiguration = generateCacheConfiguration()
                 .entryTtl(Duration.ofHours(1L));
 
