@@ -21,7 +21,7 @@
 </p>
 <br><br>
 
-<p align="center" width="100%"><a style="font-size: 180%; font-weight: bold" href="https://www.termterm.site">텀텀을 더 자세히 알고싶다면? 🔗 소개 페이지 바로가기</a></p>
+<p align="center" width="100%"><a style="font-size: 180%; font-weight: bold" href="https://www.termterm.site" target="_blank">텀텀을 더 자세히 알고싶다면? 🔗 소개 페이지 바로가기</a></p>
 
 <br><br>
 
