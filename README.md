@@ -6,6 +6,8 @@
 [![HomePage](https://img.shields.io/badge/About_termterm-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](https://www.termterm.site)
 <br><br><br>
 
+### 서비스가 종료되었습니다. (~ 2024.07)
+
 ![Artboard](./src/main/resources/static/assets/main_image.png)
 <br><br>
 
